@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Local secrets & runtime state
+.env
+*.db
+*.log
+
+# Local editor / tooling
+.claude/settings.local.json

@@ -1,0 +1,118 @@
+# Two kinds of search:
+#   hunt   -> valued and can alert (near Lille = easy/low bar, far = high bar)
+#   feeder -> only teaches the price tracker, never alerts
+#
+# Distance is handled by the zone logic, not the URL, so hunt searches can stay
+# nationwide: near-Lille listings alert on a thin margin, far ones need a big
+# net margin after shipping. To hard-limit a search to a radius, paste a
+# Leboncoin URL that already has a location filter set.
+
+default_exclude:
+  - "recherche"
+  - "achète"
+  - "je cherche"
+
+searches:
+  # ---------- hunt: deals we want alerts on ----------
+  - name: "PS5"
+    url: "https://www.leboncoin.fr/recherche?category=43&text=ps5"
+    kind: hunt
+    min_price: 120
+    max_price: 600
+
+  - name: "Xbox Series X"
+    url: "https://www.leboncoin.fr/recherche?category=43&text=xbox%20series%20x"
+    kind: hunt
+    min_price: 120
+    max_price: 500
+
+  - name: "PC Gamer"
+    url: "https://www.leboncoin.fr/recherche?category=15&text=pc%20gamer"
+    kind: hunt
+    min_price: 150
+    max_price: 1500
+
+  - name: "RTX 4070"
+    url: "https://www.leboncoin.fr/recherche?category=15&text=rtx%204070"
+    kind: hunt
+    min_price: 200
+    max_price: 800
+
+  - name: "RTX 3060"
+    url: "https://www.leboncoin.fr/recherche?category=15&text=rtx%203060"
+    kind: hunt
+    min_price: 100
+    max_price: 400
+
+  - name: "Nintendo Switch"
+    url: "https://www.leboncoin.fr/recherche?category=43&text=nintendo%20switch"
+    kind: hunt
+    min_price: 80
+    max_price: 350
+
+  # ---------- feeder: reference prices for the tracker ----------
+  - name: "RTX 3070 (ref)"
+    url: "https://www.leboncoin.fr/recherche?category=15&text=rtx%203070"
+    kind: feeder
+
+  - name: "Ryzen 5 5600 (ref)"
+    url: "https://www.leboncoin.fr/recherche?category=15&text=ryzen%205%205600"
+    kind: feeder
+
+  - name: "SSD NVMe 1To (ref)"
+    url: "https://www.leboncoin.fr/recherche?category=15&text=ssd%20nvme%201to"
+    kind: feeder
+
+  - name: "DDR4 16Go (ref)"
+    url: "https://www.leboncoin.fr/recherche?category=15&text=ddr4%2016go"
+    kind: feeder
+
+  # ---------- 2ememain (Belgique, frontalier Lille) ----------
+  - name: "PS5 (2ememain BE)"
+    source: 2ememain
+    url: "https://www.2ememain.be/lrp/api/search?query=playstation%205&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING"
+    kind: hunt
+    min_price: 120
+    max_price: 600
+  - name: "RTX 4070 (2ememain BE)"
+    source: 2ememain
+    url: "https://www.2ememain.be/lrp/api/search?query=rtx%204070&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING"
+    kind: hunt
+    min_price: 200
+    max_price: 800
+  - name: "RTX 3060 (2ememain BE)"
+    source: 2ememain
+    url: "https://www.2ememain.be/lrp/api/search?query=rtx%203060&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING"
+    kind: hunt
+    min_price: 100
+    max_price: 400
+  - name: "RTX 4060 (2ememain BE)"
+    source: 2ememain
+    url: "https://www.2ememain.be/lrp/api/search?query=rtx%204060&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING"
+    kind: hunt
+    min_price: 150
+    max_price: 500
+  - name: "PC Gamer (2ememain BE)"
+    source: 2ememain
+    url: "https://www.2ememain.be/lrp/api/search?query=pc%20gamer&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING"
+    kind: hunt
+    min_price: 250
+    max_price: 1500
+  - name: "Xbox Series X (2ememain BE)"
+    source: 2ememain
+    url: "https://www.2ememain.be/lrp/api/search?query=xbox%20series%20x&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING"
+    kind: hunt
+    min_price: 120
+    max_price: 500
+  - name: "Nintendo Switch (2ememain BE)"
+    source: 2ememain
+    url: "https://www.2ememain.be/lrp/api/search?query=nintendo%20switch&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING"
+    kind: hunt
+    min_price: 80
+    max_price: 400
+  - name: "Steam Deck (2ememain BE)"
+    source: 2ememain
+    url: "https://www.2ememain.be/lrp/api/search?query=steam%20deck&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING"
+    kind: hunt
+    min_price: 200
+    max_price: 700

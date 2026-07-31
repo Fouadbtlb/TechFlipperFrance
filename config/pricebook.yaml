@@ -1,0 +1,121 @@
+# Seed component catalog for the local price tracker.
+# Each entry: canonical key, display label, category, a seed price in EUR (the
+# median ASKING price of a working single item, used until the tracker has
+# learned enough real comparables), an optional ship_class, and match aliases.
+# The scanner overrides `seed` with the median of real single-item listings it
+# scrapes once it has enough of them. Realization (asking -> quick-flip) and
+# condition haircuts are applied downstream in appraise.py, so seeds are the
+# WORKING asking-median, not the already-discounted number.
+#
+# Levels reflect the mid-2026 regime: the AI/memory supply shock pulled used
+# RAM/SSD/GPU/console prices UP versus 2025, not down. Reprice periodically.
+
+components:
+  # ---------- consoles ----------
+  - {key: console:ps5, label: PS5, category: console, ship_class: bulky, seed: 420, aliases: [playstation 5, ps5 standard, ps5 slim, ps5 edition disque]}
+  - {key: console:ps5-digital, label: PS5 Digital, category: console, ship_class: bulky, seed: 360, aliases: [ps5 digitale, playstation 5 digital, ps5 slim digital]}
+  - {key: console:ps5-pro, label: PS5 Pro, category: console, ship_class: bulky, seed: 720, aliases: [playstation 5 pro]}
+  - {key: console:ps4, label: PS4, category: console, ship_class: bulky, seed: 120, aliases: [playstation 4]}
+  - {key: console:ps4-slim, label: PS4 Slim, category: console, ship_class: bulky, seed: 120, aliases: [playstation 4 slim]}
+  - {key: console:ps4-pro, label: PS4 Pro, category: console, ship_class: bulky, seed: 135, aliases: [playstation 4 pro]}
+  - {key: console:xbox-series-x, label: Xbox Series X, category: console, ship_class: bulky, seed: 350}
+  - {key: console:xbox-series-s, label: Xbox Series S, category: console, ship_class: bulky, seed: 160}
+  - {key: console:xbox-one, label: Xbox One, category: console, ship_class: bulky, seed: 90, aliases: [xbox one s, xbox one x]}
+  - {key: console:switch-2, label: Switch 2, category: console, ship_class: parcel, seed: 355, aliases: [switch 2, nintendo switch 2]}
+  - {key: console:switch-oled, label: Switch OLED, category: console, ship_class: parcel, seed: 275, aliases: [nintendo switch oled]}
+  - {key: console:switch-lite, label: Switch Lite, category: console, ship_class: parcel, seed: 105, aliases: [nintendo switch lite]}
+  - {key: console:switch, label: Nintendo Switch, category: console, ship_class: parcel, seed: 160, aliases: [switch]}
+
+  # ---------- handhelds ----------
+  - {key: console:steam-deck-oled, label: Steam Deck OLED, category: console, ship_class: parcel, seed: 560, aliases: [steam deck oled]}
+  - {key: console:steam-deck, label: Steam Deck, category: console, ship_class: parcel, seed: 320, aliases: [steamdeck]}
+  - {key: console:rog-ally, label: ROG Ally, category: console, ship_class: parcel, seed: 440, aliases: [asus rog ally, rog ally z1, rog ally x]}
+  - {key: console:legion-go, label: Lenovo Legion Go, category: console, ship_class: parcel, seed: 430, aliases: [legion go]}
+  - {key: console:ps-portal, label: PS Portal, category: console, ship_class: parcel, seed: 170, aliases: [playstation portal, ps portal, ps5 portal, playstation 5 portal]}
+
+  # ---------- console accessories ----------
+  - {key: controller:dualsense, label: Manette DualSense, category: controller, ship_class: parcel, seed: 45, aliases: [dualsense, manette ps5]}
+  - {key: controller:dualshock4, label: Manette DualShock 4, category: controller, ship_class: parcel, seed: 30, aliases: [dualshock, manette ps4]}
+  - {key: controller:xbox, label: Manette Xbox, category: controller, ship_class: parcel, seed: 40, aliases: [manette xbox, manette series]}
+  - {key: storage:seagate-1tb-xbox, label: Carte extension Xbox 1To, category: storage, ship_class: parcel, seed: 120, aliases: [seagate 1to, carte extension 1to, storage expansion 1tb]}
+  - {key: storage:seagate-2tb-xbox, label: Carte extension Xbox 2To, category: storage, ship_class: parcel, seed: 200, aliases: [seagate 2to, carte extension 2to]}
+
+  # ---------- GPUs ----------
+  - {key: gpu:gtx-1650, label: GTX 1650, category: gpu, ship_class: parcel, seed: 90, aliases: [gtx1650]}
+  - {key: gpu:gtx-1660-super, label: GTX 1660 Super, category: gpu, ship_class: parcel, seed: 120, aliases: [gtx 1660 super, 1660 super]}
+  - {key: gpu:gtx-1660, label: GTX 1660, category: gpu, ship_class: parcel, seed: 100, aliases: [gtx1660]}
+  - {key: gpu:rtx-2060, label: RTX 2060, category: gpu, ship_class: parcel, seed: 140, aliases: [rtx2060]}
+  - {key: gpu:rtx-3050, label: RTX 3050, category: gpu, ship_class: parcel, seed: 160}
+  - {key: gpu:rtx-3060-ti, label: RTX 3060 Ti, category: gpu, ship_class: parcel, seed: 260, aliases: [rtx 3060ti, 3060 ti]}
+  - {key: gpu:rtx-3060, label: RTX 3060, category: gpu, ship_class: parcel, seed: 260, aliases: [rtx3060]}
+  - {key: gpu:rtx-3070-ti, label: RTX 3070 Ti, category: gpu, ship_class: parcel, seed: 380, aliases: [rtx 3070ti, 3070 ti]}
+  - {key: gpu:rtx-3070, label: RTX 3070, category: gpu, ship_class: parcel, seed: 320, aliases: [rtx3070]}
+  - {key: gpu:rtx-3080, label: RTX 3080, category: gpu, ship_class: parcel, seed: 430, aliases: [rtx3080]}
+  - {key: gpu:rtx-4060-ti, label: RTX 4060 Ti, category: gpu, ship_class: parcel, seed: 370, aliases: [rtx 4060ti, 4060 ti]}
+  - {key: gpu:rtx-4060, label: RTX 4060, category: gpu, ship_class: parcel, seed: 280, aliases: [rtx4060]}
+  - {key: gpu:rtx-4070-ti-super, label: RTX 4070 Ti Super, category: gpu, ship_class: parcel, seed: 780, aliases: [4070 ti super]}
+  - {key: gpu:rtx-4070-ti, label: RTX 4070 Ti, category: gpu, ship_class: parcel, seed: 670, aliases: [rtx 4070ti, 4070 ti]}
+  - {key: gpu:rtx-4070-super, label: RTX 4070 Super, category: gpu, ship_class: parcel, seed: 580, aliases: [4070 super]}
+  - {key: gpu:rtx-4070, label: RTX 4070, category: gpu, ship_class: parcel, seed: 480, aliases: [rtx4070]}
+  - {key: gpu:rtx-4080, label: RTX 4080, category: gpu, ship_class: parcel, seed: 880, aliases: [rtx4080, 4080 super]}
+  - {key: gpu:rtx-4090, label: RTX 4090, category: gpu, ship_class: parcel, seed: 1500, aliases: [rtx4090]}
+  - {key: gpu:rx-6600, label: RX 6600, category: gpu, ship_class: parcel, seed: 170, aliases: [radeon rx 6600]}
+  - {key: gpu:rx-6700-xt, label: RX 6700 XT, category: gpu, ship_class: parcel, seed: 280, aliases: [6700 xt]}
+  - {key: gpu:rx-6800-xt, label: RX 6800 XT, category: gpu, ship_class: parcel, seed: 380, aliases: [6800 xt]}
+  - {key: gpu:rx-7600, label: RX 7600, category: gpu, ship_class: parcel, seed: 220, aliases: [radeon rx 7600]}
+  - {key: gpu:rx-7700-xt, label: RX 7700 XT, category: gpu, ship_class: parcel, seed: 370, aliases: [7700 xt]}
+  - {key: gpu:rx-7800-xt, label: RX 7800 XT, category: gpu, ship_class: parcel, seed: 460, aliases: [7800 xt]}
+
+  # ---------- CPUs ----------
+  - {key: cpu:i5-10400f, label: i5-10400F, category: cpu, ship_class: small, seed: 60, aliases: [i5 10400f, 10400f]}
+  - {key: cpu:i5-12400f, label: i5-12400F, category: cpu, ship_class: small, seed: 95, aliases: [i5 12400f, 12400f]}
+  - {key: cpu:i5-12600k, label: i5-12600K, category: cpu, ship_class: small, seed: 135, aliases: [i5 12600k, 12600k]}
+  - {key: cpu:i5-13400f, label: i5-13400F, category: cpu, ship_class: small, seed: 135, aliases: [i5 13400f, 13400f]}
+  - {key: cpu:i5-13600k, label: i5-13600K, category: cpu, ship_class: small, seed: 200, aliases: [i5 13600k, 13600k]}
+  - {key: cpu:i7-10700, label: i7-10700, category: cpu, ship_class: small, seed: 120, aliases: [i7 10700, 10700k, i7-10700k]}
+  - {key: cpu:i7-12700, label: i7-12700, category: cpu, ship_class: small, seed: 180, aliases: [i7 12700, 12700k, i7-12700k]}
+  - {key: cpu:i7-13700k, label: i7-13700K, category: cpu, ship_class: small, seed: 260, aliases: [i7 13700k, 13700k]}
+  - {key: cpu:ryzen-5-5500, label: Ryzen 5 5500, category: cpu, ship_class: small, seed: 60, aliases: [r5 5500, ryzen 5500]}
+  - {key: cpu:ryzen-5-5600x, label: Ryzen 5 5600X, category: cpu, ship_class: small, seed: 100, aliases: [r5 5600x, 5600x, ryzen 5600x]}
+  - {key: cpu:ryzen-5-5600, label: Ryzen 5 5600, category: cpu, ship_class: small, seed: 80, aliases: [r5 5600, ryzen 5600]}
+  - {key: cpu:ryzen-5-7600, label: Ryzen 5 7600, category: cpu, ship_class: small, seed: 185, aliases: [r5 7600, 7600x]}
+  - {key: cpu:ryzen-7-5700x, label: Ryzen 7 5700X, category: cpu, ship_class: small, seed: 150, aliases: [r7 5700x, 5700x]}
+  - {key: cpu:ryzen-7-5800x3d, label: Ryzen 7 5800X3D, category: cpu, ship_class: small, seed: 290, aliases: [r7 5800x3d, 5800x3d]}
+  - {key: cpu:ryzen-7-5800x, label: Ryzen 7 5800X, category: cpu, ship_class: small, seed: 165, aliases: [r7 5800x, 5800x]}
+  - {key: cpu:ryzen-7-7800x3d, label: Ryzen 7 7800X3D, category: cpu, ship_class: small, seed: 380, aliases: [r7 7800x3d, 7800x3d]}
+
+  # ---------- RAM ----------
+  - {key: ram:ddr4-8gb, label: RAM DDR4 8Go, category: ram, ship_class: small, seed: 15, aliases: [8go ddr4, ddr4 8gb, 8 go ddr4]}
+  - {key: ram:ddr4-16gb, label: RAM DDR4 16Go, category: ram, ship_class: small, seed: 40, aliases: [16go ddr4, ddr4 16gb, 16 go ddr4]}
+  - {key: ram:ddr4-32gb, label: RAM DDR4 32Go, category: ram, ship_class: small, seed: 85, aliases: [32go ddr4, ddr4 32gb, 32 go ddr4]}
+  - {key: ram:ddr5-16gb, label: RAM DDR5 16Go, category: ram, ship_class: small, seed: 85, aliases: [16go ddr5, ddr5 16gb]}
+  - {key: ram:ddr5-32gb, label: RAM DDR5 32Go, category: ram, ship_class: small, seed: 190, aliases: [32go ddr5, ddr5 32gb]}
+
+  # ---------- storage ----------
+  - {key: storage:nvme-500gb, label: SSD NVMe 500Go, category: storage, ship_class: small, seed: 25, aliases: [nvme 500go, ssd nvme 500]}
+  - {key: storage:nvme-1tb, label: SSD NVMe 1To, category: storage, ship_class: small, seed: 70, aliases: [nvme 1to, ssd nvme 1to, nvme 1tb]}
+  - {key: storage:nvme-2tb, label: SSD NVMe 2To, category: storage, ship_class: small, seed: 140, aliases: [nvme 2to, ssd nvme 2to, nvme 2tb]}
+  - {key: storage:ssd-1tb, label: SSD 1To, category: storage, ship_class: small, seed: 40, aliases: [ssd 1to, ssd sata 1to]}
+  - {key: storage:hdd-2tb, label: HDD 2To, category: storage, ship_class: small, seed: 28, aliases: [disque dur 2to, hdd 2to]}
+
+  # ---------- PSU / motherboard / cooler / case ----------
+  - {key: psu:550w, label: Alimentation 550W, category: psu, ship_class: parcel, seed: 45, aliases: [alim 550w, 550 watts]}
+  - {key: psu:650w, label: Alimentation 650W, category: psu, ship_class: parcel, seed: 55, aliases: [alim 650w, 650 watts]}
+  - {key: psu:750w, label: Alimentation 750W, category: psu, ship_class: parcel, seed: 70, aliases: [alim 750w, 750 watts]}
+  - {key: psu:850w, label: Alimentation 850W, category: psu, ship_class: parcel, seed: 85, aliases: [alim 850w, 850 watts]}
+  - {key: mobo:am5, label: Carte mere AM5, category: motherboard, ship_class: parcel, seed: 150, aliases: [carte mere am5, b650, x670]}
+  - {key: mobo:am4, label: Carte mere AM4, category: motherboard, ship_class: parcel, seed: 70, aliases: [carte mere am4, b550, b450]}
+  - {key: mobo:lga1700, label: Carte mere LGA1700, category: motherboard, ship_class: parcel, seed: 110, aliases: [carte mere lga1700, b660, b760, z690, z790]}
+  - {key: cooler:aio-360, label: Watercooling 360mm, category: cooler, ship_class: parcel, seed: 120, aliases: [aio 360, watercooling 360, aio 360mm]}
+  - {key: cooler:aio-240, label: Watercooling 240mm, category: cooler, ship_class: parcel, seed: 60, aliases: [aio 240, watercooling 240, aio 240mm]}
+  - {key: cooler:air, label: Ventirad, category: cooler, ship_class: parcel, seed: 18, aliases: [ventirad, hyper 212]}
+  - {key: case:mid-tower, label: Boitier PC, category: case, ship_class: bulky, seed: 40, aliases: [boitier pc, boitier atx, boitier moyen tour]}
+
+  # ---------- monitors ----------
+  - {key: monitor:ultrawide, label: Ecran Ultrawide 34", category: monitor, ship_class: bulky, seed: 400, aliases: [ecran ultrawide, moniteur ultrawide, ecran incurve 34]}
+  - {key: monitor:4k, label: Ecran 4K, category: monitor, ship_class: bulky, seed: 340, aliases: [ecran 4k, moniteur 4k, dalle 4k]}
+  - {key: monitor:1440p, label: Ecran 1440p, category: monitor, ship_class: bulky, seed: 190, aliases: [ecran 1440p, moniteur 1440p, ecran 27 pouces]}
+  - {key: monitor:1080p, label: Ecran 1080p, category: monitor, ship_class: bulky, seed: 85, aliases: [ecran 1080p, moniteur 1080p, ecran 24 pouces]}
+
+  # ---------- misc resellable ----------
+  - {key: game:standard, label: Jeu physique, category: game, ship_class: small, seed: 8, aliases: [jeu]}

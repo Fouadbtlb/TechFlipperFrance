@@ -27,6 +27,9 @@ components:
   - {key: console:switch, label: Nintendo Switch, category: console, ship_class: parcel, seed: 160, aliases: [switch]}
 
   # ---------- handhelds ----------
+  # The 1To OLED is its own SKU: pooled with the 512Go it dragged that model's
+  # learned price up by ~80 EUR and invented margin on 512Go ads.
+  - {key: console:steam-deck-oled-1tb, label: Steam Deck OLED 1To, category: console, ship_class: parcel, seed: 680, aliases: [steam deck oled 1tb, steam deck oled 1 to, steam deck oled 1to]}
   - {key: console:steam-deck-oled, label: Steam Deck OLED, category: console, ship_class: parcel, seed: 560, aliases: [steam deck oled]}
   - {key: console:steam-deck, label: Steam Deck, category: console, ship_class: parcel, seed: 320, aliases: [steamdeck]}
   - {key: console:rog-ally, label: ROG Ally, category: console, ship_class: parcel, seed: 440, aliases: [asus rog ally, rog ally z1, rog ally x]}
@@ -46,25 +49,48 @@ components:
   - {key: gpu:gtx-1660, label: GTX 1660, category: gpu, ship_class: parcel, seed: 100, aliases: [gtx1660]}
   - {key: gpu:rtx-2060, label: RTX 2060, category: gpu, ship_class: parcel, seed: 140, aliases: [rtx2060]}
   - {key: gpu:rtx-3050, label: RTX 3050, category: gpu, ship_class: parcel, seed: 160}
-  - {key: gpu:rtx-3060-ti, label: RTX 3060 Ti, category: gpu, ship_class: parcel, seed: 260, aliases: [rtx 3060ti, 3060 ti]}
+  - {key: gpu:rtx-3060-ti, label: RTX 3060 Ti, category: gpu, ship_class: parcel, seed: 245, aliases: [rtx 3060ti, 3060 ti]}
   - {key: gpu:rtx-3060, label: RTX 3060, category: gpu, ship_class: parcel, seed: 260, aliases: [rtx3060]}
-  - {key: gpu:rtx-3070-ti, label: RTX 3070 Ti, category: gpu, ship_class: parcel, seed: 380, aliases: [rtx 3070ti, 3070 ti]}
+  - {key: gpu:rtx-3070-ti, label: RTX 3070 Ti, category: gpu, ship_class: parcel, seed: 310, aliases: [rtx 3070ti, 3070 ti]}
   - {key: gpu:rtx-3070, label: RTX 3070, category: gpu, ship_class: parcel, seed: 320, aliases: [rtx3070]}
-  - {key: gpu:rtx-3080, label: RTX 3080, category: gpu, ship_class: parcel, seed: 430, aliases: [rtx3080]}
+  - {key: gpu:rtx-3080, label: RTX 3080, category: gpu, ship_class: parcel, seed: 400, aliases: [rtx3080]}
   - {key: gpu:rtx-4060-ti, label: RTX 4060 Ti, category: gpu, ship_class: parcel, seed: 370, aliases: [rtx 4060ti, 4060 ti]}
   - {key: gpu:rtx-4060, label: RTX 4060, category: gpu, ship_class: parcel, seed: 280, aliases: [rtx4060]}
   - {key: gpu:rtx-4070-ti-super, label: RTX 4070 Ti Super, category: gpu, ship_class: parcel, seed: 780, aliases: [4070 ti super]}
   - {key: gpu:rtx-4070-ti, label: RTX 4070 Ti, category: gpu, ship_class: parcel, seed: 670, aliases: [rtx 4070ti, 4070 ti]}
   - {key: gpu:rtx-4070-super, label: RTX 4070 Super, category: gpu, ship_class: parcel, seed: 580, aliases: [4070 super]}
   - {key: gpu:rtx-4070, label: RTX 4070, category: gpu, ship_class: parcel, seed: 480, aliases: [rtx4070]}
-  - {key: gpu:rtx-4080, label: RTX 4080, category: gpu, ship_class: parcel, seed: 880, aliases: [rtx4080, 4080 super]}
+  - {key: gpu:rtx-4080, label: RTX 4080, category: gpu, ship_class: parcel, seed: 980, aliases: [rtx4080, 4080 super]}
   - {key: gpu:rtx-4090, label: RTX 4090, category: gpu, ship_class: parcel, seed: 1500, aliases: [rtx4090]}
-  - {key: gpu:rx-6600, label: RX 6600, category: gpu, ship_class: parcel, seed: 170, aliases: [radeon rx 6600]}
+  - {key: gpu:rx-6600, label: RX 6600, category: gpu, ship_class: parcel, seed: 190, aliases: [radeon rx 6600]}
   - {key: gpu:rx-6700-xt, label: RX 6700 XT, category: gpu, ship_class: parcel, seed: 280, aliases: [6700 xt]}
   - {key: gpu:rx-6800-xt, label: RX 6800 XT, category: gpu, ship_class: parcel, seed: 380, aliases: [6800 xt]}
   - {key: gpu:rx-7600, label: RX 7600, category: gpu, ship_class: parcel, seed: 220, aliases: [radeon rx 7600]}
   - {key: gpu:rx-7700-xt, label: RX 7700 XT, category: gpu, ship_class: parcel, seed: 370, aliases: [7700 xt]}
   - {key: gpu:rx-7800-xt, label: RX 7800 XT, category: gpu, ship_class: parcel, seed: 460, aliases: [7800 xt]}
+  # Seeds below are provisional used-market estimates; the tracker overwrites
+  # them once it has learned a real median. Kept deliberately on the low side so
+  # a wrong seed misses a deal rather than inventing one.
+  - {key: gpu:rtx-2070-super, label: RTX 2070 Super, category: gpu, ship_class: parcel, seed: 175, aliases: [rtx 2070 super, 2070 super]}
+  - {key: gpu:rtx-2070, label: RTX 2070, category: gpu, ship_class: parcel, seed: 150, aliases: [rtx2070]}
+  - {key: gpu:rtx-2080-ti, label: RTX 2080 Ti, category: gpu, ship_class: parcel, seed: 280, aliases: [rtx 2080ti, 2080 ti]}
+  - {key: gpu:rtx-2080-super, label: RTX 2080 Super, category: gpu, ship_class: parcel, seed: 210, aliases: [rtx 2080 super, 2080 super]}
+  - {key: gpu:rtx-2080, label: RTX 2080, category: gpu, ship_class: parcel, seed: 190, aliases: [rtx2080]}
+  - {key: gpu:rtx-3080-ti, label: RTX 3080 Ti, category: gpu, ship_class: parcel, seed: 470, aliases: [rtx 3080ti, 3080 ti]}
+  - {key: gpu:rtx-3090, label: RTX 3090, category: gpu, ship_class: parcel, seed: 580, aliases: [rtx3090]}
+  - {key: gpu:rtx-5070-ti, label: RTX 5070 Ti, category: gpu, ship_class: parcel, seed: 620, aliases: [rtx 5070ti, 5070 ti]}
+  - {key: gpu:rtx-5070, label: RTX 5070, category: gpu, ship_class: parcel, seed: 480, aliases: [rtx5070]}
+  - {key: gpu:rtx-5080, label: RTX 5080, category: gpu, ship_class: parcel, seed: 880, aliases: [rtx5080]}
+  - {key: gpu:rtx-5090, label: RTX 5090, category: gpu, ship_class: parcel, seed: 1800, aliases: [rtx5090]}
+  - {key: gpu:gtx-1060, label: GTX 1060, category: gpu, ship_class: parcel, seed: 60, aliases: [gtx1060]}
+  - {key: gpu:gtx-1070-ti, label: GTX 1070 Ti, category: gpu, ship_class: parcel, seed: 110, aliases: [gtx 1070ti, 1070 ti]}
+  - {key: gpu:gtx-1070, label: GTX 1070, category: gpu, ship_class: parcel, seed: 95, aliases: [gtx1070]}
+  - {key: gpu:gtx-1080-ti, label: GTX 1080 Ti, category: gpu, ship_class: parcel, seed: 180, aliases: [gtx 1080ti, 1080 ti]}
+  - {key: gpu:gtx-1080, label: GTX 1080, category: gpu, ship_class: parcel, seed: 125, aliases: [gtx1080]}
+  - {key: gpu:rx-6750-xt, label: RX 6750 XT, category: gpu, ship_class: parcel, seed: 310, aliases: [6750 xt]}
+  - {key: gpu:rx-6650-xt, label: RX 6650 XT, category: gpu, ship_class: parcel, seed: 185, aliases: [6650 xt]}
+  - {key: gpu:arc-a770, label: Intel Arc A770, category: gpu, ship_class: parcel, seed: 165, aliases: [arc a770]}
+  - {key: gpu:arc-a750, label: Intel Arc A750, category: gpu, ship_class: parcel, seed: 115, aliases: [arc a750]}
 
   # ---------- CPUs ----------
   - {key: cpu:i5-10400f, label: i5-10400F, category: cpu, ship_class: small, seed: 60, aliases: [i5 10400f, 10400f]}
@@ -83,6 +109,80 @@ components:
   - {key: cpu:ryzen-7-5800x3d, label: Ryzen 7 5800X3D, category: cpu, ship_class: small, seed: 290, aliases: [r7 5800x3d, 5800x3d]}
   - {key: cpu:ryzen-7-5800x, label: Ryzen 7 5800X, category: cpu, ship_class: small, seed: 165, aliases: [r7 5800x, 5800x]}
   - {key: cpu:ryzen-7-7800x3d, label: Ryzen 7 7800X3D, category: cpu, ship_class: small, seed: 380, aliases: [r7 7800x3d, 7800x3d]}
+  # Provisional used seeds (see GPU note); tracker refines them from real ads.
+  - {key: cpu:i5-11400f, label: i5-11400F, category: cpu, ship_class: small, seed: 70, aliases: [i5 11400f, 11400f]}
+  - {key: cpu:i5-11600k, label: i5-11600K, category: cpu, ship_class: small, seed: 100, aliases: [i5 11600k, 11600k]}
+  - {key: cpu:i7-11700, label: i7-11700, category: cpu, ship_class: small, seed: 125, aliases: [i7 11700, 11700k, 11700f, 11700]}
+  - {key: cpu:i7-9700k, label: i7-9700K, category: cpu, ship_class: small, seed: 100, aliases: [i7 9700k, 9700k, i7 9700, 9700f]}
+  - {key: cpu:i5-9400f, label: i5-9400F, category: cpu, ship_class: small, seed: 55, aliases: [i5 9400f, 9400f]}
+  - {key: cpu:i7-8700k, label: i7-8700K, category: cpu, ship_class: small, seed: 85, aliases: [i7 8700k, 8700k, i7 8700]}
+  - {key: cpu:i5-14600k, label: i5-14600K, category: cpu, ship_class: small, seed: 220, aliases: [i5 14600k, 14600k]}
+  - {key: cpu:i7-14700k, label: i7-14700K, category: cpu, ship_class: small, seed: 320, aliases: [i7 14700k, 14700k]}
+  - {key: cpu:ryzen-5-3600, label: Ryzen 5 3600, category: cpu, ship_class: small, seed: 65, aliases: [r5 3600, ryzen 3600, 3600x]}
+  - {key: cpu:ryzen-7-3700x, label: Ryzen 7 3700X, category: cpu, ship_class: small, seed: 100, aliases: [r7 3700x, 3700x]}
+  - {key: cpu:ryzen-7-7700x, label: Ryzen 7 7700X, category: cpu, ship_class: small, seed: 250, aliases: [r7 7700x, 7700x, ryzen 7 7700]}
+  - {key: cpu:ryzen-9-5900x, label: Ryzen 9 5900X, category: cpu, ship_class: small, seed: 215, aliases: [r9 5900x, 5900x]}
+  - {key: cpu:ryzen-9-5950x, label: Ryzen 9 5950X, category: cpu, ship_class: small, seed: 285, aliases: [r9 5950x, 5950x]}
+  - {key: cpu:ryzen-9-7900x, label: Ryzen 9 7900X, category: cpu, ship_class: small, seed: 320, aliases: [r9 7900x, 7900x]}
+
+  # ---------- blind spots found by `cli gaps` (2026-08-13) ----------
+  # Every entry below appeared in real stored ads that the recognizer could not
+  # read, so the machine containing it was valued on its remaining parts alone:
+  # a "Game PC GTX 1070 / i5-6600K / 16GB" asking 350 came back worth 209,
+  # because two of its three parts did not exist as far as the catalog was
+  # concerned. The used pool around Lille is mostly 6th-10th gen Intel and
+  # GTX 10-series, which is exactly the range the pricebook had skipped, and
+  # that is why no PC ever looked worth buying.
+  #
+  # Desktop parts only. Mobile chips (11800H, 13900HX, 12500H...) are left out
+  # deliberately: they appear in laptop ads, and pricing a laptop's mobile GPU
+  # at its desktop namesake's value is how a 400 EUR laptop becomes a fake deal.
+  - {key: cpu:i5-4590, label: i5-4590, category: cpu, ship_class: small, seed: 22, aliases: [i5 4590, 4590]}
+  - {key: cpu:i7-4790, label: i7-4790, category: cpu, ship_class: small, seed: 45, aliases: [i7 4790, 4790k, i7-4790k, i7 4790k]}
+  - {key: cpu:i5-6500, label: i5-6500, category: cpu, ship_class: small, seed: 28, aliases: [i5 6500]}
+  - {key: cpu:i5-6600k, label: i5-6600K, category: cpu, ship_class: small, seed: 38, aliases: [i5 6600k, 6600k]}
+  - {key: cpu:i7-6700, label: i7-6700, category: cpu, ship_class: small, seed: 55, aliases: [i7 6700, 6700k, i7-6700k, i7 6700k]}
+  - {key: cpu:i5-7500, label: i5-7500, category: cpu, ship_class: small, seed: 32, aliases: [i5 7500]}
+  - {key: cpu:i7-7700, label: i7-7700, category: cpu, ship_class: small, seed: 60, aliases: [i7 7700, 7700k, i7-7700k, i7 7700k]}
+  - {key: cpu:i5-8400, label: i5-8400, category: cpu, ship_class: small, seed: 45, aliases: [i5 8400]}
+  - {key: cpu:i5-8500, label: i5-8500, category: cpu, ship_class: small, seed: 45, aliases: [i5 8500]}
+  - {key: cpu:i5-11400, label: i5-11400, category: cpu, ship_class: small, seed: 65, aliases: [i5 11400]}
+  - {key: cpu:i5-12500, label: i5-12500, category: cpu, ship_class: small, seed: 100, aliases: [i5 12500]}
+  - {key: cpu:i9-11900k, label: i9-11900K, category: cpu, ship_class: small, seed: 145, aliases: [i9 11900k, 11900k, 11900kf]}
+  - {key: cpu:i7-14700, label: i7-14700, category: cpu, ship_class: small, seed: 265, aliases: [i7 14700, 14700f, i7-14700f]}
+  - {key: cpu:i9-13900k, label: i9-13900K, category: cpu, ship_class: small, seed: 340, aliases: [i9 13900k, 13900k, 13900kf, i9-13900kf]}
+  - {key: cpu:i9-14900k, label: i9-14900K, category: cpu, ship_class: small, seed: 410, aliases: [i9 14900k, 14900k, 14900kf, i9-14900kf]}
+  - {key: cpu:ryzen-5-2600, label: Ryzen 5 2600, category: cpu, ship_class: small, seed: 38, aliases: [r5 2600, 2600x, ryzen 5 2600x]}
+  - {key: cpu:ryzen-5-4500, label: Ryzen 5 4500, category: cpu, ship_class: small, seed: 52, aliases: [r5 4500]}
+  - {key: cpu:ryzen-5-7500f, label: Ryzen 5 7500F, category: cpu, ship_class: small, seed: 125, aliases: [r5 7500f, 7500f]}
+  - {key: cpu:ryzen-5-9600x, label: Ryzen 5 9600X, category: cpu, ship_class: small, seed: 215, aliases: [r5 9600x, 9600x]}
+  - {key: cpu:ryzen-7-3800x, label: Ryzen 7 3800X, category: cpu, ship_class: small, seed: 88, aliases: [r7 3800x, 3800x]}
+  - {key: cpu:ryzen-7-7700, label: Ryzen 7 7700, category: cpu, ship_class: small, seed: 235, aliases: [r7 7700]}
+  - {key: cpu:ryzen-7-8700f, label: Ryzen 7 8700F, category: cpu, ship_class: small, seed: 185, aliases: [r7 8700f, 8700f, 8700g]}
+  - {key: cpu:ryzen-9-3900x, label: Ryzen 9 3900X, category: cpu, ship_class: small, seed: 125, aliases: [r9 3900x, 3900x]}
+  - {key: cpu:ryzen-9-7950x, label: Ryzen 9 7950X, category: cpu, ship_class: small, seed: 375, aliases: [r9 7950x, 7950x]}
+  - {key: gpu:gtx-970, label: GTX 970, category: gpu, ship_class: parcel, seed: 42, aliases: [gtx970]}
+  - {key: gpu:gtx-1050-ti, label: GTX 1050 Ti, category: gpu, ship_class: parcel, seed: 45, aliases: [gtx 1050ti, 1050 ti]}
+  - {key: gpu:gtx-1650-super, label: GTX 1650 Super, category: gpu, ship_class: parcel, seed: 95, aliases: [gtx 1650 super, 1650 super]}
+  - {key: gpu:gtx-1660-ti, label: GTX 1660 Ti, category: gpu, ship_class: parcel, seed: 110, aliases: [gtx 1660ti, 1660 ti]}
+  - {key: gpu:rx-570, label: RX 570, category: gpu, ship_class: parcel, seed: 48, aliases: [rx570, radeon rx 570]}
+  - {key: gpu:rx-580, label: RX 580, category: gpu, ship_class: parcel, seed: 62, aliases: [rx580, radeon rx 580]}
+  - {key: gpu:rx-590, label: RX 590, category: gpu, ship_class: parcel, seed: 72, aliases: [rx590, radeon rx 590]}
+  - {key: gpu:rx-5500-xt, label: RX 5500 XT, category: gpu, ship_class: parcel, seed: 72, aliases: [5500 xt]}
+  - {key: gpu:rx-5600-xt, label: RX 5600 XT, category: gpu, ship_class: parcel, seed: 100, aliases: [5600 xt]}
+  - {key: gpu:rx-5700-xt, label: RX 5700 XT, category: gpu, ship_class: parcel, seed: 130, aliases: [5700 xt]}
+  - {key: gpu:rx-5700, label: RX 5700, category: gpu, ship_class: parcel, seed: 110, aliases: [rx5700]}
+  - {key: gpu:rx-6600-xt, label: RX 6600 XT, category: gpu, ship_class: parcel, seed: 170, aliases: [6600 xt]}
+  - {key: gpu:rx-6700, label: RX 6700, category: gpu, ship_class: parcel, seed: 235, aliases: [rx6700]}
+  - {key: gpu:rx-6800, label: RX 6800, category: gpu, ship_class: parcel, seed: 320, aliases: [rx6800]}
+  - {key: gpu:rx-6900-xt, label: RX 6900 XT, category: gpu, ship_class: parcel, seed: 410, aliases: [6900 xt]}
+  - {key: gpu:rx-7900-xtx, label: RX 7900 XTX, category: gpu, ship_class: parcel, seed: 690, aliases: [7900 xtx]}
+  - {key: gpu:rx-7900-xt, label: RX 7900 XT, category: gpu, ship_class: parcel, seed: 550, aliases: [7900 xt]}
+  - {key: gpu:rtx-5060-ti, label: RTX 5060 Ti, category: gpu, ship_class: parcel, seed: 370, aliases: [rtx 5060ti, 5060 ti]}
+  - {key: gpu:rtx-5060, label: RTX 5060, category: gpu, ship_class: parcel, seed: 270, aliases: [rtx5060]}
+  - {key: gpu:rx-9070-xt, label: RX 9070 XT, category: gpu, ship_class: parcel, seed: 600, aliases: [9070 xt]}
+  - {key: gpu:rx-9070, label: RX 9070, category: gpu, ship_class: parcel, seed: 500, aliases: [rx9070]}
+  - {key: gpu:rx-9060-xt, label: RX 9060 XT, category: gpu, ship_class: parcel, seed: 290, aliases: [9060 xt]}
 
   # ---------- RAM ----------
   - {key: ram:ddr4-8gb, label: RAM DDR4 8Go, category: ram, ship_class: small, seed: 15, aliases: [8go ddr4, ddr4 8gb, 8 go ddr4]}

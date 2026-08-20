@@ -1,9 +1,11 @@
 """Leboncoin source, backed by the unofficial `lbc` client (curl-cffi).
 
-Anti-detection posture (tested live 2026-07-20):
-- The lbc client sends a Leboncoin MOBILE APP user-agent. The TLS fingerprint
-  must match a mobile stack: "safari_ios" passes; a desktop "chrome136"
-  fingerprint with that UA gets an instant DataDome 403.
+Anti-detection posture (re-tested live 2026-08-12):
+- The lbc client sends a Leboncoin MOBILE APP user-agent, so the TLS fingerprint
+  must match a mobile stack. WHICH mobile stack passes is not stable: on
+  2026-08-12 every safari*_ios fingerprint drew an instant DataDome 403 and
+  "chrome_android" was the one that got through, the reverse of the posture
+  that held on 2026-07-20. Re-test rather than trusting this note.
 - ONE consistent fingerprint per process (rotating looks robotic)
 - max_retries=1: retry storms make DataDome flag the IP harder; real backoff
   lives in the pipeline

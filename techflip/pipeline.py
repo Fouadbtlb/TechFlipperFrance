@@ -26,7 +26,9 @@ from .geo import Locator, logistics_cost, zone_for_distance
 from .notify.telegram import TelegramNotifier
 from .pricing.appraise import appraise, build_items, items_from_classification
 from .pricing.catalog import load_catalog
-from .pricing.extract import primary_key, recognize, _is_bundle
+from .pricing.sold import load_sold
+from .pricing.extract import (is_ambiguous_identity, primary_key, recognize,
+                              teaches_price, _is_bundle)
 from .pricing.tracker import PriceTracker
 from .scoring.ai import AIVetter, _parse_verdict
 from .sources.leboncoin import LeboncoinSource
@@ -67,7 +69,8 @@ class Pipeline:
         self.store = Store(settings.db_path)
         self.catalog = load_catalog(settings.pricebook_path)
         self.tracker = PriceTracker(
-            self.store, self.catalog, settings.min_comparables, settings.window_days
+            self.store, self.catalog, settings.min_comparables, settings.window_days,
+            sold=load_sold(settings.sold_path),
         )
         self.locator = Locator()
         self.policy = ZonePolicy(
@@ -89,16 +92,23 @@ class Pipeline:
 
     def run_once(self) -> dict:
         stats = {"fetched": 0, "new": 0, "alerts": 0, "errors": 0}
+        blocked_sources: set[str] = set()
         for search in self.settings.searches:
+            # A DataDome wall is per-source (Leboncoin), so skip the rest of that
+            # source this cycle but keep polling the others (2ememain stays live).
+            if search.source in blocked_sources:
+                continue
             source = self.sources[search.source]
             try:
                 listings = source.fetch(search)
                 self._consecutive_errors = 0
             except DatadomeError:
-                log.warning("DataDome block on %s — aborting cycle", search.name)
+                log.warning("DataDome block on %s — skipping source %s this cycle",
+                            search.name, search.source)
                 stats["errors"] += 1
                 self._consecutive_errors += 1
-                break
+                blocked_sources.add(search.source)
+                continue
             except Exception:
                 log.exception("Fetch failed for %s", search.name)
                 stats["errors"] += 1
@@ -123,7 +133,8 @@ class Pipeline:
         can learn a per-component price from single-item listings."""
         is_new = self.store.upsert_listing(l)
         comps = recognize(l.title, l.description, self.catalog)
-        pk = None if _is_bundle(l.title) else primary_key(comps)
+        clean = not _is_bundle(l.title) and teaches_price(l.title)
+        pk = primary_key(comps) if clean else None
         self.store.set_primary_component(l.uid, pk, bool(pk))
         return is_new, comps
 
@@ -178,6 +189,7 @@ class Pipeline:
             appr.true_value, appr.confidence, appr.lines, appr.n_priced)
         verdict = None
         risk = None
+        photo_unverified = False
 
         decompose_deal = net_text >= 0.5 * bar
         # A single liquid, easily-faked item must be eyeballed on the photos before
@@ -190,20 +202,50 @@ class Pipeline:
                       and appr.n_priced == 0 and not decompose_deal)
 
         if decompose_deal:
-            if self.vetter and (needs_photo or zone != "EASY" or net_text < bar * 1.5 or appr.confidence < 0.5):
+            # Vision costs 20-60s of flat-out CPU per photo, which is what
+            # heats the machine, so it is spent only where it changes a real
+            # decision: a candidate already worth driving out for. Below that
+            # margin the text appraisal stands on its own and the photo gate
+            # simply reports "unverified".
+            worth_a_look = net_text >= self.settings.ai_min_margin
+            if self.vetter and worth_a_look and (
+                    needs_photo or zone != "EASY"
+                    or net_text < bar * 1.5 or appr.confidence < 0.5):
                 verdict = self._run_llm(l)
-                if needs_photo and self._verify_photo(l, comps, verdict) == "reject":
+            # The gate below runs whether or not a model exists. It used to be
+            # nested inside `if self.vetter`, so configuring no AI at all did
+            # not make the check fail closed, it removed the check: a bare
+            # "Nintendo Switch" (very often the far cheaper Lite) alerted at
+            # full console value. No model is the same evidence as a model that
+            # is down -- none -- and has to reach the same "unverified" branch.
+            # Load bearing now that the scanner runs with the vision pass off,
+            # since CPU inference on photos is what heats the laptop.
+            if needs_photo:
+                status = self._verify_photo(l, comps, verdict)
+                if status == "reject":
                     return False
-                if verdict is not None:
-                    if verdict.get("is_trade") is True:
-                        self.store.mark_alerted(l.uid, None, None, tier="confirmed")
+                if status == "unverified":
+                    # LLM down, absent, or blind: too far to inspect means drop;
+                    # near Lille you go look in person, so alert with a warning
+                    # rather than swallow the deal in silence. But an ambiguous
+                    # model (a bare "Switch" that may be a cheap Lite) has no
+                    # trustworthy value unverified, so it stays closed even near
+                    # Lille -- no phantom-margin alert.
+                    if zone != "EASY" or is_ambiguous_identity(comps, l.title):
                         return False
-                    risk = _num(verdict.get("risque_arnaque"))
-                    llm_items = items_from_classification(verdict, self.catalog)
-                    appr = appraise(llm_items or build_items(comps, None, self.catalog, f"{l.title} {l.description}"),
-                                    self.tracker, self.settings.realization_factor)
-                    true_value, confidence, lines, n_priced = (
-                        appr.true_value, appr.confidence, appr.lines, appr.n_priced)
+                    photo_unverified = True
+            if verdict is not None:
+                if verdict.get("is_trade") is True:
+                    self.store.mark_alerted(l.uid, None, None, tier="confirmed")
+                    return False
+                risk = _num(verdict.get("risque_arnaque"))
+                llm_items = items_from_classification(verdict, self.catalog)
+                appr = appraise(
+                    llm_items or build_items(comps, None, self.catalog,
+                                             f"{l.title} {l.description}"),
+                    self.tracker, self.settings.realization_factor)
+                true_value, confidence, lines, n_priced = (
+                    appr.true_value, appr.confidence, appr.lines, appr.n_priced)
         elif whole_item:
             verdict = self._run_llm(l)
             if not verdict or verdict.get("is_trade") is True:
@@ -239,7 +281,14 @@ class Pipeline:
             bundle_details=verdict or {}, reasons=_risk_flags(risk),
         )
         extra = _alert_extra(zone, distance, logistics, shippable, confidence, n_priced, lines)
-        self.notifier.send_deal(l, result, extra)
+        if photo_unverified:
+            extra.insert(0, "⚠️ photo non vérifiée (IA indisponible), à contrôler sur place")
+        # Only a delivered alert is written off. Marking on a failed send is how
+        # a deal disappears without ever being seen: the next cycle skips it as
+        # already-alerted. Left unmarked, the resweep retries it.
+        if not self.notifier.send_deal(l, result, extra):
+            log.warning("alert NOT delivered for %s — will retry next cycle", l.uid)
+            return False
         self.store.mark_alerted(l.uid, true_value, d.net_profit, tier="confirmed")
         log.info("ALERT %s [%s] +%.0f€", l.uid, zone, d.net_profit)
         return True
@@ -255,18 +304,23 @@ class Pipeline:
 
     def _verify_photo(self, l: Listing, comps, verdict) -> str:
         """Single liquid item (console/GPU/laptop/phone): confirm the photo shows
-        what the title claims. 'reject' = drop, either because we could not read
-        the item off the photos (fail closed) or because they show a different,
-        usually cheaper item than advertised ("PS5" on a PS4). 'ok' = trust the
-        verdict and revalue from it."""
+        what the title claims.
+          'ok'         photos match the title (or nothing to verify), trust it.
+          'reject'     photos show a different, usually cheaper item than
+                       advertised ("PS5" on a PS4): confirmed bait, drop for good.
+          'unverified' we could not run the vision check (LLM down) or it did not
+                       recognise the item. Not proof of a lie, so the caller
+                       keeps it near Lille (inspect in person) and drops it far."""
         claimed = primary_key(comps)
         if not claimed:
             return "ok"
-        items = items_from_classification(verdict, self.catalog) if verdict else []
+        if not verdict:
+            return "unverified"
+        items = items_from_classification(verdict, self.catalog)
         cat = self.catalog.by_key[claimed].category
         seen = next((i.key for i in items if i.category == cat), None)
         if seen is None:
-            return "reject"
+            return "unverified"
         if seen != claimed:
             self.store.mark_alerted(l.uid, None, None, tier="confirmed")
             return "reject"
@@ -323,6 +377,34 @@ class Pipeline:
                 log.warning("%d consecutive errors → backing off %.0fs",
                             self._consecutive_errors, sleep)
             time.sleep(sleep)
+
+
+def recompute_primary_components(store, catalog) -> dict:
+    """Re-apply the current recognition rules to every stored listing.
+
+    Rows keep whatever primary_component was derived when they were first seen,
+    so a pool stays poisoned by ads ingested before a rule existed: bundles like
+    "Xbox Series X + 2 manettes + 5 jeux" were still setting the price of a bare
+    console long after the rule to exclude them landed. Only a re-fetch fixed
+    those, and a listing that drops out of the search results never re-fetches.
+    """
+    import json as _json
+
+    rows = store.conn.execute("SELECT uid, raw_json FROM listings").fetchall()
+    stats = {"scanned": 0, "cleared": 0, "changed": 0}
+    for r in rows:
+        l = Listing.from_dict(_json.loads(r["raw_json"]))
+        comps = recognize(l.title, l.description, catalog)
+        clean = not _is_bundle(l.title) and teaches_price(l.title)
+        pk = primary_key(comps) if clean else None
+        old = store.conn.execute(
+            "SELECT primary_component FROM listings WHERE uid=?", (r["uid"],)
+        ).fetchone()["primary_component"]
+        stats["scanned"] += 1
+        if old != pk:
+            store.set_primary_component(l.uid, pk, bool(pk))
+            stats["cleared" if pk is None else "changed"] += 1
+    return stats
 
 
 def _is_shippable(desc: str | None) -> bool:

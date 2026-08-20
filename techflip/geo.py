@@ -10,6 +10,9 @@ from __future__ import annotations
 from math import asin, cos, radians, sin, sqrt
 
 LILLE = (50.6292, 3.0573)
+# Other origins worth measuring from: a trip is planned around a place,
+# not around home, and a tower 20km from Namur reads as 110km from Lille.
+NAMUR = (50.4674, 4.8720)
 
 SHIPPING_COSTS = {"bulky": 25.0, "parcel": 12.0, "small": 6.0, "default": 12.0}
 
@@ -74,8 +77,9 @@ def logistics_cost(
 
 
 class Locator:
-    def __init__(self, resolver=None):
+    def __init__(self, resolver=None, origin: tuple[float, float] = LILLE):
         self._resolver = resolver or _default_resolver()
+        self.origin = origin
 
     def latlng(self, zipcode: str | None) -> tuple[float, float] | None:
         if not zipcode:
@@ -84,15 +88,17 @@ class Locator:
 
     def distance(self, zipcode=None, lat=None, lng=None) -> float | None:
         if lat is not None and lng is not None:
-            d = round(haversine(LILLE[0], LILLE[1], lat, lng), 1)
+            d = round(haversine(self.origin[0], self.origin[1], lat, lng), 1)
             return d if d <= 2000 else None
         return self.distance_to_lille(zipcode)
 
     def distance_to_lille(self, zipcode: str | None) -> float | None:
+        """Kept for callers that predate configurable origins; measures from
+        `self.origin`, which defaults to Lille."""
         ll = self.latlng(zipcode)
         if ll is None:
             return None
-        return round(haversine(LILLE[0], LILLE[1], ll[0], ll[1]), 1)
+        return round(haversine(self.origin[0], self.origin[1], ll[0], ll[1]), 1)
 
 
 def _default_resolver():

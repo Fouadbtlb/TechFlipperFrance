@@ -227,3 +227,29 @@ def test_classification_uses_photo_model_over_title():
 def test_classification_empty_without_components():
     from techflip.pricing.appraise import items_from_classification
     assert items_from_classification({"type": "accessory", "components": []}, CATALOG) == []
+
+
+def test_drifted_seeds_flags_a_stale_price_and_ignores_thin_evidence():
+    """A seed the market disagrees with must surface, but only once enough
+    single-item ads back the claim."""
+    catalog = load_catalog("config/pricebook.yaml")
+    store = _FakeStore({
+        "gpu:rtx-3070": [300, 300, 310, 290, 300, 305],   # seed 320, ~-5% -> quiet
+        "gpu:rtx-4090": [1100, 1150, 1120, 1130, 1140],   # seed 1500, -25% -> flag
+        "gpu:rtx-3050": [90, 95],                         # too few samples -> quiet
+    })
+    tracker = PriceTracker(store, catalog, min_comparables=5, window_days=90)
+    flagged = {r["key"]: r for r in tracker.drifted_seeds()}
+    assert "gpu:rtx-4090" in flagged
+    assert flagged["gpu:rtx-4090"]["market"] == 1130
+    assert flagged["gpu:rtx-4090"]["drift"] < -0.2
+    assert "gpu:rtx-3070" not in flagged
+    assert "gpu:rtx-3050" not in flagged
+
+
+class _FakeStore:
+    def __init__(self, by_key):
+        self.by_key = by_key
+
+    def component_prices(self, key, since_iso):
+        return self.by_key.get(key, [])

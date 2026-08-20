@@ -13,3 +13,6 @@ venv/
 
 # Local editor / tooling
 .claude/settings.local.json
+
+# DB snapshots taken before destructive maintenance
+*.db.bak-*

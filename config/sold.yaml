@@ -1,0 +1,18 @@
+# Prix REELLEMENT obtenus par le proprietaire, pas des prix demandes.
+#
+# C'est la meilleure donnee dont dispose cet outil et la seule qui ne soit pas
+# une supposition. Tout le reste ("valeur ~368EUR") est une mediane de prix
+# DEMANDES: les annonces trop cheres ne partent jamais et restent dans le
+# calcul, celles au bon prix se vendent et en sortent. La mediane derive donc
+# vers ce que les vendeurs esperent. Confirme le 2026-08-19: le scrap disait
+# Series X 414 et PS5 368, alors que la vraie vente se fait a 300 et 340.
+#
+# Ces montants sont NETS, deja ce que tu encaisses: aucun abattement de revente
+# n'est applique par-dessus (sinon on decompte deux fois).
+#
+# Ajoute une ligne des que tu vends quelque chose. C'est ce qui rend l'outil
+# plus juste que le marche affiche.
+sold:
+  console:ps5: 340
+  console:xbox-series-x: 300
+  console:xbox-series-s: 160        # "160 minimum" -> plancher, donc prudent

@@ -97,9 +97,12 @@ def appraise(items, tracker, realization_factor: float = 0.85) -> Appraisal:
         mult = CONDITION_MULT.get(it.condition, 0.7)
         val = q.unit_value * it.qty * mult
         gross += val
-        net += val * REALIZATION.get(it.category, realization_factor)
+        # A price the owner has actually been paid is already net. Applying
+        # the resale haircut on top would discount the same money twice.
+        net += val if q.source == "sold" else val * REALIZATION.get(
+            it.category, realization_factor)
         n_priced += 1
-        if q.source in ("learned", "blend"):
+        if q.source in ("learned", "blend", "sold"):
             backed += val
         lines.append(_line(it, q, val))
         breakdown.append({
@@ -141,7 +144,8 @@ def _llm_extras(llm_json, catalog, console_family) -> list[Item]:
 
 
 def _line(it: Item, q, val: float) -> str:
-    tag = {"learned": "marché", "blend": "estim+", "seed": "estim"}.get(q.source, "?")
+    tag = {"learned": "marché", "blend": "estim+", "seed": "estim",
+           "sold": "PRIX VENDU"}.get(q.source, "?")
     qty = f" x{it.qty}" if it.qty > 1 else ""
     cond = "" if it.condition == "working" else f" [{it.condition}]"
     return f"{it.label or it.key}{qty}{cond}: {val:.0f}€ ({tag})"
@@ -163,12 +167,24 @@ def items_from_classification(verdict, catalog) -> list[Item]:
     raw = verdict.get("components")
     if not isinstance(raw, list):
         return []
+    # An ad the model itself types as something other than a machine is not
+    # selling a machine. It still lists one, because box art and marketing shots
+    # show the console the thing plugs into or runs on: a PSVR2 headset came back
+    # as "PS5 + 2 DualSense" and was valued at 444 EUR, and a sealed Tekken 8
+    # came back as an Xbox Series X and alerted at +263 EUR while the very same
+    # verdict put the item's resale at 50. Its own type field is ground truth.
+    #
+    # The first version of this guard only covered "accessory", which is why the
+    # game got through; the rule is general now.
+    barred = frozenset() if _is_machine_ad(verdict.get("type")) else _MACHINES
     items: list[Item] = []
     seen: set[str] = set()
     for comp in raw:
         if not isinstance(comp, dict):
             continue
         cat = _LLM_TYPE_TO_CAT.get(str(comp.get("type", "")).lower())
+        if cat in barred:
+            continue
         try:
             qty = max(1, int(comp.get("qty") or 1))
         except (TypeError, ValueError):
@@ -179,6 +195,18 @@ def items_from_classification(verdict, catalog) -> list[Item]:
             d = catalog.by_key[key]
             items.append(Item(key, qty, _cond_for(d.category, cond), d.label, d.category))
     return items
+
+
+_MACHINES = frozenset({"console", "laptop"})
+
+# Ad types that can legitimately contain a whole machine. "other" and a missing
+# type are included on purpose: they mean "I could not tell", not "this is not a
+# machine", and barring on a shrug would silence real ads.
+_MACHINE_ADS = frozenset({"pc", "console", "laptop", "other", ""})
+
+
+def _is_machine_ad(t) -> bool:
+    return str(t or "").lower().strip() in _MACHINE_ADS
 
 
 def _canon(model, cat, catalog):

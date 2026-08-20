@@ -39,7 +39,7 @@ class Settings:
     poll_seconds_min: int = 90
     poll_seconds_max: int = 240
     night_pause: bool = True
-    impersonate: str = "safari_ios"
+    impersonate: str = "chrome_android"
     ai_url: str = "http://localhost:11434/v1"
     ai_model: str = "qwen2.5vl:7b"
     # qwen2.5vl:7b ships a 4096-token context; one full-res photo plus the prompt
@@ -47,8 +47,17 @@ class Settings:
     ai_max_images: int = 1
     # pricing
     pricebook_path: str = "config/pricebook.yaml"
+    sold_path: str = "config/sold.yaml"
+    # Run the vision model only on candidates worth this much net.
+    # CPU inference is what heats the laptop, so it must be rare and
+    # deliberate rather than fire on every borderline ad.
+    ai_min_margin: float = 70
     min_comparables: int = 5
     window_days: int = 90
+    # Comparables still on sale this many days after first sighting are dropped
+    # from the median: they demonstrably did not sell at that price. Used by the
+    # shopping board only, so far.
+    stale_days: float = 10
     realization_factor: float = 0.85
     max_eval_price: float = 1500
     # geo (km) + logistics
@@ -69,7 +78,11 @@ def _f(name: str, default: float) -> float:
     return float(v) if v else default
 
 
-def load_settings(searches_file: str | Path = "config/searches.yaml") -> Settings:
+def load_settings(searches_file: str | Path | None = None) -> Settings:
+    # SEARCHES_FILE lets the service run a trimmed search set (near-Lille
+    # radius sweeps only) without editing the file the CLI reads by hand.
+    searches_file = searches_file or os.environ.get(
+        "SEARCHES_FILE", "config/searches.yaml")
     searches: list[SearchConfig] = []
     path = Path(searches_file)
     if path.exists():
@@ -101,13 +114,16 @@ def load_settings(searches_file: str | Path = "config/searches.yaml") -> Setting
         poll_seconds_min=int(os.environ.get("POLL_SECONDS_MIN", 90)),
         poll_seconds_max=int(os.environ.get("POLL_SECONDS_MAX", 240)),
         night_pause=os.environ.get("NIGHT_PAUSE", "1") != "0",
-        impersonate=os.environ.get("LBC_IMPERSONATE", "safari_ios"),
+        impersonate=os.environ.get("LBC_IMPERSONATE", "chrome_android"),
         ai_url=os.environ.get("AI_URL", "http://localhost:11434/v1"),
         ai_model=os.environ.get("AI_MODEL", "qwen2.5vl:7b"),
         ai_max_images=int(os.environ.get("AI_MAX_IMAGES", 1)),
         pricebook_path=os.environ.get("PRICEBOOK", "config/pricebook.yaml"),
+        sold_path=os.environ.get("SOLD_PRICES", "config/sold.yaml"),
+        ai_min_margin=_f("AI_MIN_MARGIN", 70),
         min_comparables=int(os.environ.get("MIN_COMPARABLES", 5)),
         window_days=int(os.environ.get("WINDOW_DAYS", 90)),
+        stale_days=_f("STALE_DAYS", 10),
         realization_factor=_f("REALIZATION_FACTOR", 0.85),
         max_eval_price=_f("MAX_EVAL_PRICE", 1500),
         easy_km=_f("EASY_KM", 60),

@@ -6,8 +6,10 @@ as every source; paste a 2ememain search-API URL per search in searches.yaml.
 """
 from __future__ import annotations
 
+import datetime as dt
 import logging
 import re
+import unicodedata
 
 from curl_cffi import requests
 
@@ -62,7 +64,7 @@ class DeuxiemeMainSource:
             url=url,
             title=it.get("title") or it.get("displayTitle") or "",
             price=price,
-            published_at=None,
+            published_at=_published_at(it.get("date")),
             description=it.get("description") or it.get("categorySpecificDescription") or "",
             city=loc.get("cityName"),
             zipcode=None,
@@ -74,6 +76,59 @@ class DeuxiemeMainSource:
             image_urls=tuple(_images(it)),
             search_name=search_name,
         )
+
+
+# The API dates a listing the way the site shows it ("Hier", "6 aout 26"), in
+# French or Dutch depending on the ad. Parsing it is what lets the resweep come
+# back to a listing later: without a date every Belgian ad got exactly one
+# evaluation, on the cycle it first appeared, and was never reconsidered.
+_RELATIVE = {
+    "aujourd hui": 0, "aujourdhui": 0, "vandaag": 0,
+    "eergisteren": 2, "avant hier": 2,
+    "gisteren": 1, "hier": 1,
+}
+_MONTHS = {
+    "jan": 1, "feb": 2, "fev": 2, "mar": 3, "mrt": 3, "apr": 4, "avr": 4,
+    "mai": 5, "mei": 5, "jun": 6, "jui": 7, "jul": 7, "aou": 8, "aug": 8,
+    "sep": 9, "okt": 10, "oct": 10, "nov": 11, "dec": 12,
+}
+_DMY = re.compile(r"(\d{1,2})\s+([a-z]+)\.?\s+(\d{2,4})")
+
+
+def _strip_accents(s: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFD", s)
+                   if unicodedata.category(c) != "Mn")
+
+
+def _published_at(raw: str | None, today: dt.date | None = None) -> str | None:
+    """ISO day for a 2ememain date label, or None when it cannot be read.
+
+    Returned as YYYY-MM-DD so it compares directly against the resweep cutoff.
+    """
+    if not raw:
+        return None
+    today = today or dt.date.today()
+    t = _strip_accents(str(raw).lower()).replace("'", " ").replace("-", " ")
+    t = " ".join(t.split())
+
+    if ":" in t and not any(ch.isalpha() for ch in t):
+        return today.isoformat()
+    for word, back in _RELATIVE.items():
+        if word in t:
+            return (today - dt.timedelta(days=back)).isoformat()
+
+    m = _DMY.search(t)
+    if m:
+        day, month_word, year = m.groups()
+        month = _MONTHS.get(month_word[:3])
+        if month:
+            year = int(year)
+            year += 2000 if year < 100 else 0
+            try:
+                return dt.date(year, month, int(day)).isoformat()
+            except ValueError:
+                return None
+    return None
 
 
 def _with_offset(url: str, offset: int) -> str:

@@ -19,11 +19,11 @@ def _market(*rows, min_comparables=5):
 
 
 def test_a_tower_is_priced_against_other_towers():
-    m = _market(*[(f"Gaming PC RTX 3060 build {i}", p) for i, p in
+    m = _market(*[(f"Gaming PC RTX 3060 i5-12400F {i}", p) for i, p in
                   enumerate((650, 700, 700, 750, 800, 690))])
-    med, n = m.median_ask("gpu:rtx-3060")
+    med, n = m.median_ask("gpu:rtx-3060", cpu="i5")
     assert med == 700 and n == 6
-    value, _ = m.whole_value("gpu:rtx-3060")
+    value, _ = m.whole_value("gpu:rtx-3060", cpu="i5")
     assert value == round(700 * PC_REALIZATION, 2)
 
 
@@ -35,34 +35,34 @@ def test_thin_evidence_yields_no_opinion():
 
 
 def test_a_listing_does_not_help_justify_its_own_bargain():
-    rows = [(f"Gaming PC RTX 3060 {i}", p) for i, p in
+    rows = [(f"Gaming PC RTX 3060 i5-12400F {i}", p) for i, p in
             enumerate((700, 700, 700, 700, 700))]
-    m = _market(*rows, ("Gaming PC RTX 3060 cheap", 300))
-    med_all, _ = m.median_ask("gpu:rtx-3060")
-    med_self, _ = m.median_ask("gpu:rtx-3060", exclude_uid="2ememain:5")
+    m = _market(*rows, ("Gaming PC RTX 3060 i5-12400F cheap", 300))
+    med_all, _ = m.median_ask("gpu:rtx-3060", cpu="i5")
+    med_self, _ = m.median_ask("gpu:rtx-3060", cpu="i5", exclude_uid="2ememain:5")
     assert med_all == 700 and med_self == 700
     # and the cheap one is not in its own comparable set
-    assert m.median_ask("gpu:rtx-3060", exclude_uid="2ememain:0")[1] == 5
+    assert m.median_ask("gpu:rtx-3060", cpu="i5", exclude_uid="2ememain:0")[1] == 5
 
 
 def test_a_fantasy_price_does_not_move_the_median():
     """A 5300 EUR "RTX 4070 Ti" tower is really in the pool."""
-    m = _market(*[("Gaming PC RTX 4070 Ti", p) for p in
+    m = _market(*[("Gaming PC RTX 4070 Ti i7-13700K", p) for p in
                   (1200, 1500, 1650, 1700, 1800, 5300)])
-    med, n = m.median_ask("gpu:rtx-4070-ti")
+    med, n = m.median_ask("gpu:rtx-4070-ti", cpu="i7")
     # [1200,1500,1650,1700,1800] survive the trim; 5300 does not.
     assert med == 1650 and n == 5, "the outlier is trimmed, not averaged in"
 
 
 def test_laptops_never_enter_the_tower_pool():
     """"PC portable" is a bundle by token and would drag the tier to retail."""
-    m = _market(*[("Gaming PC RTX 3060", p) for p in (600, 650, 700, 700, 750)],
-                ("PC portable gamer RTX 3060", 1400),
-                ("Laptop RTX 3060", 1300))
-    assert m.median_ask("gpu:rtx-3060") == (700, 5)
+    m = _market(*[("Gaming PC RTX 3060 i5-12400F", p) for p in (600, 650, 700, 700, 750)],
+                ("PC portable gamer RTX 3060 i5", 1400),
+                ("Laptop RTX 3060 i5", 1300))
+    assert m.median_ask("gpu:rtx-3060", cpu="i5") == (700, 5)
 
 
 def test_a_bare_card_is_not_a_tower():
-    m = _market(*[("Gaming PC RTX 3060", p) for p in (600, 650, 700, 700, 750)],
+    m = _market(*[("Gaming PC RTX 3060 i5-12400F", p) for p in (600, 650, 700, 700, 750)],
                 ("Gigabyte RTX 3060 Gaming OC", 230))
-    assert m.median_ask("gpu:rtx-3060") == (700, 5)
+    assert m.median_ask("gpu:rtx-3060", cpu="i5") == (700, 5)

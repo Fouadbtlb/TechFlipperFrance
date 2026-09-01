@@ -159,3 +159,58 @@ def test_a_complete_console_with_extras_is_unaffected():
                   "Console Playstation 4 pro 1to + manette"]:
         assert [c for c in recognize(title, "", CATALOG)
                 if c.category == "console"], title
+
+
+def test_a_second_generation_switch_is_not_a_switch_2():
+    """Cash Converters Ath, 200 EUR, titled "Console NINTENDO Switch 2 th gen".
+    That is the 2nd-generation (v2) Switch, worth ~160, not the Switch 2 console
+    at 355. Three of them were sitting in the shortlist at +150 each."""
+    for title in ["Console NINTENDO Switch 2 th gen", "Console NINTENDO switch 2 gen",
+                  "Nintendo Switch 2eme generation"]:
+        keys = [c.key for c in recognize(title, "", CATALOG) if c.category == "console"]
+        assert keys == ["console:switch"], f"{title} -> {keys}"
+
+
+def test_a_real_switch_2_is_still_a_switch_2():
+    keys = [c.key for c in recognize("Console Nintendo Switch 2", "", CATALOG)
+            if c.category == "console"]
+    assert keys == ["console:switch-2"]
+
+
+def test_a_case_for_a_handheld_is_not_the_handheld():
+    """"Coque Steam Deck OLED 512 Go +, neuve, avec garantie", 370 EUR, valued
+    as a 534 EUR Steam Deck. The accessory rule never fired because "deck" was
+    not in the console vocabulary at all."""
+    for title in ["Coque Steam Deck OLED 512 Go, neuve, avec garantie",
+                  "Housse pour Steam Deck", "Chargeur ROG Ally"]:
+        assert not [c for c in recognize(title, "", CATALOG)
+                    if c.category == "console"], title
+
+
+def test_a_real_handheld_is_untouched():
+    for title in ["Valve Steam Deck OLED 512 Go", "Steam Deck LCD 64go"]:
+        assert [c for c in recognize(title, "", CATALOG)
+                if c.category == "console"], title
+
+
+def test_an_elgato_stream_deck_is_not_a_valve_steam_deck():
+    """"Steam deck + neuf! Elgato", 160 EUR, valued at 276 as a Valve handheld.
+    It is an Elgato Stream Deck, a macro pad."""
+    assert not [c for c in recognize("Steam deck + neuf! Elgato", "", CATALOG)
+                if c.category == "console"]
+
+
+def test_a_network_switch_is_not_a_nintendo_switch():
+    """Cash Converters stocks both. "Switch ethernet Sodola" (80 EUR) and
+    "SWITCH 2,5 TP LINK SG105" (20 EUR) were valued as consoles."""
+    for title in ["Switch ethernet Sodola", "SWITCH 2,5 TP LINK SG105",
+                  "Switch reseau Netgear 8 ports"]:
+        assert not [c for c in recognize(title, "", CATALOG)
+                    if c.category == "console"], title
+
+
+def test_a_real_switch_console_survives_both_guards():
+    for title in ["Console NINTENDO Switch Sans Accessoires",
+                  "Valve Steam Deck OLED 512 Go"]:
+        assert [c for c in recognize(title, "", CATALOG)
+                if c.category == "console"], title

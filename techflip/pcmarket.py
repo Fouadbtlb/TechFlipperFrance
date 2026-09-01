@@ -22,6 +22,7 @@ where a human reads every row, and stays out of the alert path.
 from __future__ import annotations
 
 import json
+import re
 import statistics
 from collections import defaultdict
 
@@ -36,6 +37,35 @@ PC_REALIZATION = 0.85
 # so trim around a first-pass median before taking the real one.
 _LO, _HI = 0.4, 2.5
 
+# The CPU is half of what a buyer pays for. Keying comparables on the GPU alone
+# priced a "GTX 1660 Super + i3-10100F" at 542 against i5 and i7 machines, and
+# recommended it as the buy of the weekend at 300. Measured over the pool, the
+# tier moves the price hard: RTX 3060 towers sit at 650 with an i5 and 1150
+# with a Ryzen 9.
+_TIER = re.compile(r"\b(i[3579]|ryzen\s*[3579]|celeron|pentium|athlon)\b", re.I)
+_TIER_ALIAS = {"ryzen 3": "r3", "ryzen 5": "r5", "ryzen 7": "r7", "ryzen 9": "r9"}
+
+# A comparable set whose middle half spans more than this fraction of its median
+# is not an estimate, it is a coin flip. Calibrated against the real pools: the
+# 1660 Super one (7 towers, 300-950) scores 0.50 and must be refused, while a
+# genuine same-tier pool sits nearer 0.2. Refusing is the honest output, and
+# the caller then falls back to the part sum.
+_MAX_SPREAD = 0.4
+
+# With no comparable at the same CPU tier, the build is somewhere in a pooled
+# range and we do not know where. Take the low quarter rather than the middle:
+# same posture as the unnamed-chassis credit, which uses the cheapest seed.
+_FALLBACK_Q = 0.25
+
+
+def cpu_tier(text: str) -> str | None:
+    """i3 / i5 / i7 / i9 / r3..r9, or None when the ad never says."""
+    m = _TIER.search(text or "")
+    if not m:
+        return None
+    t = re.sub(r"\s+", " ", m.group(1).lower())
+    return _TIER_ALIAS.get(t, t)
+
 
 class PCMarket:
     """Median asking price of complete towers, indexed by the GPU they contain.
@@ -45,6 +75,7 @@ class PCMarket:
 
     def __init__(self, min_comparables: int = 5):
         self._by_gpu: dict[str, list[tuple[str, float]]] = defaultdict(list)
+        self._by_gpu_cpu: dict[tuple[str, str], list[tuple[str, float]]] = defaultdict(list)
         self.min_comparables = min_comparables
 
     @classmethod
@@ -71,25 +102,54 @@ class PCMarket:
                     if c.category == "gpu"), None)
         if gpu:
             self._by_gpu[gpu.key].append((uid, float(price)))
+            tier = cpu_tier(f"{title} {description or ''}")
+            if tier:
+                self._by_gpu_cpu[(gpu.key, tier)].append((uid, float(price)))
 
-    def median_ask(self, gpu_key: str, exclude_uid: str | None = None):
-        """(median asking price, n) for towers with this GPU, or (None, n).
+    def median_ask(self, gpu_key: str, exclude_uid: str | None = None,
+                   cpu: str | None = None):
+        """(price, n) for towers like this one, or (None, n) when unsure.
 
-        The listing being valued is excluded from its own comparable set,
-        otherwise a lone cheap tower partly justifies its own bargain.
+        Prefers comparables with the same CPU tier. Without them it falls back
+        to the whole GPU pool but takes a low quartile rather than the median,
+        because an unmatched build sits somewhere unknown in that range and
+        guessing the middle is how an i3 machine inherited an i7 price.
         """
-        prices = [p for uid, p in self._by_gpu.get(gpu_key, ()) if uid != exclude_uid]
+        same = [p for uid, p in self._by_gpu_cpu.get((gpu_key, cpu or ""), ())
+                if uid != exclude_uid]
+        if len(same) >= self.min_comparables:
+            return self._robust(same, statistics.median)
+        pooled = [p for uid, p in self._by_gpu.get(gpu_key, ()) if uid != exclude_uid]
+        return self._robust(pooled, _quantile)
+
+    def _robust(self, prices, pick):
+        """Trim the fantasies, refuse the noise, then answer."""
         if len(prices) < self.min_comparables:
             return None, len(prices)
         rough = statistics.median(prices)
-        kept = [p for p in prices if _LO * rough <= p <= _HI * rough]
+        kept = sorted(p for p in prices if _LO * rough <= p <= _HI * rough)
         if len(kept) < self.min_comparables:
             return None, len(kept)
-        return round(statistics.median(kept), 2), len(kept)
+        lo, hi = _quantile(kept, 0.25), _quantile(kept, 0.75)
+        mid = statistics.median(kept)
+        if mid <= 0 or (hi - lo) / mid > _MAX_SPREAD:
+            return None, len(kept)
+        return round(pick(kept), 2), len(kept)
 
-    def whole_value(self, gpu_key: str, exclude_uid: str | None = None):
+    def whole_value(self, gpu_key: str, exclude_uid: str | None = None,
+                    cpu: str | None = None):
         """Realizable price of the assembled machine, and how many ads back it."""
-        med, n = self.median_ask(gpu_key, exclude_uid)
+        med, n = self.median_ask(gpu_key, exclude_uid, cpu)
         if med is None:
             return None, n
         return round(med * PC_REALIZATION, 2), n
+
+
+def _quantile(values, q: float = _FALLBACK_Q) -> float:
+    """Simple order-statistic quantile; the samples are far too few for
+    interpolation to mean anything."""
+    xs = sorted(values)
+    if not xs:
+        return 0.0
+    i = min(len(xs) - 1, max(0, int(round(q * (len(xs) - 1)))))
+    return xs[i]

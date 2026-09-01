@@ -107,7 +107,11 @@ def teaches_price(title: str) -> bool:
     return not (toks & _NOT_THE_MACHINE)
 
 
-_CONSOLE_WORDS = {"ps5", "ps4", "ps3", "playstation", "xbox", "switch", "console", "wii"}
+_CONSOLE_WORDS = {"ps5", "ps4", "ps3", "playstation", "xbox", "switch", "console", "wii",
+                  # Handhelds were absent, so "Coque Steam Deck OLED" (370 EUR)
+                  # was valued as a 534 EUR Steam Deck: with no console word in
+                  # the title the accessory rule never even ran.
+                  "deck", "steamdeck", "portal", "ally"}
 _ACCESSORY_WORDS = {"manette", "manettes", "casque", "support", "telecommande",
                     "télécommande", "cable", "câble", "chargeur", "housse", "sacoche",
                     "socle", "station", "coque", "protection", "volant", "jeu", "jeux",
@@ -150,8 +154,18 @@ _ONLY_WORDS = {"uniquement", "seul", "seule", "seulement", "only", "alleen",
                "enkel", "sans"}
 
 
+# Brands and words that rule the console out entirely, whatever else the title
+# says. A shop that stocks consoles also stocks an Elgato Stream Deck (a macro
+# pad, read as a Valve Steam Deck at 276 EUR) and network switches ("Switch
+# ethernet Sodola", read as a Nintendo Switch at 166).
+_NOT_A_CONSOLE = re.compile(
+    r"\b(elgato|stream\s*deck|ethernet|reseau|réseau|rj45|poe|tp\s*link|netgear|sodola|gigabit|ports?)\b", re.I)
+
+
 def _console_is_subject(title: str) -> bool:
     t = (title or "").lower()
+    if _NOT_A_CONSOLE.search(t):
+        return False
     toks = [x for x in re.split(r"[^0-9a-zà-ÿ]+", t) if x]
     con = next((i for i, x in enumerate(toks) if x in _CONSOLE_WORDS), None)
     if con is None:
@@ -180,6 +194,12 @@ _VARIANTS: dict[str, tuple[tuple[re.Pattern, str], ...]] = {
         (re.compile(r"\bportable\b"), "console:ps-portal"),
         (re.compile(r"\b(digital|digitale|digiale|numerique|sans lecteur)\b"),
          "console:ps5-digital"),
+    ),
+    # "Switch 2 th gen" is the second-generation (v2) Switch at ~160, not the
+    # Switch 2 console at 355. Three of them sat in the shortlist at +150.
+    "console:switch-2": (
+        (re.compile(r"\b(?:\d\s*(?:th|nd|e|eme)?\s*)?"
+                    r"(?:gen|generation)\b"), "console:switch"),
     ),
     "console:switch": (
         (re.compile(r"\blite\b"), "console:switch-lite"),

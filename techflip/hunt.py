@@ -27,7 +27,7 @@ from dataclasses import dataclass
 from .buying import WHITE_MARKERS, looks_like_sales_copy
 from .domain import Listing
 from .geo import zone_for_distance
-from .pcmarket import PCMarket
+from .pcmarket import PCMarket, cpu_tier
 from .pricing.appraise import (REALIZATION, appraise, build_items,
                                listing_condition)
 from .pricing.extract import _is_bundle, _norm, recognize
@@ -69,6 +69,14 @@ CHASSIS_LABEL = {"motherboard": "Carte mere", "psu": "Alim",
 
 _LAPTOP = re.compile(
     r"\b(portable|portables|laptop|notebook|macbook|ultrabook|chromebook)\b", re.I)
+
+# The chip suffix betrays a laptop that never uses the word. "PC Gaming HP OMEN
+# Intel i7-13700HX RTX4080", 1300 EUR, topped the shortlist at +400: HX is
+# mobile, so its RTX 4080 is the mobile part, worth a fraction of the desktop
+# card it shares a name with. H / HX / HS / U only -- never K, F or X, which
+# are desktop.
+_MOBILE_CPU = re.compile(
+    r"\b(?:i[3579]|ryzen\s*[3579])[\s-]*\d{4,5}\s*(?:hx|hs|h|u)\b", re.I)
 
 # Someone looking to BUY, not to sell. "Recherche ps5 standard" ranked third on
 # the board, appraised as if it were a PS5 for sale. The alert path drops these
@@ -183,8 +191,8 @@ def evaluate(
     # it is. Reading that as a laptop told the reader a 90 EUR console had
     # been priced from desktop part values, which is false and alarming. A
     # recognised console settles it: handhelds are consoles, not laptops.
-    laptop = bool(_LAPTOP.search(text)) and not any(
-        c.category == "console" for c in comps)
+    laptop = (bool(_LAPTOP.search(text)) or bool(_MOBILE_CPU.search(text))) \
+        and not any(c.category == "console" for c in comps)
     build = _is_bundle(l.title) and not laptop
     value, lines = appr.true_value, list(appr.lines)
     if build:
@@ -198,7 +206,8 @@ def evaluate(
         # of 700 where its parts sum to about 400.
         gpu = next((c for c in comps if c.category == "gpu"), None)
         if pc_market is not None and gpu is not None:
-            whole, n = pc_market.whole_value(gpu.key, exclude_uid=l.uid)
+            whole, n = pc_market.whole_value(gpu.key, exclude_uid=l.uid,
+                                             cpu=cpu_tier(text))
             if whole is not None:
                 lines.append(f"Machine complete comparable ({gpu.label}, "
                              f"{n} annonces): {whole:.0f}\u20ac (marche)")

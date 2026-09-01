@@ -281,3 +281,25 @@ def test_a_real_laptop_is_still_flagged(ctx):
     f = evaluate(_listing("PC Portable Gamer ASUS TUF RTX 3050", 400, source_id="lap"),
                  CATALOG, tracker, locator)
     assert "laptop" in f.flags
+
+
+def test_a_mobile_cpu_marks_a_laptop_even_when_the_ad_never_says_so(ctx):
+    """"PC Gaming HP OMEN Intel i7-13700HX RTX4080 32 GB 1To", 1300 EUR, topped
+    the shortlist at +400. It is a laptop: HX is a mobile chip and its RTX 4080
+    is the mobile part, worth a fraction of the desktop card. The word
+    "portable" never appears in the title, so only the chip suffix betrays it.
+    """
+    store, tracker, locator = ctx
+    f = evaluate(_listing("PC Gaming HP OMEN Intel i7-13700HX RTX4080 32 GB 1To", 1300),
+                 CATALOG, tracker, locator)
+    assert "laptop" in f.flags
+    assert not any("chassis" in l.lower() for l in f.lines)
+
+
+def test_a_desktop_chip_is_not_mistaken_for_a_mobile_one(ctx):
+    store, tracker, locator = ctx
+    for title in ["PC Gamer i7-13700K RTX 4070", "PC Gamer i5-12400F RTX 3060",
+                  "PC Gamer Ryzen 7 5800X3D RTX 4080"]:
+        f = evaluate(_listing(title, 900, source_id=title[:14]),
+                     CATALOG, tracker, locator)
+        assert "laptop" not in f.flags, title

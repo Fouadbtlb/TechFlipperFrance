@@ -131,10 +131,23 @@ _ADDON_NOUNS = {
     # Lille) was appraised as a 368 EUR PS5.
     # NB not "disque" alone: "PS5 edition disque" is the disc console itself.
     "ssd", "nvme", "hdd", "dur", "schijf", "harde",
+    # A headset is an accessory however a shop titles it: "ps vr 2 ps5",
+    # 250 EUR at Cash Converters, was appraised as a 340 EUR PS5.
+    "vr", "psvr", "vr2",
+    # Pad names, which `_NOT_THE_MACHINE` already blocks from teaching a
+    # price but which were not barred from BEING the machine: "Console
+    # NINTENDO Switch (Joycon Gauche uniquement)" was valued as a console.
+    "joycon", "joycons", "dualsense", "dualshock", "scuf", "nacon",
 }
 # ...unless the ad also says it is selling the machine those extras come with.
 _BUNDLE_MARKERS = {"console", "avec", "met", "inclus", "incl", "included",
                    "complet", "complete", "compleet", "bundle", "pack", "+"}
+# ...and these cancel the bundle markers again. A pro shop states the
+# shortfall in the title: "Console NINTENDO Switch Chargeur Uniquement" is a
+# charger. The word "console" alone made that read as a bundle, so it was
+# valued at 161 EUR as a whole machine.
+_ONLY_WORDS = {"uniquement", "seul", "seule", "seulement", "only", "alleen",
+               "enkel", "sans"}
 
 
 def _console_is_subject(title: str) -> bool:
@@ -145,8 +158,9 @@ def _console_is_subject(title: str) -> bool:
         return True
     # Position-independent: an accessory noun with nothing saying a machine is
     # included means the accessory is what is for sale, whatever the word order.
-    if set(toks) & _ADDON_NOUNS and not (
-            "+" in t or set(toks) & _BUNDLE_MARKERS):
+    addon = set(toks) & _ADDON_NOUNS
+    bundle = "+" in t or set(toks) & _BUNDLE_MARKERS
+    if addon and (not bundle or set(toks) & _ONLY_WORDS):
         return False
     acc = next((i for i, x in enumerate(toks) if x in _ACCESSORY_WORDS), None)
     return acc is None or con < acc

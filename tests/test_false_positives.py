@@ -130,3 +130,32 @@ def test_a_console_sold_with_a_drive_keeps_its_console():
     for title in ["PS5 avec SSD 2To", "Xbox Series X + SSD 1To"]:
         assert [c for c in recognize(title, "", CATALOG)
                 if c.category == "console"], title
+
+
+def test_a_vr_headset_named_beside_a_console_is_not_the_console():
+    """"ps vr 2 ps5", 250 EUR at Cash Converters Mouscron, appraised as a
+    340 EUR PS5. A headset is an accessory however the shop titles it."""
+    for title in ["ps vr 2 ps5", "PSVR 2 pour PS5", "Casque VR PS4"]:
+        assert not [c for c in recognize(title, "", CATALOG)
+                    if c.category == "console"], title
+
+
+def test_only_the_accessory_means_only_the_accessory():
+    """Cash Converters writes the shortfall in the title: "Console NINTENDO
+    Switch Chargeur Uniquement" is a charger, priced at 120 EUR and valued as a
+    161 EUR console. The word "console" made it look like a bundle, so the
+    accessory rule stood down -- but "uniquement" says the opposite."""
+    for title in [
+        "Console NINTENDO Switch Chargeur Uniquement",
+        "Console NINTENDO Switch (Joycon Gauche exterieur uniquement)",
+        "Console PS4 manette seule",
+    ]:
+        assert not [c for c in recognize(title, "", CATALOG)
+                    if c.category == "console"], title
+
+
+def test_a_complete_console_with_extras_is_unaffected():
+    for title in ["Console NINTENDO SWITCH Neon (etat) + Accessoires",
+                  "Console Playstation 4 pro 1to + manette"]:
+        assert [c for c in recognize(title, "", CATALOG)
+                if c.category == "console"], title

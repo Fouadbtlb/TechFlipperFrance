@@ -207,3 +207,47 @@ searches:
     kind: hunt
     min_price: 60
     max_price: 700
+
+  # ---------- Cash Converters (chaine pro, Belgique) ----------
+  # Une chaine ne negocie pas et solde son stock au calendrier, donc ses erreurs
+  # de prix sont systematiques et se repetent, contrairement a celles d'un
+  # particulier. Repere par le proprietaire: Steam Deck LCD a 230 et OLED 2To a
+  # 500, bien sous les demandes des particuliers deja suivies ici.
+  # Le facet magasin (q=Magasin-XXX) fixe la ville de toute la page, donc la
+  # position est connue sans requete supplementaire. JAMBES = Namur.
+  - name: "CC Jambes (Namur) - consoles"
+    source: cashconverters
+    url: "https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-JAMBES"
+    kind: hunt
+    min_price: 40
+    max_price: 900
+  - name: "CC Jambes (Namur) - informatique"
+    source: cashconverters
+    url: "https://www.cashconverters.be/fr/134-informatique?q=Magasin-JAMBES"
+    kind: hunt
+    min_price: 40
+    max_price: 2000
+  - name: "CC Sambreville - consoles"
+    source: cashconverters
+    url: "https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-SAMBREVILLE"
+    kind: hunt
+    min_price: 40
+    max_price: 900
+  - name: "CC Mouscron (Lille) - consoles"
+    source: cashconverters
+    url: "https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-MOUSCRON"
+    kind: hunt
+    min_price: 40
+    max_price: 900
+  - name: "CC Mouscron (Lille) - informatique"
+    source: cashconverters
+    url: "https://www.cashconverters.be/fr/134-informatique?q=Magasin-MOUSCRON"
+    kind: hunt
+    min_price: 40
+    max_price: 2000
+  - name: "CC Froyennes (Tournai) - consoles"
+    source: cashconverters
+    url: "https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-FROYENNES"
+    kind: hunt
+    min_price: 40
+    max_price: 900

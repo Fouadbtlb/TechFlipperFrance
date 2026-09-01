@@ -48,6 +48,9 @@ def _make_source(name: str, settings: Settings):
     if name == "2ememain":
         from .sources.deuxememain import DeuxiemeMainSource
         return DeuxiemeMainSource()
+    if name == "cashconverters":
+        from .sources.cashconverters import CashConvertersSource
+        return CashConvertersSource()
     raise ValueError(f"source inconnue: {name!r}")
 
 

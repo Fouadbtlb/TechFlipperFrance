@@ -220,8 +220,15 @@ class Store:
         leaving them in is what makes the median mean "what sellers ask" rather
         than "what things go for".
         """
+        # Private sellers only. A shop's shelf price is the retail ceiling,
+        # not what you can get for the same item: a Switch asks 170 at Cash
+        # Converters and 128 between private sellers. You sell as a private
+        # seller. Pooling the two (9331 shop rows against ~3500 private)
+        # dragged every median up to the shelf price and invented margin on
+        # the shop's own stock.
         sql = ("SELECT price FROM listings WHERE primary_component=? "
-               "AND price IS NOT NULL AND fetched_at >= ?")
+               "AND price IS NOT NULL AND fetched_at >= ? "
+               "AND (owner_type IS NULL OR owner_type != 'pro')")
         params: list = [key, since_iso]
         if stale_days is not None:
             sql += (" AND (first_seen IS NULL OR last_seen IS NULL "

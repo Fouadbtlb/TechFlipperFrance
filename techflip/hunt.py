@@ -34,6 +34,19 @@ from .pricing.extract import _is_bundle, _norm, recognize
 
 PC = "pc"
 
+# Source aisles that cannot contain a whole machine. A shop files its stock, and
+# "Edition Collector PlayStation 5 Dragon Ball Sparking Zero" (200 EUR) sat in
+# /jeux-playstation/ while being valued as a 340 EUR console: nothing in the
+# title says "game", but the shop already said it. Substring match, so
+# "jeux-xbox-series-x-s" and "accessoires-informatique" are both covered.
+_NON_MACHINE_AISLES = ("jeux", "accessoire", "toebehoren", "games")
+_MACHINE_CATEGORIES = frozenset({"console", "laptop"})
+
+
+def _aisle_bars_machines(source_category: str | None) -> bool:
+    c = (source_category or "").lower()
+    return bool(c) and any(w in c for w in _NON_MACHINE_AISLES)
+
 # Under this share of market value the ad is not a bargain, it is bait: the
 # card does not exist, the "PS5" is a photo off Google, payment is by transfer.
 # Kept visible but ranked last, because a real 60%-of-market ad does exist and
@@ -175,6 +188,8 @@ def evaluate(
     if _WANTED.match(_norm(l.title)):
         return None
     comps = recognize(l.title, l.description, catalog)
+    if _aisle_bars_machines(l.source_category):
+        comps = [c for c in comps if c.category not in _MACHINE_CATEGORIES]
     if not comps:
         return None
 

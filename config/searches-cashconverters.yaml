@@ -368,3 +368,183 @@ searches:
   kind: hunt
   min_price: 40
   max_price: 2500
+- name: CC Antwerpen - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-ANTWERPEN&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Arlon - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-ARLON&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Ath - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-ATH&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Aywaille - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-AYWAILLE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Binche - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-BINCHE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Bruxelles - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-BRUXELLES&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Couillet - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-COUILLET&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Drogenbos - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-DROGENBOS&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Etterbeek - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-ETTERBEEK&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Evere - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-EVERE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Fleron - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-FLERON&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Froyennes - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-FROYENNES&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Gosselies - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-GOSSELIES&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Grivegnee - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-GRIVEGNEE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Herstal - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-HERSTAL&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Huy - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-HUY&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Ixelles - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-IXELLES&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Jambes - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-JAMBES&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Jette - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-JETTE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC La Louviere - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Liege Centre - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-LIEGE+CENTRE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Marche - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-MARCHE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Mons - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-MONS&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Mouscron - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-MOUSCRON&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Quaregnon - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-QUAREGNON&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Sambreville - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-SAMBREVILLE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Seraing - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-SERAING&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Tubize - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-TUBIZE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Verviers - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-VERVIERS&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Wavre - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-WAVRE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500

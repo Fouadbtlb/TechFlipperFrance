@@ -56,6 +56,12 @@ class CashConvertersSource:
         latlng = self._latlng(store)
         out: list[Listing] = []
         for item in (r.json() or {}).get("products") or []:
+            # `add_to_cart_url` is null exactly when the shop has sold the
+            # item; `active` still reads 1, so it is no help. The 700 EUR
+            # RTX 3080 at Ixelles was recommended as the buy of the weekend
+            # while its own page said "Rupture de stock".
+            if not item.get("add_to_cart_url"):
+                continue
             try:
                 out.append(self._normalize(item, search.name, store, latlng))
             except Exception:
@@ -81,6 +87,7 @@ class CashConvertersSource:
             lat=latlng[0] if latlng else None,
             lng=latlng[1] if latlng else None,
             image_urls=tuple(_images(it)),
+            source_category=_category_of(it.get("url") or ""),
             search_name=search_name,
         )
 
@@ -125,6 +132,12 @@ def _geocode(store: str):
     except Exception:
         log.warning("cashconverters: geocoding failed for %r", store, exc_info=True)
     return None
+
+
+def _category_of(url: str) -> str | None:
+    """The aisle segment of a product URL: /fr/<aisle>/<id>-<slug>.html."""
+    m = re.search(r"/fr/([a-z0-9-]+)/\d+-", url or "")
+    return m.group(1) if m else None
 
 
 def _images(it: dict) -> list[str]:

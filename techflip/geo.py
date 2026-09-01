@@ -13,6 +13,26 @@ LILLE = (50.6292, 3.0573)
 # Other origins worth measuring from: a trip is planned around a place,
 # not around home, and a tower 20km from Namur reads as 110km from Lille.
 NAMUR = (50.4674, 4.8720)
+ANDENNE = (50.4894, 5.0951)
+
+# Fuel, not a vague per-km allowance. Every margin this tool showed was gross,
+# and at 3 EUR a litre a round trip to a far shop costs more than several of the
+# "deals" were worth. Defaults are the owner's own estimate; consumption is a
+# plain assumption and is stated wherever the number is shown.
+FUEL_EUR_PER_LITRE = 3.0
+LITRES_PER_100KM = 7.0
+
+
+def fuel_cost(distance_km: float | None,
+              price_per_litre: float = FUEL_EUR_PER_LITRE,
+              litres_per_100km: float = LITRES_PER_100KM,
+              round_trip: bool = True) -> float | None:
+    """What the drive actually costs. None when the distance is unknown."""
+    if distance_km is None:
+        return None
+    km = distance_km * (2 if round_trip else 1)
+    return round(km * litres_per_100km / 100 * price_per_litre, 2)
+
 
 SHIPPING_COSTS = {"bulky": 25.0, "parcel": 12.0, "small": 6.0, "default": 12.0}
 

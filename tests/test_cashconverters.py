@@ -14,11 +14,13 @@ RAW = {
     "products": [
         {"id_product": 1166384, "name": "Console Steam deck OLED 2TO ",
          "price_amount": 500.0, "url": "https://www.cashconverters.be/fr/x/1-a.html",
+         "add_to_cart_url": "https://www.cashconverters.be/cart?add=1",
          "description_short": "<p>Tres bon <b>etat</b></p>",
          "cover": {"bySize": {"small_default": {"url": "https://img/s.jpg"},
                               "large_default": {"url": "https://img/l.jpg"}}}},
         {"id_product": 999, "name": "Steam deck LCD 64go", "price_amount": 230.0,
-         "url": "https://www.cashconverters.be/fr/x/2-b.html"},
+         "url": "https://www.cashconverters.be/fr/x/2-b.html",
+         "add_to_cart_url": "https://www.cashconverters.be/cart?add=2"},
     ]
 }
 
@@ -108,3 +110,29 @@ def test_existing_query_params_survive():
 def urllib_unquote(s):
     import urllib.parse
     return urllib.parse.unquote_plus(s)
+
+
+def test_a_sold_item_is_not_an_offer():
+    """`add_to_cart_url` is null exactly when the shop has sold it -- `active`
+    still reads 1. The 700 EUR Corsair RTX 3080 at Ixelles was recommended as
+    the buy of the weekend while its page said "Rupture de stock"."""
+    src = _source()
+    src.session = _SoldSession()
+    got = src.fetch(_search("https://x/?q=Magasin-IXELLES"))
+    assert [l.title for l in got] == ["En stock"]
+
+
+class _SoldResp(_Resp):
+    def json(self):
+        return {"products": [
+            {"id_product": 1, "name": "En stock", "price_amount": 100.0,
+             "url": "u", "add_to_cart_url": "https://x/cart?add=1"},
+            {"id_product": 2, "name": "Vendu", "price_amount": 100.0,
+             "url": "u", "add_to_cart_url": None, "active": "1"},
+        ]}
+
+
+class _SoldSession(_Session):
+    def get(self, url, **kw):
+        self.urls.append(url)
+        return _SoldResp()

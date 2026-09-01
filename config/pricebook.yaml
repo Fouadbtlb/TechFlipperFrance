@@ -10,6 +10,16 @@
 # Levels reflect the mid-2026 regime: the AI/memory supply shock pulled used
 # RAM/SSD/GPU/console prices UP versus 2025, not down. Reprice periodically.
 
+# Verifie sur le marche reel le 2026-09 (le proprietaire a demande de croiser):
+#   RTX 5070 12Go   neuf 679-929 EUR -> seed occasion releve de 480 a 570
+#   Ryzen 7 5700X   occasion 128-181 EUR -> seed 150 confirme
+#   DDR4 32Go kit   45-70 EUR -> seed baisse de 85 a 60 (l'envolee 2026 a frappe
+#                   la DDR5, pas la DDR4)
+#   SSD NVMe 2To    neuf 100-140 EUR Gen4 -> seed 120
+# Le NAND et la DRAM ont double en 2026 (penurie liee a l'IA), donc ces lignes
+# vieillissent vite: recroiser avant de se fier a une grosse marge sur du
+# stockage ou de la memoire.
+
 components:
   # ---------- consoles ----------
   - {key: console:ps5, label: PS5, category: console, ship_class: bulky, seed: 420, aliases: [playstation 5, ps5 standard, ps5 slim, ps5 edition disque]}
@@ -79,7 +89,7 @@ components:
   - {key: gpu:rtx-3080-ti, label: RTX 3080 Ti, category: gpu, ship_class: parcel, seed: 470, aliases: [rtx 3080ti, 3080 ti]}
   - {key: gpu:rtx-3090, label: RTX 3090, category: gpu, ship_class: parcel, seed: 580, aliases: [rtx3090]}
   - {key: gpu:rtx-5070-ti, label: RTX 5070 Ti, category: gpu, ship_class: parcel, seed: 620, aliases: [rtx 5070ti, 5070 ti]}
-  - {key: gpu:rtx-5070, label: RTX 5070, category: gpu, ship_class: parcel, seed: 480, aliases: [rtx5070]}
+  - {key: gpu:rtx-5070, label: RTX 5070, category: gpu, ship_class: parcel, seed: 570, aliases: [rtx5070]}  # neuf 679-929 (materiel.net, alternate.fr, 2026-09)
   - {key: gpu:rtx-5080, label: RTX 5080, category: gpu, ship_class: parcel, seed: 880, aliases: [rtx5080]}
   - {key: gpu:rtx-5090, label: RTX 5090, category: gpu, ship_class: parcel, seed: 1800, aliases: [rtx5090]}
   - {key: gpu:gtx-1060, label: GTX 1060, category: gpu, ship_class: parcel, seed: 60, aliases: [gtx1060]}
@@ -184,17 +194,56 @@ components:
   - {key: gpu:rx-9070, label: RX 9070, category: gpu, ship_class: parcel, seed: 500, aliases: [rx9070]}
   - {key: gpu:rx-9060-xt, label: RX 9060 XT, category: gpu, ship_class: parcel, seed: 290, aliases: [9060 xt]}
 
+  # ---------- telephones ----------
+  # Le rayon GSM de Cash Converters compte des centaines d'appareils en stock et
+  # l'outil etait totalement aveugle: aucune categorie phone n'existait, donc un
+  # iPhone a 1199 EUR ne valait rien du tout a ses yeux.
+  #
+  # Les seeds ci-dessous sont volontairement APPROXIMATIFS et bas. Ils n'ont pas
+  # besoin d'etre justes: avec des milliers d'annonces GSM en base, le tracker
+  # apprend la vraie mediane des qu'il a 5 comparables et remplace le seed. Un
+  # seed trop haut inventerait des marges, un seed trop bas fait juste rater une
+  # affaire -- on choisit de rater.
+  - {key: phone:iphone-17-pro-max, label: iPhone 17 Pro Max, category: phone, ship_class: small, seed: 1050, aliases: [iphone 17 pro max]}
+  - {key: phone:iphone-17-pro, label: iPhone 17 Pro, category: phone, ship_class: small, seed: 900, aliases: [iphone 17 pro]}
+  - {key: phone:iphone-17, label: iPhone 17, category: phone, ship_class: small, seed: 700, aliases: [iphone 17]}
+  - {key: phone:iphone-16-pro-max, label: iPhone 16 Pro Max, category: phone, ship_class: small, seed: 800, aliases: [iphone 16 pro max]}
+  - {key: phone:iphone-16-pro, label: iPhone 16 Pro, category: phone, ship_class: small, seed: 680, aliases: [iphone 16 pro]}
+  - {key: phone:iphone-16, label: iPhone 16, category: phone, ship_class: small, seed: 520, aliases: [iphone 16]}
+  - {key: phone:iphone-15-pro-max, label: iPhone 15 Pro Max, category: phone, ship_class: small, seed: 620, aliases: [iphone 15 pro max]}
+  - {key: phone:iphone-15-pro, label: iPhone 15 Pro, category: phone, ship_class: small, seed: 520, aliases: [iphone 15 pro]}
+  - {key: phone:iphone-15, label: iPhone 15, category: phone, ship_class: small, seed: 400, aliases: [iphone 15]}
+  - {key: phone:iphone-14-pro-max, label: iPhone 14 Pro Max, category: phone, ship_class: small, seed: 480, aliases: [iphone 14 pro max]}
+  - {key: phone:iphone-14-pro, label: iPhone 14 Pro, category: phone, ship_class: small, seed: 410, aliases: [iphone 14 pro]}
+  - {key: phone:iphone-14, label: iPhone 14, category: phone, ship_class: small, seed: 310, aliases: [iphone 14]}
+  - {key: phone:iphone-13-pro-max, label: iPhone 13 Pro Max, category: phone, ship_class: small, seed: 380, aliases: [iphone 13 pro max]}
+  - {key: phone:iphone-13-pro, label: iPhone 13 Pro, category: phone, ship_class: small, seed: 330, aliases: [iphone 13 pro]}
+  - {key: phone:iphone-13, label: iPhone 13, category: phone, ship_class: small, seed: 250, aliases: [iphone 13]}
+  - {key: phone:iphone-12, label: iPhone 12, category: phone, ship_class: small, seed: 180, aliases: [iphone 12]}
+  - {key: phone:iphone-11, label: iPhone 11, category: phone, ship_class: small, seed: 130, aliases: [iphone 11]}
+  - {key: phone:s25-ultra, label: Galaxy S25 Ultra, category: phone, ship_class: small, seed: 700, aliases: [galaxy s25 ultra, s25 ultra]}
+  - {key: phone:s24-ultra, label: Galaxy S24 Ultra, category: phone, ship_class: small, seed: 520, aliases: [galaxy s24 ultra, s24 ultra]}
+  - {key: phone:s23-ultra, label: Galaxy S23 Ultra, category: phone, ship_class: small, seed: 390, aliases: [galaxy s23 ultra, s23 ultra]}
+  - {key: phone:s24, label: Galaxy S24, category: phone, ship_class: small, seed: 330, aliases: [galaxy s24]}
+  - {key: phone:s23, label: Galaxy S23, category: phone, ship_class: small, seed: 260, aliases: [galaxy s23]}
+  - {key: phone:s22, label: Galaxy S22, category: phone, ship_class: small, seed: 180, aliases: [galaxy s22]}
+  - {key: phone:z-fold-6, label: Galaxy Z Fold 6, category: phone, ship_class: small, seed: 700, aliases: [galaxy z fold 6, z fold 6]}
+  - {key: phone:z-flip-6, label: Galaxy Z Flip 6, category: phone, ship_class: small, seed: 420, aliases: [galaxy z flip 6, z flip 6]}
+  - {key: phone:pixel-9-pro, label: Pixel 9 Pro, category: phone, ship_class: small, seed: 480, aliases: [google pixel 9 pro, pixel 9 pro]}
+  - {key: phone:pixel-9, label: Pixel 9, category: phone, ship_class: small, seed: 380, aliases: [google pixel 9, pixel 9]}
+  - {key: phone:pixel-8, label: Pixel 8, category: phone, ship_class: small, seed: 260, aliases: [google pixel 8, pixel 8]}
+
   # ---------- RAM ----------
   - {key: ram:ddr4-8gb, label: RAM DDR4 8Go, category: ram, ship_class: small, seed: 15, aliases: [8go ddr4, ddr4 8gb, 8 go ddr4]}
   - {key: ram:ddr4-16gb, label: RAM DDR4 16Go, category: ram, ship_class: small, seed: 40, aliases: [16go ddr4, ddr4 16gb, 16 go ddr4]}
-  - {key: ram:ddr4-32gb, label: RAM DDR4 32Go, category: ram, ship_class: small, seed: 85, aliases: [32go ddr4, ddr4 32gb, 32 go ddr4]}
+  - {key: ram:ddr4-32gb, label: RAM DDR4 32Go, category: ram, ship_class: small, seed: 60, aliases: [32go ddr4, ddr4 32gb, 32 go ddr4]}
   - {key: ram:ddr5-16gb, label: RAM DDR5 16Go, category: ram, ship_class: small, seed: 85, aliases: [16go ddr5, ddr5 16gb]}
   - {key: ram:ddr5-32gb, label: RAM DDR5 32Go, category: ram, ship_class: small, seed: 190, aliases: [32go ddr5, ddr5 32gb]}
 
   # ---------- storage ----------
   - {key: storage:nvme-500gb, label: SSD NVMe 500Go, category: storage, ship_class: small, seed: 25, aliases: [nvme 500go, ssd nvme 500]}
   - {key: storage:nvme-1tb, label: SSD NVMe 1To, category: storage, ship_class: small, seed: 70, aliases: [nvme 1to, ssd nvme 1to, nvme 1tb]}
-  - {key: storage:nvme-2tb, label: SSD NVMe 2To, category: storage, ship_class: small, seed: 140, aliases: [nvme 2to, ssd nvme 2to, nvme 2tb]}
+  - {key: storage:nvme-2tb, label: SSD NVMe 2To, category: storage, ship_class: small, seed: 120, aliases: [nvme 2to, ssd nvme 2to, nvme 2tb]}
   - {key: storage:ssd-1tb, label: SSD 1To, category: storage, ship_class: small, seed: 40, aliases: [ssd 1to, ssd sata 1to]}
   - {key: storage:hdd-2tb, label: HDD 2To, category: storage, ship_class: small, seed: 28, aliases: [disque dur 2to, hdd 2to]}
 

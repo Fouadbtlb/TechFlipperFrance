@@ -42,6 +42,11 @@ class Listing:
     has_phone: bool = False
     seller_id: str | None = None    # source-side user id, for lazy profile enrichment
     image_urls: tuple[str, ...] = field(default_factory=tuple)
+    # The aisle the SOURCE filed it under, when the source states one.
+    # Ground truth about what kind of thing is for sale, in the same way
+    # the LLM's `type` field is: a listing under /jeux-playstation/ is a
+    # game, whatever console its title names.
+    source_category: str | None = None
 
     # Source's OWN price estimate (Leboncoin's per-vehicle "cote"). Only set
     # when the source is confident (badge != "estimation indisponible").

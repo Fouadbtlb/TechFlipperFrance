@@ -214,3 +214,14 @@ def test_a_real_switch_console_survives_both_guards():
                   "Valve Steam Deck OLED 512 Go"]:
         assert [c for c in recognize(title, "", CATALOG)
                 if c.category == "console"], title
+
+
+def test_a_screen_for_a_console_is_not_the_console():
+    """"ECRAN PS5 FAT 4K 60HZ G-STORY" (160 EUR) is a portable monitor, valued
+    as a 340 EUR PS5. "ECRAN DE SWITCH NINTENDO SANS JOY-CON" (100) is a spare
+    screen, valued as a 166 EUR console."""
+    for title in ["ECRAN PS5 FAT 4K 60HZ G-STORY",
+                  "ECRAN DE SWITCH  NINTENDO  SANS JOY-CON/ACC",
+                  "Moniteur pour PS5", "Scherm voor Nintendo Switch"]:
+        assert not [c for c in recognize(title, "", CATALOG)
+                    if c.category == "console"], title

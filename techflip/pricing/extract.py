@@ -142,6 +142,10 @@ _ADDON_NOUNS = {
     # price but which were not barred from BEING the machine: "Console
     # NINTENDO Switch (Joycon Gauche uniquement)" was valued as a console.
     "joycon", "joycons", "dualsense", "dualshock", "scuf", "nacon",
+    # A screen sold FOR a console, or the console's own spare screen:
+    # "ECRAN PS5 FAT 4K G-STORY" (160) was valued as a 340 EUR PS5, and
+    # "ECRAN DE SWITCH SANS JOY-CON" (100) as a 166 EUR console.
+    "ecran", "écran", "scherm", "moniteur", "monitor",
 }
 # ...unless the ad also says it is selling the machine those extras come with.
 _BUNDLE_MARKERS = {"console", "avec", "met", "inclus", "incl", "included",

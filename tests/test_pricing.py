@@ -253,3 +253,15 @@ class _FakeStore:
 
     def component_prices(self, key, since_iso):
         return self.by_key.get(key, [])
+
+
+def test_shop_shorthand_for_damaged_is_understood():
+    """Cash Converters states the damage in the title: "Console NINTENDO SWITCH
+    ABIMER" was valued at full price. Their vocabulary is terse and French-
+    inflected, not the phrases a private seller writes."""
+    from techflip.pricing.appraise import listing_condition
+    for text in ["Console NINTENDO SWITCH ABIMER", "Console PS4 abime",
+                 "Manette abîmée", "Console Xbox cassee"]:
+        assert listing_condition(None, text) == "broken", text
+    for text in ["Console NINTENDO Switch En etat", "PS5 tres bon etat"]:
+        assert listing_condition(None, text) == "working", text

@@ -63,7 +63,13 @@ def listing_condition(llm_json: dict | None, text: str = "") -> str:
         return "working"
     tl = f" {text.lower()} "
     marks = ("ne s'allume", "en panne", "pour piece", "pour pièce", "hors service",
-             "defectueux", "défectueux", " hs ", " hs,", " hs.", "cassé", "ne fonctionne")
+             "defectueux", "défectueux", " hs ", " hs,", " hs.", "cassé", "ne fonctionne",
+             # Pro-shop shorthand, terse and loosely inflected: Cash Converters
+             # titles a broken console "ABIMER", not "ne s'allume pas".
+             # Stems, not forms: abime / abimer / abimee / abimé / abîmée are
+             # all the same word and a shop uses whichever comes to hand.
+             "abim", "abîm", "casse ", "cassee", "cassée", "beschadigd",
+             "defect", "kapot")
     return "broken" if any(m in tl for m in marks) else "working"
 
 

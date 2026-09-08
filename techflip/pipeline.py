@@ -23,6 +23,7 @@ from .decision import ZonePolicy, decide
 from .domain import Listing, ScoreResult
 from .filters import price_prefilter, text_prefilter
 from .geo import Locator, logistics_cost, zone_for_distance
+from .hunt import _aisle_bars_machines, _MACHINE_CATEGORIES
 from .notify.telegram import TelegramNotifier
 from .pricing.appraise import appraise, build_items, items_from_classification
 from .pricing.catalog import load_catalog
@@ -48,6 +49,9 @@ def _make_source(name: str, settings: Settings):
     if name == "2ememain":
         from .sources.deuxememain import DeuxiemeMainSource
         return DeuxiemeMainSource()
+    if name == "cashexpress":
+        from .sources.cashexpress import CashExpressSource
+        return CashExpressSource()
     if name == "cashconverters":
         from .sources.cashconverters import CashConvertersSource
         return CashConvertersSource()
@@ -136,6 +140,8 @@ class Pipeline:
         can learn a per-component price from single-item listings."""
         is_new = self.store.upsert_listing(l)
         comps = recognize(l.title, l.description, self.catalog)
+        if _aisle_bars_machines(l.source_category):
+            comps = [c for c in comps if c.category not in _MACHINE_CATEGORIES]
         clean = not _is_bundle(l.title) and teaches_price(l.title)
         pk = primary_key(comps) if clean else None
         self.store.set_primary_component(l.uid, pk, bool(pk))
@@ -162,6 +168,8 @@ class Pipeline:
     def _evaluate(self, l: Listing, comps) -> bool:
         if self.store.alert_tier(l.uid) == "confirmed":
             return False
+        if _aisle_bars_machines(l.source_category):
+            comps = [c for c in comps if c.category not in _MACHINE_CATEGORIES]
         by_name = {s.name: s for s in self.settings.searches}
         search = by_name.get(l.search_name)
         min_price = search.min_price if search else 20

@@ -406,6 +406,8 @@ def recompute_primary_components(store, catalog) -> dict:
     for r in rows:
         l = Listing.from_dict(_json.loads(r["raw_json"]))
         comps = recognize(l.title, l.description, catalog)
+        if _aisle_bars_machines(l.source_category):
+            comps = [c for c in comps if c.category not in _MACHINE_CATEGORIES]
         clean = not _is_bundle(l.title) and teaches_price(l.title)
         pk = primary_key(comps) if clean else None
         old = store.conn.execute(

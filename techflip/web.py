@@ -35,19 +35,19 @@ CAT_LABEL = {"pc": "PC complet", "console": "Console", "gpu": "Carte graphique",
              "cooler": "Refroidissement", "case": "Boitier"}
 
 FLAG_LABEL = {
-    "bait": ("arnaque probable", "Prix trop bas pour etre vrai: annonce bidon, "
-                                 "photo volee, ou paiement par virement."),
+    "bait": ("arnaque probable", ("Prix trop bas pour etre vrai: annonce bidon, "
+                                 "photo volee, ou paiement par virement.")),
     "broken": ("en panne", "L'annonce dit HS / ne s'allume pas. Valeur deja reduite."),
-    "sales_copy": ("texte fiche produit", "Description copiee du site du fabricant, "
-                                          "pas ecrite par un vendeur. Exige une vraie photo."),
-    "partial": ("pieces non chiffrees", "Une piece citee n'est pas au catalogue: "
-                                        "la valeur affichee est un plancher."),
+    "sales_copy": ("texte fiche produit", ("Description copiee du site du fabricant, "
+                                          "pas ecrite par un vendeur. Exige une vraie photo.")),
+    "partial": ("pieces non chiffrees", ("Une piece citee n'est pas au catalogue: "
+                                        "la valeur affichee est un plancher.")),
     "stale": ("ancienne", "Pas revue depuis plus de 10 jours: probablement vendue."),
     "cut": ("prix baisse", "Le vendeur a deja baisse son prix. Il rebaissera."),
-    "sitting": ("ne part pas", "Toujours en ligne des semaines apres sa parution: "
-                               "le marche a refuse ce prix. Negocie."),
-    "laptop": ("portable", "Chiffre avec des prix de pieces DESKTOP. Un GPU de "
-                           "portable vaut nettement moins: valeur a diviser."),
+    "sitting": ("ne part pas", ("Toujours en ligne des semaines apres sa parution: "
+                               "le marche a refuse ce prix. Negocie.")),
+    "laptop": ("portable", ("Chiffre avec des prix de pieces DESKTOP. Un GPU de "
+                           "portable vaut nettement moins: valeur a diviser.")),
 }
 
 ZONE_DOT = {"EASY": "z-easy", "MEDIUM": "z-med", "HARD": "z-hard"}
@@ -194,8 +194,19 @@ def _page(board, q) -> str:
         f"<option value='{k}'{' selected' if show == k else ''}>{_e(v)}</option>"
         for k, v in (("open", "a trier"), ("interested", "ma liste"), ("all", "tout")))
 
+
     cards = "".join(_card(f, picks.get(f.uid)) for f in sel[:400])
     kept = sum(1 for p in picks.values() if p["state"] == "interested")
+
+    markers = []
+    for f in sel[:400]:
+        if f.lat is not None and f.lng is not None:
+            markers.append({
+                "lat": f.lat, "lng": f.lng, 
+                "title": f.title, "url": f.url, "price": f.price, 
+                "uid": f.uid, "source": f.source
+            })
+    markers_json = json.dumps(markers).replace("</", "<\\/")
 
     return _SHELL.format(
         css=_CSS, js=_JS,
@@ -213,6 +224,7 @@ def _page(board, q) -> str:
         cards=cards or "<p class='empty'>Rien avec ces filtres. Elargis le budget "
                        "ou la distance, ou lance une recherche live ci-dessus.</p>",
         busy=_e(board.busy),
+        markers_json=markers_json,
     )
 
 
@@ -366,6 +378,7 @@ details ul{margin:6px 0 0;padding-left:18px;color:var(--dim);font-size:12.5px}
 .note{flex:1 1 90px;font-size:12.5px;padding:5px 8px}
 .empty{color:var(--dim);padding:40px 16px;text-align:center}
 #busy{color:var(--acc);font-size:13px;padding:0 16px}
+#map{height:400px;width:100%;border-bottom:1px solid var(--line)}
 """
 
 _JS = """
@@ -395,12 +408,52 @@ function poll(){
     else { location.reload(); }
   });
 }
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById('map')) {
+    const map = L.map('map');
+    let bounds = L.latLngBounds();
+    let hasValidMarkers = false;
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    const clusterGroup = L.markerClusterGroup({
+      maxClusterRadius: 40
+    });
+
+    markersData.forEach(m => {
+      if (m.lat && m.lng) {
+        const marker = L.marker([m.lat, m.lng]);
+        marker.bindPopup(`<b>${m.price}€</b><br><a href="${m.url}" target="_blank">${m.title}</a><br>Source: ${m.source}`);
+        clusterGroup.addLayer(marker);
+        bounds.extend([m.lat, m.lng]);
+        hasValidMarkers = true;
+      }
+    });
+
+    if (hasValidMarkers) {
+      map.addLayer(clusterGroup);
+      map.fitBounds(bounds);
+    } else {
+      map.setView([50.6292, 3.0573], 9);
+    }
+  }
+});
+
 """
 
 _SHELL = """<!doctype html>
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TechFlip - offres</title><style>{css}</style></head>
+<title>TechFlip - offres</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin=""></script>
+<style>{css}</style></head>
 <body>
 <header>
   <h1>TechFlip <small>{n_shown} affichees sur {n_total} chiffrees &middot; {kept} gardees</small></h1>
@@ -422,7 +475,11 @@ _SHELL = """<!doctype html>
   </form>
 </header>
 <div id="busy">{busy}</div>
+<div id="map"></div>
 <main class="grid">{cards}</main>
+<script>
+  const markersData = {markers_json};
+</script>
 <script>{js}</script>
 </body></html>
 """

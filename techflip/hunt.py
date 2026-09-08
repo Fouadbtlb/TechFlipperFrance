@@ -21,15 +21,13 @@ import datetime as dt
 import json
 import math
 import re
-
 from dataclasses import dataclass
 
 from .buying import WHITE_MARKERS, looks_like_sales_copy
 from .domain import Listing
 from .geo import zone_for_distance
 from .pcmarket import PCMarket, cpu_tier
-from .pricing.appraise import (REALIZATION, appraise, build_items,
-                               listing_condition)
+from .pricing.appraise import REALIZATION, appraise, build_items, listing_condition
 from .pricing.extract import _is_bundle, _norm, recognize
 
 PC = "pc"
@@ -81,7 +79,7 @@ CHASSIS_LABEL = {"motherboard": "Carte mere", "psu": "Alim",
                  "case": "Boitier", "cooler": "Ventirad"}
 
 _LAPTOP = re.compile(
-    r"\b(portable|portables|laptop|notebook|macbook|ultrabook|chromebook)\b", re.I)
+    r"\b(portable|portables|laptop|notebook|macbook|ultrabook|chromebook)\b", re.IGNORECASE)
 
 # The chip suffix betrays a laptop that never uses the word. "PC Gaming HP OMEN
 # Intel i7-13700HX RTX4080", 1300 EUR, topped the shortlist at +400: HX is
@@ -89,7 +87,7 @@ _LAPTOP = re.compile(
 # card it shares a name with. H / HX / HS / U only -- never K, F or X, which
 # are desktop.
 _MOBILE_CPU = re.compile(
-    r"\b(?:i[3579]|ryzen\s*[3579])[\s-]*\d{4,5}\s*(?:hx|hs|h|u)\b", re.I)
+    r"\b(?:i[3579]|ryzen\s*[3579])[\s-]*\d{4,5}\s*(?:hx|hs|h|u)\b", re.IGNORECASE)
 
 # Someone looking to BUY, not to sell. "Recherche ps5 standard" ranked third on
 # the board, appraised as if it were a PS5 for sale. The alert path drops these
@@ -135,6 +133,8 @@ class Find:
     flags: tuple[str, ...]
     days_listed: float | None = None   # how long it has failed to sell
     price_cut: dict | None = None      # {first, current, cut, pct, changes}
+    lat: float | None = None
+    lng: float | None = None
 
     @property
     def is_bait(self) -> bool:
@@ -262,6 +262,7 @@ def evaluate(
         lines=tuple(lines),
         zone=zone_for_distance(distance, easy_km, medium_km),
         distance=distance, city=l.city, country=l.country,
+        lat=l.lat, lng=l.lng,
         image=l.image_urls[0] if l.image_urls else None,
         published_at=l.published_at, last_seen=last_seen, age_days=age,
         confidence=appr.confidence, n_priced=appr.n_priced,
@@ -275,13 +276,13 @@ def evaluate(
 # blind to: a token matching one of these that the recognizer cannot read is a
 # real part, in a real ad, being valued at zero.
 _PART_SHAPES = {
-    "gpu": re.compile(r"\b(?:rtx|gtx|rx|arc)\s*[- ]?\s*a?\d{3,4}\s*(?:ti|xt|xtx|super)?\b", re.I),
+    "gpu": re.compile(r"\b(?:rtx|gtx|rx|arc)\s*[- ]?\s*a?\d{3,4}\s*(?:ti|xt|xtx|super)?\b", re.IGNORECASE),
     "cpu": re.compile(r"\b(?:i[3579][- ]?\d{4,5}[a-z]{0,2}"
-                      r"|ryzen\s*[3579]\s*\d{4}[a-z]{0,3})\b", re.I),
+                      r"|ryzen\s*[3579]\s*\d{4}[a-z]{0,3})\b", re.IGNORECASE),
 }
 # Mobile suffixes. A laptop chip is not a desktop chip at any price, so these
 # are reported separately rather than proposed as pricebook entries.
-_MOBILE = re.compile(r"\d{3,5}\s*(?:h[xs]?|u|hk)$", re.I)
+_MOBILE = re.compile(r"\d{3,5}\s*(?:h[xs]?|u|hk)$", re.IGNORECASE)
 
 
 def gaps(store, catalog, limit: int = 40) -> list[dict]:
@@ -293,6 +294,7 @@ def gaps(store, catalog, limit: int = 40) -> list[dict]:
     alone. Run it, add the top rows to config/pricebook.yaml, run `retrack`.
     """
     from collections import Counter
+
     from .pricing.extract import extract_components
 
     seen = Counter()
@@ -363,7 +365,7 @@ def sweep(pipeline, terms, *, max_price: float | None = None,
             for page in range(1, pages + 1):
                 try:
                     listings = source.fetch(search, page=page)
-                except Exception:
+                except Exception:  # noqa: BLE001
                     stats["errors"] += 1
                     break
                 stats["fetched"] += len(listings)

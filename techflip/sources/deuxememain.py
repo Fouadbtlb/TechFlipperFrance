@@ -66,6 +66,7 @@ class DeuxiemeMainSource:
             price=price,
             published_at=_published_at(it.get("date")),
             description=it.get("description") or it.get("categorySpecificDescription") or "",
+            source_category=_aisle_of(url),
             city=loc.get("cityName"),
             zipcode=None,
             department=None,
@@ -107,7 +108,7 @@ def _published_at(raw: str | None, today: dt.date | None = None) -> str | None:
     """
     if not raw:
         return None
-    today = today or dt.date.today()
+    today = today or dt.datetime.now(tz=dt.timezone.utc).date()
     t = _strip_accents(str(raw).lower()).replace("'", " ").replace("-", " ")
     t = " ".join(t.split())
 
@@ -153,3 +154,14 @@ def _images(it: dict) -> list[str]:
         if isinstance(u, str):
             urls.append(u if u.startswith("http") else "https:" + u)
     return urls[:10]
+
+
+def _aisle_of(url: str) -> str | None:
+    """The aisle the seller filed it under: /v/<department>/<aisle>/<id>-<slug>.
+
+    Ground truth about the kind of thing for sale, exactly as on Cash
+    Converters. 94 rows under /jeux-sony-playstation-5/ were each priced as a
+    340 EUR console because this was being dropped on the floor.
+    """
+    m = re.search(r"/v/[a-z0-9-]+/([a-z0-9-]+)/m?\d", url or "")
+    return m.group(1) if m else None

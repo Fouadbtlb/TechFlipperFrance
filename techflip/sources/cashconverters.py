@@ -74,12 +74,12 @@ class CashConvertersSource:
             source=self.name,
             source_id=str(it.get("id_product")),
             url=it.get("url") or it.get("canonical_url") or _BASE,
-            title=(it.get("name") or "").strip(),
+            title=_title(it),
             price=float(price) if price is not None else None,
             # A shop has stock, not a posting date. Recording the day we first
             # saw it is the closest true statement, and it is what lets the
             # resweep reconsider the item later instead of judging it once.
-            published_at=dt.date.today().isoformat(),
+            published_at=dt.datetime.now(tz=dt.timezone.utc).date().isoformat(),
             description=_TAGS.sub(" ", it.get("description_short") or "").strip(),
             city=_pretty(store),
             country="BE",
@@ -144,3 +144,56 @@ def _images(it: dict) -> list[str]:
     sizes = ((it.get("cover") or {}).get("bySize") or {})
     urls = [v.get("url") for v in sizes.values() if isinstance(v, dict) and v.get("url")]
     return urls[-1:] or urls
+
+
+def _slug_words(url: str) -> str:
+    """The product slug, as words: /fr/<aisle>/<id>-<slug>.html -> "<slug>".
+
+    A clerk retypes the title and drops things the slug kept. "Smartphone
+    Samsung z flip 7 black 8gb/128gb" is filed at .../z-flip-7-FE-black-...,
+    and the FE is 200 EUR cheaper between private sellers than the Flip 7 the
+    title claims.
+    """
+    m = re.search(r"/fr/[a-z0-9-]+/\d+-([a-z0-9-]+)\.html", url or "")
+    return m.group(1).replace("-", " ") if m else ""
+
+
+# Variant markers only. The slug is NOT a safe copy of the title: Cash
+# Converters reuses product pages, so /1211064-pc-gaming-ryzen-5-4th-rtx-4060-...
+# now holds an ad titled "carte graphique Gigabyte RTX 4060". Appending that
+# slug wholesale turned a bare graphics card into a whole tower worth 638 EUR.
+#
+# What the slug is reliably good for is the one word a clerk drops when
+# retyping: "Smartphone Samsung z flip 7 black 8gb/128gb" is filed under
+# .../z-flip-7-FE-black-..., and the FE asks 450 between private sellers where
+# the Flip 7 asks 650. So take variant words, and only when the slug is
+# demonstrably describing the same product as the title.
+_VARIANT_WORDS = {"fe", "pro", "max", "ultra", "lite", "mini", "plus", "slim",
+                  "digital", "oled", "xl", "se"}
+
+
+def _title(it: dict) -> str:
+    name = (it.get("name") or "").strip()
+    slug = _slug_words(it.get("url") or it.get("canonical_url") or "")
+    extra = _variant_hint(name, slug)
+    return f"{name} {extra}".strip() if extra else name
+
+
+def _variant_hint(name: str, slug: str) -> str:
+    if not name or not slug:
+        return ""
+    have = {w for w in re.split(r"[^0-9a-z]+", name.lower()) if w}
+    words = [w for w in slug.split() if w]
+    if not have or not words:
+        return ""
+    # Same product? Most of the title has to reappear in the slug. A reused
+    # page fails this and contributes nothing.
+    shared = len(have & set(words)) / len(have)
+    if shared < 0.6:
+        return ""
+    if not any(w in _VARIANT_WORDS and w not in have for w in words):
+        return ""
+    # The whole slug, not the bare variant word: "fe" tacked onto the end of
+    # the title is not adjacent to "flip 7" and matches no alias. Safe to take
+    # in full precisely because the overlap test above proved same product.
+    return slug

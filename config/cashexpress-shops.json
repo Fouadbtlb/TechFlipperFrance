@@ -1,0 +1,746 @@
+{
+ "AJACCIO": {
+  "address": "ROUTE DE MEZZAVIA RN 194 20090 AJACCIO MEZZAVIA",
+  "country": "FR",
+  "lat": 41.94971,
+  "lng": 8.76875
+ },
+ "ANDENNE": {
+  "address": "AVENUE DE BELLE-MINE 20C 5300 ANDENNE",
+  "country": "BE",
+  "lat": 50.49346,
+  "lng": 5.1024
+ },
+ "ANDORRE": {
+  "address": "JOAN MARAGALL 12 AD500 ANDORRA LA VELLA",
+  "country": "AD",
+  "lat": 42.50726,
+  "lng": 1.53014
+ },
+ "ANGERS": {
+  "address": "40 RUE DE LA ROE 49100 ANGERS",
+  "country": "FR",
+  "lat": 47.47174,
+  "lng": -0.55229
+ },
+ "ANGOULEME SOYAUX": {
+  "address": "220 AVENUE CHARLES DE GAULLE 16800 SOYAUX",
+  "country": "FR",
+  "lat": 45.64015,
+  "lng": 0.19958
+ },
+ "ANNEMASSE": {
+  "address": "17 RUE DE LA RÉSISTANCE 74100 ANNEMASSE",
+  "country": "FR",
+  "lat": 46.19669,
+  "lng": 6.25528
+ },
+ "ANTIBES": {
+  "address": "2208 ROUTE DE GRASSE 06600 ANTIBES",
+  "country": "FR",
+  "lat": 43.60142,
+  "lng": 7.08643
+ },
+ "AURILLAC": {
+  "address": "41 AVENUE DES VOLONTAIRES 15000 AURILLAC",
+  "country": "FR",
+  "lat": 44.91483,
+  "lng": 2.44085
+ },
+ "AVRANCHES": {
+  "address": "49 RUE DE LA DIVISION LECLERC 50300 AVRANCHES",
+  "country": "FR",
+  "lat": 48.68204,
+  "lng": -1.35437
+ },
+ "BEAUCAIRE": {
+  "address": "ZAC LES MILLIAIRES AVENUE AVITUS 30300 BEAUCAIRE",
+  "country": "FR",
+  "lat": 43.81479,
+  "lng": 4.61284
+ },
+ "BERNAY": {
+  "address": "37 RUE THIERS 27300 BERNAY",
+  "country": "FR",
+  "lat": 49.09025,
+  "lng": 0.59697
+ },
+ "BONCELLES": {
+  "address": "RUE DE TILFF 91 4100 BONCELLES",
+  "country": "BE",
+  "lat": 50.56695,
+  "lng": 5.54783
+ },
+ "BORDEAUX": {
+  "address": "101 COURS ALSACE ET LORRAINE 33000 BORDEAUX",
+  "country": "FR",
+  "lat": 44.83761,
+  "lng": -0.57412
+ },
+ "BOULOGNE": {
+  "address": "98 AVENUE DU GÉNÉRAL LECLERC 92100 BOULOGNE BILLANCOURT",
+  "country": "FR",
+  "lat": 48.83114,
+  "lng": 2.23494
+ },
+ "BOURGES": {
+  "address": "258 ROUTE D'ORLÉANS 18230 SAINT DOULCHARD",
+  "country": "FR",
+  "lat": 47.10764,
+  "lng": 2.37875
+ },
+ "BREST CENTRE": {
+  "address": "35 JEAN JAURES 29200 BREST",
+  "country": "FR",
+  "lat": 48.39234,
+  "lng": -4.4826
+ },
+ "BREST KERGARADEC": {
+  "address": "254 RUE DE GOUESNOU 29200 BREST",
+  "country": "FR",
+  "lat": 48.42418,
+  "lng": -4.46778
+ },
+ "BRIVE": {
+  "address": "3 AVENUE DU 14 JUILLET 19100 BRIVE LA GAILLARDE",
+  "country": "FR",
+  "lat": 45.1613,
+  "lng": 1.53427
+ },
+ "CAEN": {
+  "address": "10 RUE SAINT JEAN 14000 CAEN",
+  "country": "FR",
+  "lat": 49.18304,
+  "lng": -0.36064
+ },
+ "CAHORS": {
+  "address": "49 BOULEVARD GAMBETTA 46000 CAHORS",
+  "country": "FR",
+  "lat": 44.44879,
+  "lng": 1.44019
+ },
+ "CANNES MANDELIEU": {
+  "address": "ZI LES TOURRADES 225 AVENUE ST EXUPERY 06210 MANDELIEU",
+  "country": "FR",
+  "lat": 43.55422,
+  "lng": 6.95341
+ },
+ "CHALONS EN CHAMPAGNE": {
+  "address": "93 AVENUE DU PRESIDENT ROOSEVELT 51470 SAINT-MEMMIE",
+  "country": "FR",
+  "lat": 48.94398,
+  "lng": 4.38884
+ },
+ "CHAMBRAY": {
+  "address": "1 RUE ETIENNE COSSON 37170 CHAMBRAY LES TOURS",
+  "country": "FR",
+  "lat": 47.33004,
+  "lng": 0.70624
+ },
+ "CHARLEROI": {
+  "address": "AVENUE DE PHILIPPEVILLE 284B 6001 CHARLEROI",
+  "country": "BE",
+  "lat": 50.39589,
+  "lng": 4.45569
+ },
+ "CHARLEVILLE": {
+  "address": "134 RUE JULES FUZELIER ZAC LA CROISETTE 08000 CHARLEVILLE MÉZIÈRES",
+  "country": "FR",
+  "lat": 49.73858,
+  "lng": 4.70173
+ },
+ "CHARTRES": {
+  "address": "9 RUE DE LA VOLAILLE 28000 CHARTRES",
+  "country": "FR",
+  "lat": 48.44456,
+  "lng": 1.48816
+ },
+ "CHATEAUDUN": {
+  "address": "LOTISSEMENT DE L'ABBAYE ROUTE NATIONALE RD 927 28200 ST DENIS LES PONTS",
+  "country": "FR",
+  "lat": 48.06938,
+  "lng": 1.30214
+ },
+ "CHATELLERAULT": {
+  "address": "2 RUE LA FAYETTE 86100 CHATELLERAULT",
+  "country": "FR",
+  "lat": 46.81783,
+  "lng": 0.54337
+ },
+ "CHERBOURG": {
+  "address": "363 RUE PIERRE BROSSOLETTE 50110 TOURLAVILLE",
+  "country": "FR",
+  "lat": 49.63296,
+  "lng": -1.58964
+ },
+ "CHINON": {
+  "address": "RUE GEORGES GUYNEMER ZAC DU BLANC CARROI 37500 CHINON",
+  "country": "FR",
+  "lat": 47.18079,
+  "lng": 0.26587
+ },
+ "COURT SAINT ETIENNE": {
+  "address": "AVENUE DES MÉTALLURGISTES 14 1490 COURT ST ETIENNE",
+  "country": "BE",
+  "lat": 50.65337,
+  "lng": 4.56541
+ },
+ "DAVEZIEUX": {
+  "address": "CC, 113 RUE DES PINS, LE MAS 07430 DAVEZIEUX",
+  "country": "FR",
+  "lat": 45.25466,
+  "lng": 4.68622
+ },
+ "DINAN": {
+  "address": "ZC CAP RANCE RUE DES FOLIES D'AHAUT 22100 TADEN",
+  "country": "FR",
+  "lat": 48.47277,
+  "lng": -2.04488
+ },
+ "DINANT": {
+  "address": "RUE ST JACQUES 324 5500 DINANT",
+  "country": "BE",
+  "lat": 50.26729,
+  "lng": 4.9303
+ },
+ "DORLISHEIM": {
+  "address": "ZONE DE LOISIR LE TRÈFLE 67120 DORLISHEIM",
+  "country": "FR",
+  "lat": 48.52251,
+  "lng": 7.5017
+ },
+ "ELBEUF": {
+  "address": "21 RUE DES MARTYRS 76500 ELBEUF",
+  "country": "FR",
+  "lat": 49.28814,
+  "lng": 1.00695
+ },
+ "ESSEY-LES-NANCY": {
+  "address": "8, RUE TARBES PORTE VERTE 54270 ESSEY LES NANCY",
+  "country": "FR",
+  "lat": 48.70741,
+  "lng": 6.24585
+ },
+ "EVREUX": {
+  "address": "18 RUE DE LA HARPE 27000 EVREUX",
+  "country": "FR",
+  "lat": 49.02323,
+  "lng": 1.14961
+ },
+ "FECAMP": {
+  "address": "25 RUE ALEXANDRE LEGROS 76400 FECAMP",
+  "country": "FR",
+  "lat": 49.75626,
+  "lng": 0.3773
+ },
+ "FLERS": {
+  "address": "RUE DU 6 JUIN 61100 FLERS",
+  "country": "FR",
+  "lat": 48.74971,
+  "lng": -0.56727
+ },
+ "FLEURY-LES-AUBRAIS": {
+  "address": "5 RUE FREDERIC  ET IRENE JOLIOT-CURIE 45400 FLEURY LES AUBRAIS",
+  "country": "FR",
+  "lat": 47.94531,
+  "lng": 1.91711
+ },
+ "FONTAINEBLEAU": {
+  "address": "110 TER VOIE DE LA LIBERTE 77210 SAMOREAU",
+  "country": "FR",
+  "lat": 48.42857,
+  "lng": 2.76434
+ },
+ "FORBACH": {
+  "address": "315, RUE NATIONALE 57600 FORBACH",
+  "country": "FR",
+  "lat": 49.17627,
+  "lng": 6.88141
+ },
+ "FRESNES": {
+  "address": "1-3-5 ALLÉE DES FLEURS ZA LA CERISAIE 94260 FRESNES",
+  "country": "FR",
+  "lat": 48.75385,
+  "lng": 2.32756
+ },
+ "GAP": {
+  "address": "ROUTE DES FAUVINS ZAC LA LUYSANNE 05000 GAP",
+  "country": "FR",
+  "lat": 44.56423,
+  "lng": 6.09245
+ },
+ "GRIVEGNEE": {
+  "address": "RUE SERVAIS MALAISE 31 4030 GRIVEGNEE",
+  "country": "BE",
+  "lat": 50.62996,
+  "lng": 5.62446
+ },
+ "HAGUENAU": {
+  "address": "19 ZI DE LA SABLIERE 67590 SCHWEIGHOUSE SUR MODER",
+  "country": "FR",
+  "lat": 48.82821,
+  "lng": 7.75079
+ },
+ "HERSTAL": {
+  "address": "RUE DU FORT 2 4040 HERSTAL",
+  "country": "BE",
+  "lat": 50.68958,
+  "lng": 5.64118
+ },
+ "HORNU": {
+  "address": "RUE DE MONS 280/A9 7301 HORNU",
+  "country": "BE",
+  "lat": 50.43928,
+  "lng": 3.8385
+ },
+ "IBOS TARBES": {
+  "address": "LIEU-DIT LA \"HITTE\" ROUTE DE PAU 65420 IBOS",
+  "country": "FR",
+  "lat": 43.24214,
+  "lng": 0.0199
+ },
+ "JARRY": {
+  "address": "LOCAL 24, VILLAGE COEUR DE JARRY HOUELBOURG, ZONE DE JARRY 97122 BAIE-MAHAULT",
+  "country": "GP",
+  "lat": 16.24029,
+  "lng": -61.57176
+ },
+ "LA LOUVIERE": {
+  "address": "CHAUSSÉE DE MONS 560 7100 LA LOUVIERE",
+  "country": "BE",
+  "lat": 50.44688,
+  "lng": 4.17375
+ },
+ "LANGRES": {
+  "address": "14 RUE DE L'AVENIR 52200 SAINTS GEOSMES",
+  "country": "FR",
+  "lat": 47.83115,
+  "lng": 5.33304
+ },
+ "LE HAVRE": {
+  "address": "7 PLACE DE L'HOTEL DE VILLE 76600 LE HAVRE",
+  "country": "FR",
+  "lat": 49.49228,
+  "lng": 0.10721
+ },
+ "LE LAMENTIN": {
+  "address": "ZI LES MANGLES ACAJOU 97232 LE LAMENTIN",
+  "country": "MQ",
+  "lat": 14.61549,
+  "lng": -61.01563
+ },
+ "LEMPDES": {
+  "address": "RUE DE LA ROCHELLE 63370 LEMPDES",
+  "country": "FR",
+  "lat": 45.78004,
+  "lng": 3.19653
+ },
+ "LIEGE": {
+  "address": "BOULEVARD CUIVRE ET ZINC 17B 4030 GRIVEGNEE",
+  "country": "BE",
+  "lat": 50.62469,
+  "lng": 5.59193
+ },
+ "LIEVIN": {
+  "address": "AVENUE FRANCOIS MITTERAND ROND POINT DE L'AN 2000 62800 LIEVIN",
+  "country": "FR",
+  "lat": 50.42819,
+  "lng": 2.78911
+ },
+ "LILLE CENTRE": {
+  "address": "20 RUE SEC AREMBAULT 59800 LILLE",
+  "country": "FR",
+  "lat": 50.6355,
+  "lng": 3.06539
+ },
+ "LISIEUX": {
+  "address": "12 RUE DES MATHURINS 14100 LISIEUX",
+  "country": "FR",
+  "lat": 49.1446,
+  "lng": 0.22461
+ },
+ "LONGWY": {
+  "address": "AVENUE DE L'EUROPE ZAC DES 3 FRONTIÈRES 54350 MONT SAINT MARTIN",
+  "country": "FR",
+  "lat": 49.54957,
+  "lng": 5.80845
+ },
+ "MACON": {
+  "address": "ZAC DES BOUCHARDES 355 RUE DE BRESSE 71570 CHAINTRE",
+  "country": "FR",
+  "lat": 46.25513,
+  "lng": 4.7935
+ },
+ "MARSEILLE LA VAL": {
+  "address": "111, RTE DE LA VALENTINE 13011 MARSEILLE",
+  "country": "FR",
+  "lat": 43.29074,
+  "lng": 5.47386
+ },
+ "MARSEILLE RUE DE ROME": {
+  "address": "86 RUE DE ROME 13006 MARSEILLE",
+  "country": "FR",
+  "lat": 43.29193,
+  "lng": 5.38028
+ },
+ "METZ AUGNY": {
+  "address": "29 RUE DU BOIS D'ORLY 57685 AUGNY",
+  "country": "FR",
+  "lat": 49.07658,
+  "lng": 6.10309
+ },
+ "METZ CENTRE": {
+  "address": "19 RUE DE LA TÊTE D’OR 57000 METZ",
+  "country": "FR",
+  "lat": 49.11726,
+  "lng": 6.17701
+ },
+ "MIRAMAS": {
+  "address": "AVENUE DES ANCIENS COMBATTANTS 13140 MIRAMAS",
+  "country": "FR",
+  "lat": 43.58965,
+  "lng": 5.00326
+ },
+ "MONTARGIS": {
+  "address": "564 RUE DE SAINT FIRMIN DES VIGNES 45200 AMILLY",
+  "country": "FR",
+  "lat": 47.97734,
+  "lng": 2.73677
+ },
+ "MONTBELIARD": {
+  "address": "57 AV. CHABAUD LATOUR 25200 MONTBELIARD",
+  "country": "FR",
+  "lat": 47.50952,
+  "lng": 6.80933
+ },
+ "NANCY": {
+  "address": "7 RUE DU DR SCHMITT 54000 NANCY",
+  "country": "FR",
+  "lat": 48.68973,
+  "lng": 6.18457
+ },
+ "NANTES": {
+  "address": "6 RUE DE LA BARILLERIE 44000 NANTES",
+  "country": "FR",
+  "lat": 47.2154,
+  "lng": -1.55523
+ },
+ "NICE MALAUSSENA": {
+  "address": "29 AVENUE MALAUSSENA RÉSIDENCE BEL CANTO 06000 NICE",
+  "country": "FR",
+  "lat": 43.70873,
+  "lng": 7.26284
+ },
+ "NICE REPUBLIQUE": {
+  "address": "16 AVENUE DE LA RÉPUBLIQUE 06300 NICE",
+  "country": "FR",
+  "lat": 43.70567,
+  "lng": 7.28279
+ },
+ "NIORT": {
+  "address": "6 RUE JEAN BAPTISTE COLBERT ESPACE MENDES FRANCE 2 79000 NIORT",
+  "country": "FR",
+  "lat": 46.33715,
+  "lng": -0.40553
+ },
+ "NOGENT LE ROTROU": {
+  "address": "128 RUE SAINT HILAIRE 28400 NOGENT LE ROTROU",
+  "country": "FR",
+  "lat": 48.3233,
+  "lng": 0.82048
+ },
+ "OLIVET": {
+  "address": "ZAC DES PROVINCES 140, RUE DE GUYENNE 45160 OLIVET",
+  "country": "FR",
+  "lat": 47.84128,
+  "lng": 1.91739
+ },
+ "ORTHEZ": {
+  "address": "46 ROUTE DE BAYONNE 64300 ORTHEZ",
+  "country": "FR",
+  "lat": 43.48566,
+  "lng": -0.81074
+ },
+ "PARIS 05": {
+  "address": "43 RUE MONGE M PLACE MONGE LIGNE 7 75005 PARIS",
+  "country": "FR",
+  "lat": 48.84575,
+  "lng": 2.35219
+ },
+ "PARIS 07": {
+  "address": "17 AVENUE DUQUESNE 75007 PARIS",
+  "country": "FR",
+  "lat": 48.85317,
+  "lng": 2.30819
+ },
+ "PARIS 11": {
+  "address": "51 BIS RUE DE LA ROQUETTE 75011 PARIS",
+  "country": "FR",
+  "lat": 48.85583,
+  "lng": 2.37494
+ },
+ "PARIS 12": {
+  "address": "10 RUE DE LYON 75012 PARIS",
+  "country": "FR",
+  "lat": 48.84737,
+  "lng": 2.37197
+ },
+ "PARIS 13": {
+  "address": "146 AVENUE D'ITALIE 75013 PARIS 13",
+  "country": "FR",
+  "lat": 48.82274,
+  "lng": 2.35806
+ },
+ "PARIS 14": {
+  "address": "143 RUE D'ALESIA 75014 PARIS",
+  "country": "FR",
+  "lat": 48.82986,
+  "lng": 2.3208
+ },
+ "PARIS 15": {
+  "address": "292 RUE LECOURBE 75015 PARIS",
+  "country": "FR",
+  "lat": 48.83812,
+  "lng": 2.28738
+ },
+ "PARIS 17": {
+  "address": "88 AVENUE DE CLICHY 75017 PARIS",
+  "country": "FR",
+  "lat": 48.88872,
+  "lng": 2.32368
+ },
+ "PARIS 19": {
+  "address": "8 RUE PETIT 75019 PARIS",
+  "country": "FR",
+  "lat": 48.88467,
+  "lng": 2.3803
+ },
+ "PARTHENAY": {
+  "address": "ZAC LES LOGES 39 RUE LEONARD DE VINCI 79200 PARTHENAY",
+  "country": "FR",
+  "lat": 46.64891,
+  "lng": -0.22716
+ },
+ "PAU": {
+  "address": "9 COURS BOSQUET 64000 PAU",
+  "country": "FR",
+  "lat": 43.29758,
+  "lng": -0.36535
+ },
+ "PERPIGNAN": {
+  "address": "4, PLACE DE LA RESISTANCE 66000 PERPIGNAN",
+  "country": "FR",
+  "lat": 42.70136,
+  "lng": 2.89299
+ },
+ "PERPIGNAN SUD": {
+  "address": "10, RUE DU DOCTEUR BAILLAT 66100 PERPIGNAN",
+  "country": "FR",
+  "lat": 42.67209,
+  "lng": 2.89087
+ },
+ "PIERRELATTE": {
+  "address": "RUE AUGUSTE RODIN ZAC DE LA CROIX D'OR 26700 PIERRELATTE",
+  "country": "FR",
+  "lat": 44.36177,
+  "lng": 4.69544
+ },
+ "PIERRY": {
+  "address": "2 ALLÉE DE MAXENU 51530 PIERRY",
+  "country": "FR",
+  "lat": 49.02248,
+  "lng": 3.9455
+ },
+ "PLAN DE CAMPAGNE": {
+  "address": "700 AVENUE DU PLAN DE CAMPAGNE BAT C 13480 CABRIES",
+  "country": "FR",
+  "lat": 43.4184,
+  "lng": 5.35855
+ },
+ "REIMS": {
+  "address": "1 RUE DU DR BAZELAIRE ZAC LA NEUVILLETTE 51100 REIMS",
+  "country": "FR",
+  "lat": 49.29129,
+  "lng": 4.02121
+ },
+ "REIMS CORMONTREUIL": {
+  "address": "3, RUE DES CARREAUX ROUTE DE LOUVOIS 51350 CORMONTREUIL",
+  "country": "FR",
+  "lat": 49.21457,
+  "lng": 4.04988
+ },
+ "ROCOURT": {
+  "address": "RUE D'ANS 154 4000 ROCOURT",
+  "country": "BE",
+  "lat": 50.67429,
+  "lng": 5.54469
+ },
+ "ROUEN REPUBLIQUE": {
+  "address": "2-6  RUE DU GENERAL LECLERC 76000 ROUEN",
+  "country": "FR",
+  "lat": 49.43992,
+  "lng": 1.09029
+ },
+ "ROUEN SAINT SEVER": {
+  "address": "146 RUE SAINT SEVER 76100 ROUEN",
+  "country": "FR",
+  "lat": 49.43135,
+  "lng": 1.0866
+ },
+ "RUEIL-MALMAISON": {
+  "address": "58 AVENUE DE FOUILLEUSE 92500 RUEIL-MALMAISON",
+  "country": "FR",
+  "lat": 48.86241,
+  "lng": 2.194
+ },
+ "SAINT AVOLD": {
+  "address": "22 RUE DE LA PISCINE 57500 SAINT-AVOLD",
+  "country": "FR",
+  "lat": 49.10557,
+  "lng": 6.69916
+ },
+ "SAINT DIZIER": {
+  "address": "ZAC DU CHENE SAINT AMAND RUE DES MEROVINGIENS 52100 SAINT DIZIER",
+  "country": "FR",
+  "lat": 48.62291,
+  "lng": 4.96767
+ },
+ "SAINT LO": {
+  "address": "61 RUE TORTERON 50000 SAINT LÔ",
+  "country": "FR",
+  "lat": 49.11451,
+  "lng": -1.09623
+ },
+ "SAINT PIERRE": {
+  "address": "6 RUE DU VIEUX GOUVERNEMENT 97410 SAINT-PIERRE",
+  "country": "RE",
+  "lat": -21.33994,
+  "lng": 55.47325
+ },
+ "SAINT VINCENT DE TYROSSE": {
+  "address": "1500 ROUTE DE BORDEAUX 40230 SAINT VINCENT DE TYROSSE",
+  "country": "FR",
+  "lat": 43.66741,
+  "lng": -1.28474
+ },
+ "SAINTE CLOTILDE": {
+  "address": "16 RUE BRIDET 97490 SAINTE-CLOTILDE",
+  "country": "RE",
+  "lat": -20.89267,
+  "lng": 55.48609
+ },
+ "SARREGUEMINES": {
+  "address": "14 RUE DES ORMES 57200 SARREGUEMINES",
+  "country": "FR",
+  "lat": 49.11717,
+  "lng": 7.08719
+ },
+ "SELESTAT": {
+  "address": "13 RUE WESTRICH 67600 SELESTAT",
+  "country": "FR",
+  "lat": 48.28098,
+  "lng": 7.46314
+ },
+ "SERAING": {
+  "address": "BOULEVARD PASTEUR 6 4100 SERAING",
+  "country": "BE",
+  "lat": 50.5945,
+  "lng": 5.49927
+ },
+ "TERVILLE": {
+  "address": "14 BOUCLE DU FERRONNIER 57180 TERVILLE",
+  "country": "FR",
+  "lat": 49.35727,
+  "lng": 6.13343
+ },
+ "TOULON LA FAYETTE": {
+  "address": "SARL MGL83 109 COURS LA FAYETTE 83000 TOULON",
+  "country": "FR",
+  "lat": 43.12053,
+  "lng": 5.934
+ },
+ "TOULOUSE ARENES": {
+  "address": "54 BVD GABRIEL KOENIGS 31300 TOULOUSE",
+  "country": "FR",
+  "lat": 43.59556,
+  "lng": 1.4196
+ },
+ "TOULOUSE CHANGES": {
+  "address": "22 RUE DES CHANGES 31000 TOULOUSE",
+  "country": "FR",
+  "lat": 43.60115,
+  "lng": 1.44376
+ },
+ "TRANS EN PROVENCE": {
+  "address": "15 LIEU DIT ROUTE DU PLAN 83720 TRANS EN PROVENCE",
+  "country": "FR",
+  "lat": 43.50748,
+  "lng": 6.47804
+ },
+ "VALENCE": {
+  "address": "68 RUE MADIER DE MONTJAU 26000 VALENCE",
+  "country": "FR",
+  "lat": 44.9325,
+  "lng": 4.89441
+ },
+ "VENDÔME": {
+  "address": "46 RUE DU CHANGE 41100 VENDOME",
+  "country": "FR",
+  "lat": 47.79319,
+  "lng": 1.06779
+ },
+ "VERDUN": {
+  "address": "RUE JEAN NORTON CRU 55100 VERDUN",
+  "country": "FR",
+  "lat": 49.14781,
+  "lng": 5.40985
+ },
+ "VERNON": {
+  "address": "8-10 RUE SAINTE GENEVIÈVE 27200 VERNON",
+  "country": "FR",
+  "lat": 49.09264,
+  "lng": 1.48491
+ },
+ "VERVIERS": {
+  "address": "CENTRE CRESCEND’EAU RUE DE LA STATION 8 4800 VERVIERS",
+  "country": "BE",
+  "lat": 50.59025,
+  "lng": 5.84954
+ },
+ "VICHY": {
+  "address": "33-35 RUE DES PEUPLIERS 03300 CUSSET",
+  "country": "FR",
+  "lat": 46.13614,
+  "lng": 3.43595
+ },
+ "VILLENEUVE LOUBET": {
+  "address": "866 RN7 MARINA AIRPORT 06270 VILLENEUVE LOUBET",
+  "country": "FR",
+  "lat": 43.64198,
+  "lng": 7.13257
+ },
+ "VILLEURBANNE": {
+  "address": "180 COURS EMILE ZOLA 69100 VILLEURBANNE",
+  "country": "FR",
+  "lat": 45.76911,
+  "lng": 4.88123
+ },
+ "VINCENNES": {
+  "address": "74 RUE DE MONTREUIL 94300 VINCENNES",
+  "country": "FR",
+  "lat": 48.84918,
+  "lng": 2.43466
+ },
+ "VIRE": {
+  "address": "AVENUE BISCHWILLER 14500 VIRE",
+  "country": "FR",
+  "lat": 48.8535,
+  "lng": -0.86413
+ },
+ "VITRE": {
+  "address": "1 RUE GUTENBERG ZONE DE LA BARATIERE 35500 VITRE",
+  "country": "FR",
+  "lat": 48.11115,
+  "lng": -1.22039
+ }
+}

@@ -7,8 +7,7 @@ at 500 there, well under the private asks already tracked.
 import datetime as dt
 
 from techflip.config import SearchConfig
-from techflip.sources.cashconverters import (CashConvertersSource, _store_of,
-                                             _with_ajax)
+from techflip.sources.cashconverters import CashConvertersSource, _store_of, _with_ajax
 
 RAW = {
     "products": [
@@ -57,7 +56,9 @@ def test_products_become_listings_located_at_their_shop():
     got = src.fetch(_search(
         "https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-JAMBES"))
     assert [l.price for l in got] == [500.0, 230.0]
-    assert got[0].title == "Console Steam deck OLED 2TO"
+    # The slug is appended to the retyped name on purpose: the clerk drops
+    # words the URL keeps ("z flip 7" vs .../z-flip-7-fe-...). See test_cc_slug.
+    assert got[0].title.startswith("Console Steam deck OLED 2TO")
     assert got[0].uid == "cashconverters:1166384"
     # JAMBES is Namur: an item there must not read as 130km away in Lille terms
     # by having no coordinates at all.
@@ -80,7 +81,7 @@ def test_stock_is_dated_the_day_it_is_first_seen():
     """A shop has stock, not a posting date, and a listing with no date is
     invisible to the resweep forever."""
     got = _source().fetch(_search("https://x/?q=Magasin-JAMBES"))
-    assert got[0].published_at == dt.date.today().isoformat()
+    assert got[0].published_at == dt.datetime.now(tz=dt.timezone.utc).date().isoformat()
 
 
 def test_an_unfiltered_page_has_no_pretend_location():

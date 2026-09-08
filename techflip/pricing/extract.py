@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import re
 import unicodedata
-
 from dataclasses import dataclass
 
 from .catalog import Catalog
@@ -46,7 +45,11 @@ def extract_components(text: str, catalog: Catalog) -> list[Component]:
 # them entirely when only the description mentions several.
 _STRICT = {"gpu", "cpu", "motherboard", "laptop"}
 _CAP1 = {"ram", "storage", "psu", "monitor"}
-_TITLE_ONLY = {"console"}
+# A phone gets the same treatment as a console: one per ad, from the title
+# only, and only when the ad is actually selling it. "Coque Iphone 14 Pro Max
+# Titane" (200 EUR) was appraised at 408 EUR as the handset, because the phone
+# category fell through to "keep everything matched, title or description".
+_TITLE_ONLY = {"console", "phone"}
 
 
 _BUNDLE_TOKENS = {"pc", "tour", "setup", "ordinateur", "config", "lot",
@@ -116,7 +119,14 @@ _ACCESSORY_WORDS = {"manette", "manettes", "casque", "support", "telecommande",
                     "télécommande", "cable", "câble", "chargeur", "housse", "sacoche",
                     "socle", "station", "coque", "protection", "volant", "jeu", "jeux",
                     "simulateur", "pedales", "pédales", "pedalier",
-                    "sticker", "stickers", "grip", "facade", "façade", "abonnement",
+                    "sticker", "stickers", "grip", "facade", "façade",
+                    "facades", "façades", "abonnement",
+                    # Word order settles the collector editions: the machine
+                    # comes first when the machine is what is for sale.
+                    # "Ps5 ghost of yotei edition collector" is a console;
+                    # "Assassin's Creed Shadows Edition Collector PS5" is a
+                    # game, and was priced at 340 EUR as a PlayStation 5.
+                    "collector", "collectors",
                     # An empty case is a part, never the machine: "Boitier PC ...
                     # 10 ventilateur" was being appraised as a whole tower.
                     "boitier", "boîtier", "ventilateur", "ventilateurs"}
@@ -131,6 +141,14 @@ _ADDON_NOUNS = {
     "spelletje", "spelletjes", "jeu", "jeux", "game", "games", "housse", "hoes",
     "coque", "sacoche", "chargeur", "charger", "oplader", "kabel", "kabels",
     "casque", "sticker", "stickers", "volant", "pedales", "pédales",
+    # Racing wheels, which arrive titled in three languages and were all
+    # priced as the console they plug into: "Nintendo switch stuur" (40 EUR)
+    # was appraised at 166, "PS4 PS5 stuur" (50) at 340.
+    "stuur", "racestuur", "wheel", "playseat", "shifter", "pedalen",
+    "pedalier", "pédalier",
+    # A faceplate is a plastic shell: "Ghost of Yotei Facades PS5 Slim
+    # Collector Neuf" (80 EUR) was appraised as a 340 EUR PS5.
+    "facade", "facades", "façade", "façades",
     # A drive sold FOR a console is not the console: "SSD ps5 2TO" (300 EUR,
     # Lille) was appraised as a 368 EUR PS5.
     # NB not "disque" alone: "PS5 edition disque" is the disc console itself.
@@ -163,12 +181,61 @@ _ONLY_WORDS = {"uniquement", "seul", "seule", "seulement", "only", "alleen",
 # pad, read as a Valve Steam Deck at 276 EUR) and network switches ("Switch
 # ethernet Sodola", read as a Nintendo Switch at 166).
 _NOT_A_CONSOLE = re.compile(
-    r"\b(elgato|stream\s*deck|ethernet|reseau|réseau|rj45|poe|tp\s*link|netgear|sodola|gigabit|ports?)\b", re.I)
+    r"\b(elgato|stream\s*deck|ethernet|reseau|réseau|rj45|poe|tp\s*link|netgear|sodola|gigabit|ports?)\b", re.IGNORECASE)
+
+# A run of platforms is compatibility, not contents. "Logitech G29 + Shifter +
+# Pedalen | PS5/PS4/PC" was priced at 340 EUR as a PlayStation 5; it is a
+# steering wheel, and the accessory guard could not fire because the "+" reads
+# as a bundle marker -- which it is, of wheel parts. Nobody sells a machine
+# that is simultaneously a PS4 and a PC, so two platforms joined by a slash (or
+# trailing "compatible") describe what the thing plugs into.
+#
+# Full platform names on both sides on purpose: "Xbox Series X/S" is one
+# console written with a slash and must survive.
+# "nintendo" is deliberately absent: "Nintendo Switch" is one console written
+# as two words, and listing it here would bar the commonest console in the pool.
+_CONSOLE_PLAT = r"(?:ps\s?[2-5]|playstation|xbox|switch|wii)"
+_ANY_PLAT = rf"(?:{_CONSOLE_PLAT}|pc|mac)"
+_COMPAT_LIST = re.compile(
+    # "PS5/PS4/PC", "PS5, PS4 & PC". Not "+": "PS4 + PS5" is a lot of two
+    # machines, and the plus is what says so.
+    rf"{_ANY_PLAT}\s*[/|,&]\s*{_ANY_PLAT}"
+    # "(PS4 - PS5 - PC)". Spaced dash only, so "Xbox-One" stays one word.
+    rf"|{_ANY_PLAT}\s+[-\u2013]\s+{_ANY_PLAT}"
+    # "PS4 PS5 stuur" -- two console families touching, no separator needed.
+    rf"|{_CONSOLE_PLAT}\s+{_CONSOLE_PLAT}\b"
+    rf"|compatible[^.]{{0,24}}?{_ANY_PLAT}", re.IGNORECASE)
+
+
+_PHONE_WORDS = {"iphone", "galaxy", "samsung", "smartphone", "gsm", "xiaomi",
+                "redmi", "pixel", "oneplus", "motorola", "huawei", "honor",
+                "telephone", "téléphone", "portable"}
+
+
+def _machine_is_subject(title: str, category: str) -> bool:
+    """Is the ad selling the machine, or something that clips onto it?"""
+    if category == "phone":
+        return _phone_is_subject(title)
+    return _console_is_subject(title)
+
+
+def _phone_is_subject(title: str) -> bool:
+    """Word order, exactly as for consoles: the handset comes first when the
+    handset is what is for sale. "Batterie 98 %" is not an accessory -- every
+    Cash Converters phone title carries it -- so the battery word stays out of
+    the accessory set."""
+    t = (title or "").lower()
+    toks = [x for x in re.split(r"[^0-9a-zà-ÿ]+", t) if x]
+    phone = next((i for i, x in enumerate(toks) if x in _PHONE_WORDS), None)
+    if phone is None:
+        return True
+    acc = next((i for i, x in enumerate(toks) if x in _ACCESSORY_WORDS), None)
+    return acc is None or phone < acc
 
 
 def _console_is_subject(title: str) -> bool:
     t = (title or "").lower()
-    if _NOT_A_CONSOLE.search(t):
+    if _NOT_A_CONSOLE.search(t) or _COMPAT_LIST.search(t):
         return False
     toks = [x for x in re.split(r"[^0-9a-zà-ÿ]+", t) if x]
     con = next((i for i, x in enumerate(toks) if x in _CONSOLE_WORDS), None)
@@ -251,7 +318,7 @@ def recognize(title: str, description: str, catalog: Catalog) -> list[Component]
     for cat, comps in all_by_cat.items():
         title_comps_cat = title_by_cat.get(cat, [])
         if cat in _TITLE_ONLY:
-            if title_comps_cat and _console_is_subject(title):
+            if title_comps_cat and _machine_is_subject(title, cat):
                 out.append(title_comps_cat[0])
         elif cat in _STRICT:
             if title_comps_cat:

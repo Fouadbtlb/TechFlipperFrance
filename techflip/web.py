@@ -203,8 +203,8 @@ def _page(board, q) -> str:
         if f.lat is not None and f.lng is not None:
             markers.append({
                 "lat": f.lat, "lng": f.lng, 
-                "title": f.title, "url": f.url, "price": f.price, 
-                "uid": f.uid, "source": f.source
+                "title": _e(f.title), "url": _e(f.url), "price": f.price, 
+                "uid": f.uid, "source": _e(f.source), "city": _e(f.city or "?")
             })
     markers_json = json.dumps(markers).replace("</", "<\\/")
 
@@ -426,7 +426,7 @@ document.addEventListener("DOMContentLoaded", () => {
     markersData.forEach(m => {
       if (m.lat && m.lng) {
         const marker = L.marker([m.lat, m.lng]);
-        marker.bindPopup(`<b>${m.price}€</b><br><a href="${m.url}" target="_blank">${m.title}</a><br>Source: ${m.source}`);
+        marker.bindPopup(`<b>${m.price}€</b><br><a href="${m.url}" target="_blank">${m.title}</a><br>Source: ${m.source} (${m.city})`);
         clusterGroup.addLayer(marker);
         bounds.extend([m.lat, m.lng]);
         hasValidMarkers = true;

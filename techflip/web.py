@@ -163,9 +163,16 @@ def _page(board, q) -> str:
     # away and valued off seeds. Both defaults are rendered into the form, so
     # they are visible and one click from being cleared -- a hidden default that
     # silently drops listings would be worse than no default at all.
+    ulat = _num(q.get("ulat"))
+    ulng = _num(q.get("ulng"))
+    urad = _num(q.get("urad"))
+
     first_visit = not any(q.get(k) for k in ("q", "budget", "cat", "km", "age",
-                                             "sort", "show", "conf", "nohs"))
+                                             "sort", "show", "conf", "nohs",
+                                             "ulat", "ulng", "urad"))
     km = _num(q.get("km")) if not first_visit else 120.0
+    if ulat is not None and ulng is not None and urad is not None:
+        km = None
     conf = _num(q.get("conf")) if not first_visit else 0.5
 
     sel = filter_finds(
@@ -179,6 +186,9 @@ def _page(board, q) -> str:
         max_age_days=_num(q.get("age")),
         hide_broken=q.get("nohs") == "1",
         min_confidence=conf,
+        ulat=ulat,
+        ulng=ulng,
+        urad=urad,
     )
     sort = q.get("sort") if q.get("sort") in SORTS else "savings"
     sel = rank(sel, sort)
@@ -208,6 +218,12 @@ def _page(board, q) -> str:
             })
     markers_json = json.dumps(markers).replace("</", "<\\/")
 
+    circle_inputs = ""
+    circle_clear_btn = ""
+    if ulat is not None and ulng is not None and urad is not None:
+        circle_inputs = f'<input type="hidden" name="ulat" value="{ulat}"><input type="hidden" name="ulng" value="{ulng}"><input type="hidden" name="urad" value="{urad}">'
+        circle_clear_btn = f'<button type="button" onclick="clearCircle()" class="clear-btn">&times; Zone {urad:g}km</button>'
+
     return _SHELL.format(
         css=_CSS, js=_JS,
         n_shown=len(sel), n_total=len(board.finds), kept=kept,
@@ -225,6 +241,8 @@ def _page(board, q) -> str:
                        "ou la distance, ou lance une recherche live ci-dessus.</p>",
         busy=_e(board.busy),
         markers_json=markers_json,
+        circle_inputs=circle_inputs,
+        circle_clear_btn=circle_clear_btn,
     )
 
 
@@ -378,7 +396,8 @@ details ul{margin:6px 0 0;padding-left:18px;color:var(--dim);font-size:12.5px}
 .note{flex:1 1 90px;font-size:12.5px;padding:5px 8px}
 .empty{color:var(--dim);padding:40px 16px;text-align:center}
 #busy{color:var(--acc);font-size:13px;padding:0 16px}
-#map{height:400px;width:100%;border-bottom:1px solid var(--line)}
+#map{height:400px;width:calc(100% - 32px);margin:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.clear-btn{background:var(--down);border-color:var(--down);color:#fff;font-weight:600}
 """
 
 _JS = """
@@ -414,9 +433,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let bounds = L.latLngBounds();
     let hasValidMarkers = false;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
+      attribution: '&copy; OpenStreetMap &copy; CARTO'
     }).addTo(map);
 
     const clusterGroup = L.markerClusterGroup({
@@ -433,15 +452,70 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    const params = new URLSearchParams(window.location.search);
+    const ulat = parseFloat(params.get('ulat'));
+    const ulng = parseFloat(params.get('ulng'));
+    const urad = parseFloat(params.get('urad'));
+    let searchCircle = null;
+    
+    if (!isNaN(ulat) && !isNaN(ulng) && !isNaN(urad)) {
+      searchCircle = L.circle([ulat, ulng], {
+        radius: urad * 1000,
+        color: 'var(--acc)',
+        fillColor: 'var(--acc)',
+        fillOpacity: 0.1,
+        weight: 2,
+        interactive: false
+      }).addTo(map);
+      bounds.extend(searchCircle.getBounds());
+      hasValidMarkers = true;
+    }
+
     if (hasValidMarkers) {
       map.addLayer(clusterGroup);
       map.fitBounds(bounds);
     } else {
       map.setView([50.6292, 3.0573], 9);
     }
+
+    map.on('click', function(e) {
+      const rad = 50;
+      if (searchCircle) { map.removeLayer(searchCircle); }
+      searchCircle = L.circle(e.latlng, {
+        radius: rad * 1000, color: 'var(--acc)', fillColor: 'var(--acc)', fillOpacity: 0.1, weight: 2, interactive: false
+      }).addTo(map);
+      
+      window.activeSearchCircle = searchCircle;
+      
+      L.popup()
+       .setLatLng(e.latlng)
+       .setContent(`<div style="text-align:center;font-family:system-ui">
+          <div style="margin-bottom:8px">Chercher dans cette zone ?</div>
+          <button onclick="searchHere(${e.latlng.lat}, ${e.latlng.lng})" style="background:var(--acc);color:#fff;border:none;padding:5px 10px;border-radius:4px;cursor:pointer">Chercher</button>
+          <div style="margin-top:8px"><input type="number" id="radInput" value="${rad}" min="1" max="2000" oninput="if(window.activeSearchCircle) window.activeSearchCircle.setRadius(this.value * 1000)" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px"> km</div>
+        </div>`)
+       .openOn(map);
+    });
   }
 });
 
+function searchHere(lat, lng) {
+  const rad = document.getElementById('radInput').value;
+  const url = new URL(window.location);
+  url.searchParams.set('ulat', lat);
+  url.searchParams.set('ulng', lng);
+  url.searchParams.set('urad', rad);
+  url.searchParams.delete('km');
+  window.location = url.toString();
+}
+
+function clearCircle() {
+  const url = new URL(window.location);
+  url.searchParams.delete('ulat');
+  url.searchParams.delete('ulng');
+  url.searchParams.delete('urad');
+  window.location = url.toString();
+}
 """
 
 _SHELL = """<!doctype html>
@@ -467,7 +541,9 @@ _SHELL = """<!doctype html>
     <select name="sort">{sort_opts}</select>
     <select name="show">{show_opts}</select>
     <label class="chk"><input type="checkbox" name="nohs" value="1"{nohs}>cacher les HS</label>
+    {circle_inputs}
     <button class="go" type="submit">filtrer</button>
+    {circle_clear_btn}
   </form>
   <form onsubmit="goLook();return false" style="margin-top:8px">
     <input class="w-q" id="sweepterms" type="text" placeholder="chercher en direct sur leboncoin + 2ememain (ex: xbox series s, pc gamer)">

@@ -451,9 +451,13 @@ def filter_finds(
     white_only: bool = False,
     hide_broken: bool = False,
     min_confidence: float | None = None,
+    ulat: float | None = None,
+    ulng: float | None = None,
+    urad: float | None = None,
 ) -> list[Find]:
     """Narrow the list, preserving order. Every argument is optional so the web
     board can pass whatever the form happened to set."""
+    from .geo import haversine
     terms = [t for t in (query or "").lower().split() if t]
     out = []
     for f in finds:
@@ -480,6 +484,11 @@ def filter_finds(
             continue
         if hide_broken and "broken" in f.flags:
             continue
+        if ulat is not None and ulng is not None and urad is not None:
+            if f.lat is None or f.lng is None:
+                continue
+            if haversine(ulat, ulng, f.lat, f.lng) > urad:
+                continue
         if terms:
             hay = f"{f.title} {' '.join(f.parts)} {f.city or ''}".lower()
             if not all(t in hay for t in terms):

@@ -79,8 +79,10 @@ class CashExpressSource:
     # this one talks to Algolia's public REST API, which has no bot protection
     # and no reason to care who is asking. Impersonation would only add a
     # dependency the source does not use.
-    def __init__(self, timeout: float = 30.0):
+    def __init__(self, timeout: float = 30.0, proxy: str | None = None):
         self.session = requests.Session()
+        if proxy:
+            self.session.proxies.update({"http": proxy, "https": proxy})
         self.timeout = timeout
 
     def fetch(self, search: SearchConfig, page: int = 1) -> list[Listing]:

@@ -39,8 +39,10 @@ _TAGS = re.compile(r"<[^>]+>")
 class CashConvertersSource:
     name = "cashconverters"
 
-    def __init__(self, impersonate: str = "chrome131", timeout: float = 30.0):
+    def __init__(self, impersonate: str = "chrome131", timeout: float = 30.0, proxy: str | None = None):
         self.session = requests.Session(impersonate=impersonate)
+        if proxy:
+            self.session.proxies = {"http": proxy, "https": proxy}
         self.timeout = timeout
         self._geo: dict[str, tuple[float, float] | None] = {}
 

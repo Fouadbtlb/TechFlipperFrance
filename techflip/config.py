@@ -36,6 +36,7 @@ class Settings:
     telegram_token: str
     telegram_chat_id: str
     db_path: Path
+    proxy: str | None = None
     poll_seconds_min: int = 90
     poll_seconds_max: int = 240
     night_pause: bool = True
@@ -111,6 +112,7 @@ def load_settings(searches_file: str | Path | None = None) -> Settings:
         telegram_token=os.environ.get("TELEGRAM_BOT_TOKEN", ""),
         telegram_chat_id=os.environ.get("TELEGRAM_CHAT_ID", ""),
         db_path=Path(os.environ.get("TECHFLIP_DB", "techflip.db")),
+        proxy=os.environ.get("HTTP_PROXY") or os.environ.get("HTTPS_PROXY") or (raw.get("proxy") if "raw" in locals() else None),
         poll_seconds_min=int(os.environ.get("POLL_SECONDS_MIN", 90)),
         poll_seconds_max=int(os.environ.get("POLL_SECONDS_MAX", 240)),
         night_pause=os.environ.get("NIGHT_PAUSE", "1") != "0",

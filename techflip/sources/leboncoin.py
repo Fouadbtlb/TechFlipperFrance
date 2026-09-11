@@ -28,8 +28,10 @@ log = logging.getLogger(__name__)
 class LeboncoinSource:
     name = "leboncoin"
 
-    def __init__(self, proxy: lbc.Proxy | None = None, impersonate: str = "safari_ios"):
-        self.client = lbc.Client(proxy=proxy, impersonate=impersonate, max_retries=1)
+    def __init__(self, proxy: str | None = None, impersonate: str = "safari_ios"):
+        self.client = lbc.Client(impersonate=impersonate, max_retries=1)
+        if proxy:
+            self.client.session.proxies = {"http": proxy, "https": proxy}
 
     def fetch(self, search: SearchConfig, page: int = 1) -> list[Listing]:
         result = self.client.search(

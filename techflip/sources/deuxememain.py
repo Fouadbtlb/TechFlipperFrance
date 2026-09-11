@@ -25,8 +25,10 @@ _LIMIT = 30
 class DeuxiemeMainSource:
     name = "2ememain"
 
-    def __init__(self, impersonate: str = "chrome131", timeout: float = 25.0):
+    def __init__(self, impersonate: str = "chrome131", timeout: float = 25.0, proxy: str | None = None):
         self.session = requests.Session(impersonate=impersonate)
+        if proxy:
+            self.session.proxies = {"http": proxy, "https": proxy}
         self.timeout = timeout
         self._warm = False
 

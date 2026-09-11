@@ -45,16 +45,16 @@ _SHIP_YES = ("envoi", "livraison", "mondial relay", "colissimo", "colis", "relai
 
 def _make_source(name: str, settings: Settings):
     if name == "leboncoin":
-        return LeboncoinSource(impersonate=settings.impersonate)
+        return LeboncoinSource(impersonate=settings.impersonate, proxy=settings.proxy)
     if name == "2ememain":
         from .sources.deuxememain import DeuxiemeMainSource
-        return DeuxiemeMainSource()
+        return DeuxiemeMainSource(proxy=settings.proxy)
     if name == "cashexpress":
         from .sources.cashexpress import CashExpressSource
-        return CashExpressSource()
+        return CashExpressSource(proxy=settings.proxy)
     if name == "cashconverters":
         from .sources.cashconverters import CashConvertersSource
-        return CashConvertersSource()
+        return CashConvertersSource(proxy=settings.proxy)
     raise ValueError(f"source inconnue: {name!r}")
 
 

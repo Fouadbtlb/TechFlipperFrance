@@ -433,9 +433,12 @@ document.addEventListener("DOMContentLoaded", () => {
     let bounds = L.latLngBounds();
     let hasValidMarkers = false;
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    // OpenStreetMap's own tiles, not CARTO's: CARTO started requiring an API
+    // key and every tile came back stamped "API KEY REQUIRED", which made the
+    // map unreadable. OSM asks for attribution and nothing else.
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap &copy; CARTO'
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
     const clusterGroup = L.markerClusterGroup({
@@ -474,6 +477,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (hasValidMarkers) {
       map.addLayer(clusterGroup);
       map.fitBounds(bounds);
+      // Leaflet measures the container when fitBounds runs. If the pane is
+      // still laying out, it measures nothing and settles on zoom 0, which
+      // draws the whole planet with one cluster in the middle -- 387 markers
+      // inside a 100 km box, rendered as a world map. Re-measure once the
+      // layout has settled, and again whenever the window changes size.
+      const refit = () => { map.invalidateSize(); map.fitBounds(bounds); };
+      setTimeout(refit, 0);
+      window.addEventListener('load', refit);
+      window.addEventListener('resize', refit);
     } else {
       map.setView([50.6292, 3.0573], 9);
     }

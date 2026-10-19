@@ -94,6 +94,21 @@ def main():
     elif cmd == "buy":
         _buy(settings, sys.argv[2:])
 
+    elif cmd == "ingest":
+        # Refresh the pool the shopping board reads. Ingest only: no alerts,
+        # no marking. `ingest <searches.yaml> [pages]`.
+        from .ingest import ingest as _ingest
+        from .pipeline import _make_source
+        from .pricing.catalog import load_catalog
+        path = sys.argv[2] if len(sys.argv) > 2 else "config/searches.yaml"
+        pages = int(sys.argv[3]) if len(sys.argv) > 3 else 4
+        cfg = load_settings(path)
+        srcs = {name: _make_source(name, cfg)
+                for name in {x.source for x in cfg.searches}}
+        stats = _ingest(Store(cfg.db_path), cfg.searches, srcs,
+                        catalog=load_catalog(cfg.pricebook_path), max_pages=pages)
+        print(f"{path}: {stats}")
+
     elif cmd == "web":
         from .web import serve
         serve(settings, port=int(sys.argv[2]) if len(sys.argv) > 2 else 8765)

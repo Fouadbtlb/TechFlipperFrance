@@ -102,7 +102,13 @@ class Store:
         # The scanner loop and the web board now hold the file at the same time.
         # Without a timeout the loser of a write race raises "database is locked"
         # immediately, which in the loop means a dropped cycle.
-        self.conn.execute("PRAGMA busy_timeout = 5000")
+        # WAL lets the refreshes run side by side. Three `cli ingest` jobs
+        # against the rollback journal serialise on one writer lock and the
+        # phone refresh died on "database is locked" after exhausting its
+        # retries. WAL keeps readers going during a write and shortens the
+        # window writers fight over; the longer timeout absorbs the rest.
+        self.conn.execute("PRAGMA journal_mode = WAL")
+        self.conn.execute("PRAGMA busy_timeout = 30000")
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(_SCHEMA)
         self._migrate()

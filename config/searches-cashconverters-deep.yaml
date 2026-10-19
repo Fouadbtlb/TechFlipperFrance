@@ -1,0 +1,906 @@
+# Les 30 magasins Cash Converters, les cinq rayons qui portent une marge.
+# Genere: 30 magasins x {gsm, consoles-nintendo, consoles-sony,
+# ordinateurs-de-bureau, tablettes-tactiles}, tri par prix decroissant.
+#
+#   python -m techflip.cli ingest config/searches-cashconverters-deep.yaml 6
+searches:
+- name: CC ANTWERPEN - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-ANTWERPEN&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC ANTWERPEN - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-ANTWERPEN&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC ANTWERPEN - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-ANTWERPEN&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC ANTWERPEN - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-ANTWERPEN&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC ANTWERPEN - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-ANTWERPEN&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC ARLON - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-ARLON&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC ARLON - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-ARLON&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC ARLON - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-ARLON&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC ARLON - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-ARLON&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC ARLON - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-ARLON&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC ATH - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-ATH&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC ATH - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-ATH&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC ATH - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-ATH&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC ATH - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-ATH&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC ATH - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-ATH&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC AYWAILLE - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-AYWAILLE&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC AYWAILLE - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-AYWAILLE&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC AYWAILLE - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-AYWAILLE&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC AYWAILLE - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-AYWAILLE&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC AYWAILLE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-AYWAILLE&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC BINCHE - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC BINCHE - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC BINCHE - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC BINCHE - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC BINCHE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC BRUXELLES - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-BRUXELLES&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC BRUXELLES - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-BRUXELLES&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC BRUXELLES - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-BRUXELLES&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC BRUXELLES - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-BRUXELLES&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC BRUXELLES - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-BRUXELLES&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC COUILLET - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC COUILLET - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC COUILLET - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC COUILLET - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC COUILLET - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC DROGENBOS - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-DROGENBOS&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC DROGENBOS - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-DROGENBOS&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC DROGENBOS - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-DROGENBOS&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC DROGENBOS - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-DROGENBOS&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC DROGENBOS - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-DROGENBOS&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC ETTERBEEK - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-ETTERBEEK&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC ETTERBEEK - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-ETTERBEEK&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC ETTERBEEK - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-ETTERBEEK&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC ETTERBEEK - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-ETTERBEEK&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC ETTERBEEK - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-ETTERBEEK&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC EVERE - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-EVERE&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC EVERE - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-EVERE&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC EVERE - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-EVERE&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC EVERE - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-EVERE&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC EVERE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-EVERE&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC FLERON - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-FLERON&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC FLERON - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-FLERON&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC FLERON - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-FLERON&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC FLERON - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-FLERON&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC FLERON - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-FLERON&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC FROYENNES - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC FROYENNES - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC FROYENNES - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC FROYENNES - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC FROYENNES - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC GOSSELIES - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC GOSSELIES - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC GOSSELIES - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC GOSSELIES - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC GOSSELIES - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC GRIVEGNEE - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-GRIVEGNEE&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC GRIVEGNEE - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-GRIVEGNEE&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC GRIVEGNEE - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-GRIVEGNEE&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC GRIVEGNEE - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-GRIVEGNEE&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC GRIVEGNEE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-GRIVEGNEE&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC HERSTAL - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-HERSTAL&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC HERSTAL - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-HERSTAL&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC HERSTAL - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-HERSTAL&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC HERSTAL - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-HERSTAL&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC HERSTAL - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-HERSTAL&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC HUY - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-HUY&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC HUY - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-HUY&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC HUY - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-HUY&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC HUY - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-HUY&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC HUY - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-HUY&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC IXELLES - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-IXELLES&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC IXELLES - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-IXELLES&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC IXELLES - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-IXELLES&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC IXELLES - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-IXELLES&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC IXELLES - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-IXELLES&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC JAMBES - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC JAMBES - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC JAMBES - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC JAMBES - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC JAMBES - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC JETTE - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-JETTE&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC JETTE - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-JETTE&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC JETTE - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-JETTE&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC JETTE - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-JETTE&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC JETTE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-JETTE&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC LA LOUVIERE - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC LA LOUVIERE - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC LA LOUVIERE - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC LA LOUVIERE - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC LA LOUVIERE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC LIEGE - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-LIEGE&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC LIEGE - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-LIEGE&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC LIEGE - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-LIEGE&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC LIEGE - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-LIEGE&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC LIEGE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-LIEGE&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC MARCHE - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC MARCHE - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC MARCHE - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC MARCHE - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC MARCHE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC MONS - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-MONS&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC MONS - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-MONS&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC MONS - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-MONS&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC MONS - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-MONS&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC MONS - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-MONS&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC MOUSCRON - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC MOUSCRON - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC MOUSCRON - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC MOUSCRON - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC MOUSCRON - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC QUAREGNON - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-QUAREGNON&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC QUAREGNON - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-QUAREGNON&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC QUAREGNON - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-QUAREGNON&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC QUAREGNON - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-QUAREGNON&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC QUAREGNON - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-QUAREGNON&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC SAMBREVILLE - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC SAMBREVILLE - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC SAMBREVILLE - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC SAMBREVILLE - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC SAMBREVILLE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC SERAING - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-SERAING&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC SERAING - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-SERAING&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC SERAING - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-SERAING&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC SERAING - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-SERAING&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC SERAING - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-SERAING&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC TUBIZE - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-TUBIZE&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC TUBIZE - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-TUBIZE&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC TUBIZE - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-TUBIZE&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC TUBIZE - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-TUBIZE&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC TUBIZE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-TUBIZE&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC VERVIERS - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-VERVIERS&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC VERVIERS - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-VERVIERS&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC VERVIERS - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-VERVIERS&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC VERVIERS - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-VERVIERS&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC VERVIERS - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-VERVIERS&order=product.price.desc
+  min_price: 80
+  max_price: 1500
+- name: CC WAVRE - gsm
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/137-gsm?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 80
+  max_price: 1600
+- name: CC WAVRE - consoles-nintendo
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/158-consoles-nintendo?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 60
+  max_price: 700
+- name: CC WAVRE - consoles-sony
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/139-consoles-sony?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 60
+  max_price: 900
+- name: CC WAVRE - ordinateurs-de-bureau
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/164-ordinateurs-de-bureau?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 120
+  max_price: 2500
+- name: CC WAVRE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 80
+  max_price: 1500

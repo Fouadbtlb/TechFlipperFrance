@@ -1,0 +1,485 @@
+# Les magasins Cash Converters autour de Charleroi et de Namur, tout le stock
+# des rayons qui comptent, trie par prix decroissant.
+#
+#   python -m techflip.cli ingest config/searches-cc-sud.yaml 12
+searches:
+- name: CC COUILLET - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC COUILLET - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC COUILLET - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC COUILLET - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC COUILLET - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC COUILLET - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC COUILLET - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC COUILLET - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-COUILLET&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC GOSSELIES - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC GOSSELIES - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC GOSSELIES - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC GOSSELIES - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC GOSSELIES - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC GOSSELIES - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC GOSSELIES - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC GOSSELIES - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-GOSSELIES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC BINCHE - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC BINCHE - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC BINCHE - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC BINCHE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC BINCHE - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC BINCHE - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC BINCHE - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC BINCHE - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-BINCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC LA LOUVIERE - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC LA LOUVIERE - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC LA LOUVIERE - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC LA LOUVIERE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC LA LOUVIERE - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC LA LOUVIERE - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC LA LOUVIERE - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC LA LOUVIERE - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC SAMBREVILLE - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC SAMBREVILLE - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC SAMBREVILLE - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC SAMBREVILLE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC SAMBREVILLE - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC SAMBREVILLE - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC SAMBREVILLE - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC SAMBREVILLE - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-SAMBREVILLE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC JAMBES - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC JAMBES - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC JAMBES - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC JAMBES - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC JAMBES - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC JAMBES - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC JAMBES - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC JAMBES - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-JAMBES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC HUY - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-HUY&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC HUY - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-HUY&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC HUY - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-HUY&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC HUY - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-HUY&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC HUY - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-HUY&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC HUY - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-HUY&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC HUY - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-HUY&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC HUY - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-HUY&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC WAVRE - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC WAVRE - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC WAVRE - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC WAVRE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC WAVRE - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC WAVRE - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC WAVRE - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC WAVRE - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-WAVRE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MARCHE - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MARCHE - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MARCHE - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MARCHE - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MARCHE - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MARCHE - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MARCHE - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MARCHE - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-MARCHE&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MONS - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-MONS&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MONS - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-MONS&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MONS - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-MONS&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MONS - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-MONS&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MONS - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-MONS&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MONS - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-MONS&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MONS - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-MONS&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MONS - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-MONS&order=product.price.desc
+  min_price: 30
+  max_price: 5000

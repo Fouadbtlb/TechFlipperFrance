@@ -1,0 +1,78 @@
+# Consoles portables et tours a carte dediee: ROG Ally, Steam Deck, Legion Go,
+# plus les requetes tour-par-GPU. Ces modeles passaient entre les mailles des
+# balayages par rayon, qui ramenent surtout des accessoires.
+#
+#   python -m techflip.cli ingest config/searches-handhelds.yaml 3
+searches:
+- name: HH rog ally
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=rog+ally&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500
+- name: HH steam deck
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=steam+deck&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500
+- name: HH steam deck oled
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=steam+deck+oled&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500
+- name: HH legion go
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=legion+go&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500
+- name: HH msi claw
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=msi+claw&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500
+- name: HH pc gamer rtx
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=pc+gamer+rtx&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500
+- name: HH gaming pc rtx 4070
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=gaming+pc+rtx+4070&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500
+- name: HH gaming pc rtx 5070
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=gaming+pc+rtx+5070&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500
+- name: HH pc gamer rtx 3080
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=pc+gamer+rtx+3080&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500
+- name: HH ps5 pro
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=ps5+pro&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500
+- name: HH xbox series x
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=xbox+series+x&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500
+- name: HH switch 2
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=switch+2&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 120
+  max_price: 2500

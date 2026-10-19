@@ -16,3 +16,7 @@ venv/
 
 # DB snapshots taken before destructive maintenance
 *.db.bak-*
+
+# SQLite write-ahead log, now that the store runs in WAL mode
+*.db-shm
+*.db-wal

@@ -29,7 +29,7 @@ def extract_components(text: str, catalog: Catalog) -> list[Component]:
     out: list[Component] = []
     seen: set[str] = set()
     for d in catalog.ordered():
-        span = _first_free_match(d.patterns, text, consumed)
+        span = _first_free_match(d.patterns, text, consumed, d.category)
         if span is None:
             continue
         consumed.append(span)
@@ -49,7 +49,7 @@ _CAP1 = {"ram", "storage", "psu", "monitor"}
 # only, and only when the ad is actually selling it. "Coque Iphone 14 Pro Max
 # Titane" (200 EUR) was appraised at 408 EUR as the handset, because the phone
 # category fell through to "keep everything matched, title or description".
-_TITLE_ONLY = {"console", "phone"}
+_TITLE_ONLY = {"console", "phone", "tablet"}
 
 
 _BUNDLE_TOKENS = {"pc", "tour", "setup", "ordinateur", "config", "lot",
@@ -207,14 +207,15 @@ _COMPAT_LIST = re.compile(
     rf"|compatible[^.]{{0,24}}?{_ANY_PLAT}", re.IGNORECASE)
 
 
-_PHONE_WORDS = {"iphone", "galaxy", "samsung", "smartphone", "gsm", "xiaomi",
+_PHONE_WORDS = {"ipad", "tablette", "tablet", "surface", "tab",
+                "iphone", "galaxy", "samsung", "smartphone", "gsm", "xiaomi",
                 "redmi", "pixel", "oneplus", "motorola", "huawei", "honor",
                 "telephone", "téléphone", "portable"}
 
 
 def _machine_is_subject(title: str, category: str) -> bool:
     """Is the ad selling the machine, or something that clips onto it?"""
-    if category == "phone":
+    if category in ("phone", "tablet"):
         return _phone_is_subject(title)
     return _console_is_subject(title)
 
@@ -364,11 +365,23 @@ def is_ambiguous_identity(components: list[Component], title: str) -> bool:
     return not any(m in t for m in markers)
 
 
-def _first_free_match(patterns, text, consumed) -> tuple[int, int] | None:
+# CPU and GPU model numbers collide: a Radeon RX 5600 XT and a Ryzen 5 5600X
+# share their digits, and shops mistype. "PC Gaming Zalman ryzen 5 5600xt rtx
+# 4060" was read as an RX 5600 XT, which then displaced the real RTX 4060
+# because only one card is ever kept, and valued the machine 200 EUR low.
+# Whatever follows a CPU brand word is that brand's model.
+_CPU_CONTEXT = re.compile(r"(?:ryzen|core|intel|athlon|pentium|celeron)\s*"
+                          r"(?:[0-9]\s*)?$", re.I)
+
+
+def _first_free_match(patterns, text, consumed, category: str = "") -> tuple[int, int] | None:
     for rx in patterns:
         for m in rx.finditer(text):
-            if not _overlaps(m.span(), consumed):
-                return m.span()
+            if _overlaps(m.span(), consumed):
+                continue
+            if category == "gpu" and _CPU_CONTEXT.search(text[max(0, m.start() - 14):m.start()]):
+                continue
+            return m.span()
     return None
 
 

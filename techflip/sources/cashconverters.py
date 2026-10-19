@@ -119,11 +119,37 @@ def _pretty(store: str | None) -> str | None:
     return store.title() if store else None
 
 
+# Postcode of the commune each shop sits in. pgeocode's NAME search is not safe
+# for these: it put HUY in Lathuy, MARCHE in Marchienne-au-Pont (Charleroi)
+# rather than Marche-en-Famenne, and found nothing for LIEGE or LA LOUVIERE.
+# A postcode lookup is exact.
+_STORE_POSTCODE = {
+    "ANTWERPEN": "2000", "ARLON": "6700", "ATH": "7800", "AYWAILLE": "4920",
+    "BINCHE": "7130", "BRUXELLES": "1000", "COUILLET": "6010",
+    "DROGENBOS": "1620", "ETTERBEEK": "1040", "EVERE": "1140",
+    "FLERON": "4620", "FROYENNES": "7503", "GOSSELIES": "6041",
+    "GRIVEGNEE": "4030", "HERSTAL": "4040", "HUY": "4500", "IXELLES": "1050",
+    "JAMBES": "5100", "JETTE": "1090", "LA LOUVIERE": "7100", "LA": "7100",
+    "LIEGE": "4000", "MARCHE": "6900", "MONS": "7000", "MOUSCRON": "7700",
+    "QUAREGNON": "7390", "SAMBREVILLE": "5060", "SERAING": "4100",
+    "TUBIZE": "1480", "VERVIERS": "4800", "WAVRE": "1300",
+}
+
+
 def _geocode(store: str):
     try:
         import pgeocode
     except Exception:
         return None
+    pc = _STORE_POSTCODE.get((store or "").upper().strip())
+    if pc:
+        try:
+            r = pgeocode.Nominatim("be").query_postal_code(pc)
+            lat, lng = float(r["latitude"]), float(r["longitude"])
+            if lat == lat and lng == lng:
+                return (lat, lng)
+        except Exception:
+            log.warning("cashconverters: postcode lookup failed for %r", store, exc_info=True)
     try:
         df = pgeocode.Nominatim("be").query_location(store.title(), top_k=1)
         if len(df):

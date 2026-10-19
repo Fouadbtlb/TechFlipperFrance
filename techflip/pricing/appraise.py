@@ -7,6 +7,7 @@ deal can be held to a higher bar than a cheap local one.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from .extract import extract_components
@@ -24,6 +25,7 @@ REALIZATION = {
     "ram": 0.85,
     "storage": 0.85,
     "phone": 0.85,
+    "tablet": 0.85,
     "controller": 0.85,
     "monitor": 0.82,
     "laptop": 0.80,
@@ -69,8 +71,49 @@ def listing_condition(llm_json: dict | None, text: str = "") -> str:
              # Stems, not forms: abime / abimer / abimee / abimé / abîmée are
              # all the same word and a shop uses whichever comes to hand.
              "abim", "abîm", "casse ", "cassee", "cassée", "beschadigd",
-             "defect", "kapot")
-    return "broken" if any(m in tl for m in marks) else "working"
+             "defect", "kapot",
+             # Screens, in the three languages the pool is written in.
+             # "Samsung Z Flip 7 / SCHERMPROBLEEM!" (325 EUR) topped the board.
+             "schermprobleem", "fissur", "barst", "gebarsten",
+             "pixel mort", "pixels morts", "pixel dood", "dode pixel",
+             # A lock makes a handset unsellable, whatever its condition.
+             "blacklist", "icloud",
+             # Dutch dead-screen phrasing, and the stuck-pixel dot.
+             "start niet op", "werkt niet", "moet gemaakt", "moet hersteld",
+             "gaat niet aan", "point vert",
+             # "(carte mere HS)" has no trailing space, so the " hs " forms
+             # above all missed it. The ad was parting out an S23 Ultra.
+             "hs)", "sans la carte mere", "sans carte mere", "court-circuit",
+             "sans la carte mère", "sans carte mère",
+             # A folding phone whose hinge is called out is a folding phone
+             # with a broken hinge: "(ETAT CHARNIERE) Z Fold 7", 550 EUR.
+             "charniere", "charnière", "scharnier", "gebroken",
+             # Aftermarket parts the shop discloses: iOS flags them forever.
+             "non officiel", "pas d'origine", "non d'origine", "niet origineel",
+             # "vendu dans l'etat" is the standard French disclaimer, and a
+             # part "a changer" is a part that does not work.
+             "vendu dans l", "vendu en l", "a changer", "à changer",
+             "s'eteint", "s'éteint")
+    if any(m in tl for m in marks):
+        return "broken"
+    # "Probleme app photo" is a broken camera; "fonctionne sans probleme" is
+    # the commonest reassurance on the site. Only the unnegated word counts.
+    if _PROBLEM.search(tl) or _ETAT_PART.search(tl):
+        return "broken"
+    return "working"
+
+
+# A pro shop names the defective part right after "etat": "(ETAT CHARNIERE)",
+# "(etat lentille)". "(Etat) 100 %" is the shop's plain used-condition mark
+# followed by battery health, and must not match.
+_ETAT_PART = re.compile(
+    r"\b[eé]tat\s+(?:charni[eè]re|lentille|[eé]cran|scherm|dos|ch[aâ]ssis|chassis"
+    r"|cam[eé]ra|vitre|coque|batterie|clavier|lecteur)\b")
+
+
+_PROBLEM = re.compile(
+    r"(?<!sans )(?<!aucun )(?<!pas de )(?<!geen )(?<!zonder )(?<!no )"
+    r"\b(?:probl[eè]me?s?|probleem|problemen)\b")
 
 
 def build_items(text_components, llm_json, catalog, text: str = "") -> list[Item]:

@@ -23,13 +23,12 @@ from .decision import ZonePolicy, decide
 from .domain import Listing, ScoreResult
 from .filters import price_prefilter, text_prefilter
 from .geo import Locator, logistics_cost, zone_for_distance
-from .hunt import _aisle_bars_machines, _MACHINE_CATEGORIES
+from .hunt import _aisle_bars_machines, _MACHINE_CATEGORIES, teaching_key
 from .notify.telegram import TelegramNotifier
 from .pricing.appraise import appraise, build_items, items_from_classification
 from .pricing.catalog import load_catalog
 from .pricing.sold import load_sold
-from .pricing.extract import (is_ambiguous_identity, primary_key, recognize,
-                              teaches_price, _is_bundle)
+from .pricing.extract import is_ambiguous_identity, primary_key, recognize
 from .pricing.tracker import PriceTracker
 from .scoring.ai import AIVetter, _parse_verdict
 from .sources.leboncoin import LeboncoinSource
@@ -142,8 +141,7 @@ class Pipeline:
         comps = recognize(l.title, l.description, self.catalog)
         if _aisle_bars_machines(l.source_category):
             comps = [c for c in comps if c.category not in _MACHINE_CATEGORIES]
-        clean = not _is_bundle(l.title) and teaches_price(l.title)
-        pk = primary_key(comps) if clean else None
+        pk = teaching_key(l, self.catalog)
         self.store.set_primary_component(l.uid, pk, bool(pk))
         return is_new, comps
 
@@ -405,11 +403,7 @@ def recompute_primary_components(store, catalog) -> dict:
     stats = {"scanned": 0, "cleared": 0, "changed": 0}
     for r in rows:
         l = Listing.from_dict(_json.loads(r["raw_json"]))
-        comps = recognize(l.title, l.description, catalog)
-        if _aisle_bars_machines(l.source_category):
-            comps = [c for c in comps if c.category not in _MACHINE_CATEGORIES]
-        clean = not _is_bundle(l.title) and teaches_price(l.title)
-        pk = primary_key(comps) if clean else None
+        pk = teaching_key(l, catalog)
         old = store.conn.execute(
             "SELECT primary_component FROM listings WHERE uid=?", (r["uid"],)
         ).fetchone()["primary_component"]

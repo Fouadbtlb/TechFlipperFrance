@@ -21,7 +21,10 @@ def test_the_new_models_are_recognized():
     assert _phone("Smartphone Samsung Galaxy Z Flip 7 512") == "phone:z-flip-7"
     assert _phone("Smartphone Apple iPhone SE 64Go") == "phone:iphone-se"
     assert _phone("Xiaomi Redmi Note 13 Pro 256") == "phone:redmi-note-13"
-    assert _phone("GSM HONOR MAGIC V5") is None          # still unknown, honestly
+    # Honor was the honest "unknown" here until 2026-09-29, when the private
+    # market was measured and it turned out to be the widest shop-to-private
+    # gap in the whole phone aisle: 430 against 710.
+    assert _phone("GSM HONOR MAGIC V5") == "phone:honor-magic"
 
 
 def test_a_variant_never_matches_as_its_parent():

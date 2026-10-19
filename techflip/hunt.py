@@ -28,7 +28,7 @@ from .domain import Listing
 from .geo import zone_for_distance
 from .pcmarket import PCMarket, cpu_tier
 from .pricing.appraise import REALIZATION, appraise, build_items, listing_condition
-from .pricing.extract import _is_bundle, _norm, recognize
+from .pricing.extract import _is_bundle, _norm, primary_key, recognize, teaches_price
 
 PC = "pc"
 
@@ -37,8 +37,27 @@ PC = "pc"
 # /jeux-playstation/ while being valued as a 340 EUR console: nothing in the
 # title says "game", but the shop already said it. Substring match, so
 # "jeux-xbox-series-x-s" and "accessoires-informatique" are both covered.
-_NON_MACHINE_AISLES = ("jeux", "accessoire", "toebehoren", "games")
-_MACHINE_CATEGORIES = frozenset({"console", "laptop"})
+_NON_MACHINE_AISLES = ("jeux", "accessoire", "toebehoren", "games",
+                       # "Samsung Galaxy S26 256GB" at 400 EUR sat under
+                       # /housses-coques-facades-samsung/: the seller filed it
+                       # with the cases, and the price alone cannot overrule that.
+                       "housse", "coque", "hoesje",
+                       # "mikrotik switch crs125" under /commutateurs-reseau/
+                       # was a 166 EUR Nintendo Switch.
+                       "reseau", "netwerk")
+_MACHINE_CATEGORIES = frozenset({"console", "laptop", "phone"})
+
+
+# Aisles that hold single components. "Gigabyte GeForce RTX 3080 PC de jeu 10G"
+# sat in /cartes-video/ and the description said card only, but "PC de jeu" in
+# the title made it a build, valued against whole towers at 849 EUR.
+_PART_AISLES = ("cartes-video", "carte-graphique", "cartes-graphiques",
+                "composants", "processeur", "memoire")
+
+
+def _is_part_aisle(source_category: str | None) -> bool:
+    c = (source_category or "").lower()
+    return bool(c) and any(w in c for w in _PART_AISLES)
 
 
 def _aisle_bars_machines(source_category: str | None) -> bool:
@@ -89,6 +108,46 @@ _LAPTOP = re.compile(
 _MOBILE_CPU = re.compile(
     r"\b(?:i[3579]|ryzen\s*[3579])[\s-]*\d{4,5}\s*(?:hx|hs|h|u)\b", re.IGNORECASE)
 
+# Laptop lines that never say "laptop". "Lenovo Legion Slim 5 16GB RAM Geforce
+# RTX4070" (750 EUR) and "MSI Katana 17 ... RTX4070" (1100 EUR) both name one
+# part the catalog knows, so they read as single RTX 4070 cards: 41 such rows
+# pushed the card's market price to 700 EUR against a real 450-500, and a 400
+# EUR card showed +184. Card brands that share a name with a laptop line
+# (ROG Strix, TUF, Sapphire Nitro, Titan) only count with the laptop's model
+# number after them.
+_LAPTOP_FAMILY = re.compile(
+    r"\b(?:legion|victus|omen|katana|zephyrus|vivobook|zenbook|ideapad|thinkpad|yoga"
+    r"|loq|alienware|xps|predator|aspire|razer\s*blade|gf63|cyborg|crosshair"
+    r"|strix\s*(?:scar|g\s*\d{2})|scar\s*\d{2}|tuf\s*(?:gaming\s*)?[af]\s*\d{2}"
+    r"|acer\s*nitro|nitro\s*(?:v|5|\d{2})\b|msi\s*(?:sword|raider|stealth|titan|vector|pulse)"
+    r"|dell\s*g\s*1[5-6]|(?:13|14|15|16|17|18)(?:[.,]\d)?\s*(?:\"|\u201d|''|pouces?|inch|duim))",
+    re.IGNORECASE)
+
+# Categories a laptop ad can impersonate by naming the chip inside it.
+_DESKTOP_PARTS = frozenset({"gpu", "cpu", "motherboard", "ram", "storage"})
+
+
+def teaching_key(l: Listing, catalog) -> str | None:
+    """The component this ad may set the market price of, or None.
+
+    One rule for every writer of `primary_component`. The ingest command had
+    its own copy that skipped the bundle and title guards, so every tower it
+    stored taught the tracker the price of the one card named in its title.
+    """
+    comps = recognize(l.title, l.description, catalog)
+    if _aisle_bars_machines(l.source_category):
+        comps = [c for c in comps if c.category not in _MACHINE_CATEGORIES]
+    if _is_bundle(l.title) or not teaches_price(l.title):
+        return None
+    pk = primary_key(comps)
+    if pk is None:
+        return None
+    if catalog.by_key[pk].category in _DESKTOP_PARTS and (
+            _LAPTOP.search(l.title) or _MOBILE_CPU.search(l.title)
+            or _LAPTOP_FAMILY.search(l.title)):
+        return None
+    return pk
+
 # Someone looking to BUY, not to sell. "Recherche ps5 standard" ranked third on
 # the board, appraised as if it were a PS5 for sale. The alert path drops these
 # through `default_exclude` in searches.yaml; the board reads the database
@@ -100,8 +159,45 @@ _MOBILE_CPU = re.compile(
 # Stems, not whole words: sellers type "Recherch ps5" and "cherches", and an
 # exact-word list misses every typo. Matched against the accent-stripped title,
 # because "achète" does not start with the stem "achet".
+# A copy sold as a copy is still not the phone. "Galaxy s26 ultra(replique)"
+# (400 EUR) topped the 2026-09-14 board at a 808 EUR valuation.
+_SWAP = re.compile(r"\bruilen\s+tegen\b|\b[ée]chang\w*\s+(?:contre|tegen)\b"
+                   r"|\bruil\w*\s+tegen\b|\bswap\s+(?:for|against)\b")
+# In a description "copie" alone is usually the invoice ("copie de la
+# facture"). Only the admission counts: "Samsung S25 Ultra" at 300 EUR said
+# "Lisez bien l'annonce, c'est une copie."
+_ADMITTED_COPY = re.compile(
+    r"\b(?:c\W?est|est|is|it\W?s|dit\s+is)\s+(?:une|een|a|an)\s+"
+    r"(?:copie|kopie|replica|r[eé]plique|copy|fake|namaak|imitation|clone)\b")
+_CLONE_SHOP = re.compile(r"\b(?:aliexpress|temu|wish\.com|dhgate)\b")
+_COUNTERFEIT = re.compile(r"\b(?:replique|replica|copie|clone|fake|namaak|imitation)\b")
+
+# Damage a shop writes in the TITLE only. Kept out of `listing_condition`,
+# which also reads descriptions, where "coup de coeur" and "coup de pouce" are
+# everywhere; in a Cash Converters title "coup" is a dent and nothing else.
+# "pixel" is deliberately absent: Google sells a phone by that name.
+_TITLE_DAMAGE = re.compile(r"\bcoups?\b|\blignes?\s+(?:sur\s+l\W?)?ecran\b")
+
+# A repair shop advertising its service, not a device for sale: "Reparation
+# ecran Samsung Galaxy S24 Ultra pas cher Garantie" (260 EUR) was priced as a
+# 487 EUR phone and sat eighth on the board.
+_SERVICE = re.compile(
+    r"^\W*(?:reparation|reparatie|herstelling|remplacement|vervanging|depannage)\b")
+
+# Sellable, but only to that network's customers, and at a discount. Shown with
+# a flag rather than hidden: the owner may know a Proximus buyer.
+_CARRIERS = r"(?:proximus|orange|base|telenet|voo|scarlet|mobile\s*vikings|sfr|bouygues|free)"
+_CARRIER_LOCK = re.compile(
+    # The separator is whatever the clerk typed: "(Uniq. Proximus)",
+    # "(uniq,proximus)", "ONLY-PROXIMUS".
+    rf"\b(?:only|uniq\w*|uniquement|enkel|alleen|bloqu\w*|geblokkeerd)[\s.,;:)（(-]*{_CARRIERS}\b"
+    # The carrier first works too: "(proximus uniquement)", 2 x S25 FE at 200.
+    rf"|\b{_CARRIERS}[\s.,;:)(-]*(?:only|uniq\w*|uniquement|enkel|alleen)\b"
+    rf"|\bsimlock\w*|\bbloqu\w*\s+op[eé]rateur", re.I)
+
 _WANTED = re.compile(
-    r"^\W*(?:recherch\w*|cherch\w*|achet\w*|achat|"
+    r"^\W*(?:(?:je|ik|on|nous)\s+(?:ben\s+)?)?"
+    r"(?:recherch\w*|cherch\w*|achet\w*|achat|"
     r"gezocht|zoek\w*|op zoek|gevraagd|wanted|looking for)\b")
 
 
@@ -185,9 +281,21 @@ def evaluate(
     """Price one listing as a purchase. None when nothing in it can be priced."""
     if not l.price or l.price <= 0:
         return None
-    if _WANTED.match(_norm(l.title)):
+    if _WANTED.match(_norm(l.title)) or _SERVICE.match(_norm(l.title)):
+        return None
+    if _COUNTERFEIT.search(_norm(l.title)) or _ADMITTED_COPY.search(_norm(l.description or "")):
+        return None
+    # "Moet weg of ruilen tegen iPhone 16 of 17" was priced as an iPhone 16.
+    # A model named after "swap against" is the one the seller WANTS; what
+    # they are offering is not named at all, so there is nothing to price.
+    if _SWAP.search(_norm(l.title)):
         return None
     comps = recognize(l.title, l.description, catalog)
+    # A flagship "bought on AliExpress" is a clone: the S24 Ultra at 250 EUR
+    # said so in its own description.
+    if any(c.category == "phone" for c in comps) and _CLONE_SHOP.search(
+            _norm(f"{l.title} {l.description or ''}")):
+        return None
     if _aisle_bars_machines(l.source_category):
         comps = [c for c in comps if c.category not in _MACHINE_CATEGORIES]
     if not comps:
@@ -208,7 +316,7 @@ def evaluate(
     # recognised console settles it: handhelds are consoles, not laptops.
     laptop = (bool(_LAPTOP.search(text)) or bool(_MOBILE_CPU.search(text))) \
         and not any(c.category == "console" for c in comps)
-    build = _is_bundle(l.title) and not laptop
+    build = _is_bundle(l.title) and not laptop and not _is_part_aisle(l.source_category)
     value, lines = appr.true_value, list(appr.lines)
     if build:
         credit, credit_lines = chassis_allowance(catalog, comps, realization)
@@ -239,8 +347,10 @@ def evaluate(
         flags.append("laptop")
     if l.price < BAIT_RATIO * value:
         flags.append("bait")
-    if listing_condition(None, text) == "broken":
+    if listing_condition(None, text) == "broken" or _TITLE_DAMAGE.search(_norm(l.title)):
         flags.append("broken")
+    if _CARRIER_LOCK.search(text):
+        flags.append("locked")
     if looks_like_sales_copy(l.description):
         flags.append("sales_copy")
     if appr.n_unpriced:

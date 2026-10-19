@@ -221,15 +221,15 @@ components:
   - {key: phone:iphone-13, label: iPhone 13, category: phone, ship_class: small, seed: 250, aliases: [iphone 13]}
   - {key: phone:iphone-12, label: iPhone 12, category: phone, ship_class: small, seed: 180, aliases: [iphone 12]}
   - {key: phone:iphone-11, label: iPhone 11, category: phone, ship_class: small, seed: 130, aliases: [iphone 11]}
-  - {key: phone:s25-ultra, label: Galaxy S25 Ultra, category: phone, ship_class: small, seed: 700, aliases: [galaxy s25 ultra, s25 ultra]}
-  - {key: phone:s24-ultra, label: Galaxy S24 Ultra, category: phone, ship_class: small, seed: 520, aliases: [galaxy s24 ultra, s24 ultra]}
-  - {key: phone:s23-ultra, label: Galaxy S23 Ultra, category: phone, ship_class: small, seed: 390, aliases: [galaxy s23 ultra, s23 ultra]}
-  - {key: phone:s25, label: Galaxy S25, category: phone, ship_class: small, seed: 475, aliases: [galaxy s25]}        # prive n=28, releve 2026-09-08
-  - {key: phone:s24, label: Galaxy S24, category: phone, ship_class: small, seed: 330, aliases: [galaxy s24]}
-  - {key: phone:s23, label: Galaxy S23, category: phone, ship_class: small, seed: 260, aliases: [galaxy s23]}
-  - {key: phone:s22, label: Galaxy S22, category: phone, ship_class: small, seed: 180, aliases: [galaxy s22]}
-  - {key: phone:z-fold-6, label: Galaxy Z Fold 6, category: phone, ship_class: small, seed: 700, aliases: [galaxy z fold 6, z fold 6]}
-  - {key: phone:z-flip-6, label: Galaxy Z Flip 6, category: phone, ship_class: small, seed: 420, aliases: [galaxy z flip 6, z flip 6]}
+  - {key: phone:s25-ultra, label: Galaxy S25 Ultra, category: phone, ship_class: small, seed: 700, aliases: [galaxy s25 ultra, s25 ultra, samsung s25 ultra]}
+  - {key: phone:s24-ultra, label: Galaxy S24 Ultra, category: phone, ship_class: small, seed: 520, aliases: [galaxy s24 ultra, s24 ultra, samsung s24 ultra]}
+  - {key: phone:s23-ultra, label: Galaxy S23 Ultra, category: phone, ship_class: small, seed: 390, aliases: [galaxy s23 ultra, s23 ultra, samsung s23 ultra]}
+  - {key: phone:s25, label: Galaxy S25, category: phone, ship_class: small, seed: 475, aliases: [galaxy s25, samsung s25]}        # prive n=28, releve 2026-09-08
+  - {key: phone:s24, label: Galaxy S24, category: phone, ship_class: small, seed: 330, aliases: [galaxy s24, samsung s24]}
+  - {key: phone:s23, label: Galaxy S23, category: phone, ship_class: small, seed: 260, aliases: [galaxy s23, samsung s23]}
+  - {key: phone:s22, label: Galaxy S22, category: phone, ship_class: small, seed: 180, aliases: [galaxy s22, samsung s22]}
+  - {key: phone:z-fold-6, label: Galaxy Z Fold 6, category: phone, ship_class: small, seed: 700, aliases: [galaxy z fold 6, z fold 6, samsung z fold 6]}
+  - {key: phone:z-flip-6, label: Galaxy Z Flip 6, category: phone, ship_class: small, seed: 420, aliases: [galaxy z flip 6, z flip 6, samsung z flip 6]}
   - {key: phone:pixel-9-pro, label: Pixel 9 Pro, category: phone, ship_class: small, seed: 480, aliases: [google pixel 9 pro, pixel 9 pro]}
   - {key: phone:pixel-9, label: Pixel 9, category: phone, ship_class: small, seed: 380, aliases: [google pixel 9, pixel 9]}
   - {key: phone:pixel-8, label: Pixel 8, category: phone, ship_class: small, seed: 260, aliases: [google pixel 8, pixel 8]}
@@ -244,18 +244,20 @@ components:
   # sur les telephones le prive demande environ 1,12x le prix magasin (mediane
   # de 20 modeles), donc partir du magasin sous-estime plutot que l'inverse.
   # C'est l'inverse des consoles, ou la chaine est AU-DESSUS du prive.
-  - {key: phone:s26-ultra, label: Galaxy S26 Ultra, category: phone, ship_class: small, seed: 950, aliases: [s26 ultra, galaxy s26 ultra]}          # prive n=82
-  - {key: phone:s26, label: Galaxy S26, category: phone, ship_class: small, seed: 650, aliases: [galaxy s26]}                                        # prive n=74
-  - {key: phone:s25-edge, label: Galaxy S25 Edge, category: phone, ship_class: small, seed: 500, aliases: [s25 edge, galaxy s25 edge]}               # prive n=25
-  - {key: phone:s25-fe, label: Galaxy S25 FE, category: phone, ship_class: small, seed: 425, aliases: [s25 fe, galaxy s25 fe]}                       # prive n=7
-  - {key: phone:s24-fe, label: Galaxy S24 FE, category: phone, ship_class: small, seed: 300, aliases: [s24 fe, galaxy s24 fe]}                       # prive n=15
-  - {key: phone:s22-ultra, label: Galaxy S22 Ultra, category: phone, ship_class: small, seed: 325, aliases: [s22 ultra, galaxy s22 ultra]}           # prive n=19
-  - {key: phone:s21, label: Galaxy S21, category: phone, ship_class: small, seed: 200, aliases: [galaxy s21]}                                        # prive n=22
-  - {key: phone:z-fold-7, label: Galaxy Z Fold 7, category: phone, ship_class: small, seed: 950, aliases: [z fold 7, fold 7, galaxy fold 7]}         # prive n=27
+  - {key: phone:s26-ultra, label: Galaxy S26 Ultra, category: phone, ship_class: small, seed: 950, aliases: [s26 ultra, galaxy s26 ultra, samsung s26 ultra]}          # prive n=82
+  - {key: phone:s26, label: Galaxy S26, category: phone, ship_class: small, seed: 650, aliases: [galaxy s26, samsung s26]}                                        # prive n=74
+  - {key: phone:s25-edge, label: Galaxy S25 Edge, category: phone, ship_class: small, seed: 500, aliases: [s25 edge, galaxy s25 edge, samsung s25 edge]}               # prive n=25
+  - {key: phone:s25-fe, label: Galaxy S25 FE, category: phone, ship_class: small, seed: 425, aliases: [s25 fe, galaxy s25 fe, samsung s25 fe]}                       # prive n=7
+  - {key: phone:s24-fe, label: Galaxy S24 FE, category: phone, ship_class: small, seed: 300, aliases: [s24 fe, galaxy s24 fe, samsung s24 fe]}                       # prive n=15
+  - {key: phone:s22-ultra, label: Galaxy S22 Ultra, category: phone, ship_class: small, seed: 325, aliases: [s22 ultra, galaxy s22 ultra, samsung s22 ultra]}           # prive n=19
+  - {key: phone:s21, label: Galaxy S21, category: phone, ship_class: small, seed: 200, aliases: [galaxy s21, samsung s21]}                                        # prive n=22
+  - {key: phone:z-fold-7, label: Galaxy Z Fold 7, category: phone, ship_class: small, seed: 950, aliases: [z fold 7, fold 7, galaxy fold 7, samsung fold 7]}         # prive n=27
+  - {key: phone:z-fold-8, label: Galaxy Z Fold 8, category: phone, ship_class: small, seed: 1300, aliases: [z fold 8, fold 8, galaxy fold 8, samsung fold 8]}   # prive n=4 med 1325, magasin n=7 med 1300
+  - {key: phone:z-flip-8, label: Galaxy Z Flip 8, category: phone, ship_class: small, seed: 645, aliases: [z flip 8, flip 8, galaxy flip 8, samsung flip 8]}      # prive n=4 med 645, magasin n=111 med 650
   - {key: phone:z-flip-7-fe, label: Galaxy Z Flip 7 FE, category: phone, ship_class: small, seed: 450, aliases: [z flip 7 fe, flip 7 fe]}        # prive n=9
-  - {key: phone:z-flip-7, label: Galaxy Z Flip 7, category: phone, ship_class: small, seed: 650, aliases: [z flip 7, flip 7, galaxy flip 7]}         # prive n=51 hors FE
+  - {key: phone:z-flip-7, label: Galaxy Z Flip 7, category: phone, ship_class: small, seed: 650, aliases: [z flip 7, flip 7, galaxy flip 7, samsung flip 7]}         # prive n=51 hors FE
   - {key: phone:z-flip-5, label: Galaxy Z Flip 5, category: phone, ship_class: small, seed: 300, aliases: [z flip 5, flip 5]}                        # magasin n=22
-  - {key: phone:xcover-5, label: Galaxy XCover 5, category: phone, ship_class: small, seed: 80, aliases: [xcover 5, galaxy xcover 5]}                # magasin n=23
+  - {key: phone:xcover-5, label: Galaxy XCover 5, category: phone, ship_class: small, seed: 80, aliases: [xcover 5, galaxy xcover 5, samsung xcover 5]}                # magasin n=23
   - {key: phone:iphone-se, label: iPhone SE, category: phone, ship_class: small, seed: 100, aliases: [iphone se]}                                    # prive n=12
   - {key: phone:iphone-16e, label: iPhone 16e, category: phone, ship_class: small, seed: 400, aliases: [iphone 16e, iphone 16 e]}                    # magasin n=24
   - {key: phone:iphone-air, label: iPhone Air, category: phone, ship_class: small, seed: 680, aliases: [iphone air]}                                 # magasin n=17
@@ -272,6 +274,40 @@ components:
   - {key: phone:redmi-note-13, label: Redmi Note 13, category: phone, ship_class: small, seed: 250, aliases: [redmi note 13]}                        # prive n=15
   - {key: phone:motorola-edge-50, label: Motorola Edge 50, category: phone, ship_class: small, seed: 190, aliases: [edge 50, motorola edge 50]}      # magasin n=15
   - {key: phone:oneplus-nord, label: OnePlus Nord, category: phone, ship_class: small, seed: 178, aliases: [oneplus nord, one plus nord]}            # prive n=10
+
+  # ---------- tablettes ----------
+  # Angle mort mesure le 2026-09-29: 127 000 EUR de stock, 100% non reconnu,
+  # parce qu'aucune categorie tablette n'existait. `seed` = mediane des
+  # demandes ENTRE PARTICULIERS relevee ce jour-la, echantillon en commentaire.
+  #
+  # C'est le rayon ou les chaines se trompent le plus: un vendeur grade un
+  # iPhone de tete et une Surface Pro au jugé, d'ou 220 en magasin contre 475
+  # entre particuliers. Les variantes viennent AVANT l'iPad generique, sinon
+  # un iPad Pro se fait chiffrer au prix d'un iPad d'entree de gamme.
+  - {key: tablet:ipad-pro, label: iPad Pro, category: tablet, ship_class: parcel, seed: 750, aliases: [ipad pro]}                     # prive n=52
+  - {key: tablet:ipad-air, label: iPad Air, category: tablet, ship_class: parcel, seed: 550, aliases: [ipad air]}                     # prive n=48
+  - {key: tablet:ipad-mini, label: iPad mini, category: tablet, ship_class: parcel, seed: 282, aliases: [ipad mini]}                  # prive n=46
+  - {key: tablet:ipad, label: iPad, category: tablet, ship_class: parcel, seed: 378, aliases: [ipad]}                                 # prive n=226
+  - {key: tablet:surface-pro-new, label: Surface Pro 9+, category: tablet, ship_class: parcel, seed: 690, aliases: [surface pro 9, surface pro 10, surface pro 11, surface pro x]}   # prive n=4
+  - {key: tablet:surface-pro-7, label: Surface Pro 7/8, category: tablet, ship_class: parcel, seed: 300, aliases: [surface pro 7, surface pro 8]}   # prive n=9 med 300
+  - {key: tablet:surface-pro-old, label: Surface Pro 4-6, category: tablet, ship_class: parcel, seed: 200, aliases: [surface pro 4, surface pro 5, surface pro 6]}   # prive n=5 med 200
+  - {key: tablet:surface-pro, label: Surface Pro, category: tablet, ship_class: parcel, seed: 300, aliases: [surface pro]}            # prive n=26   # generation inconnue: on suppose ancien, par prudence
+  - {key: tablet:galaxy-tab-s11-ultra, label: Galaxy Tab S11 Ultra, category: tablet, ship_class: parcel, seed: 1100, aliases: [galaxy tab s11 ultra, tab s11 ultra]}   # prive n=10, 790-1829 selon stockage
+  - {key: tablet:galaxy-tab-s11, label: Galaxy Tab S11, category: tablet, ship_class: parcel, seed: 650, aliases: [galaxy tab s11, tab s11]}   # prive n=4 hors Ultra: 650 650 650 800
+  - {key: tablet:galaxy-tab-s10, label: Galaxy Tab S10, category: tablet, ship_class: parcel, seed: 300, aliases: [galaxy tab s10, tab s10]}   # prive n=56
+  - {key: tablet:galaxy-tab-s9, label: Galaxy Tab S9, category: tablet, ship_class: parcel, seed: 375, aliases: [galaxy tab s9, tab s9]}       # prive n=9
+  - {key: tablet:galaxy-tab-a, label: Galaxy Tab A, category: tablet, ship_class: parcel, seed: 175, aliases: [galaxy tab a, tab a9, tab a11, tab a8]}  # prive n=29
+  - {key: tablet:redmi-pad, label: Redmi Pad, category: tablet, ship_class: parcel, seed: 138, aliases: [redmi pad]}                  # prive n=8
+
+  # ---------- telephones, autres marques ----------
+  # Meme cause, meme effet: Honor se vend 710 entre particuliers et 430 en
+  # magasin, l'ecart le plus large de tout le rayon telephone.
+  - {key: phone:honor-magic-lite, label: Honor Magic Lite, category: phone, ship_class: small, seed: 210, aliases: [honor magic lite, magic 7 lite, magic 8 lite, magic 6 lite, magic7 lite, magic8 lite]}   # prive n=2 (169, 250); la Lite est un milieu de gamme, pas la Magic
+  - {key: phone:honor-magic, label: Honor Magic, category: phone, ship_class: small, seed: 710, aliases: [honor magic]}               # prive n=12
+  - {key: phone:oneplus-13, label: OnePlus 13, category: phone, ship_class: small, seed: 525, aliases: [oneplus 13, one plus 13]}     # prive n=8
+  - {key: phone:oneplus-12, label: OnePlus 12, category: phone, ship_class: small, seed: 400, aliases: [oneplus 12, one plus 12]}     # prive n=5, mince
+  - {key: phone:nothing-phone, label: Nothing Phone, category: phone, ship_class: small, seed: 222, aliases: [nothing phone]}         # prive n=8
+  - {key: phone:oppo-reno, label: Oppo Reno, category: phone, ship_class: small, seed: 200, aliases: [oppo reno]}                     # prive n=9
 
   # ---------- RAM ----------
   - {key: ram:ddr4-8gb, label: RAM DDR4 8Go, category: ram, ship_class: small, seed: 15, aliases: [8go ddr4, ddr4 8gb, 8 go ddr4]}

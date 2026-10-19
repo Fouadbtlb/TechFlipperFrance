@@ -16,3 +16,8 @@ sold:
   console:ps5: 340
   console:xbox-series-x: 300
   console:xbox-series-s: 160        # "160 minimum" -> plancher, donc prudent
+  # 2026-09-30: deux S26 256Go partis a 440 et 450, achetes 300 chez Cash
+  # Converters Couillet. Le scrap disait 605 (mediane des demandes) et le
+  # bas du marche etait a 430 pour du neuf scelle: la vraie vente tombe
+  # pile entre les deux. Premiere vente reelle de telephone enregistree.
+  phone:s26: 445

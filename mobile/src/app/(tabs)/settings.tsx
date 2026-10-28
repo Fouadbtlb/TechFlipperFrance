@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import * as Application from 'expo-application';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
@@ -6,7 +5,7 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Card, Chip, SectionTitle, T, type IconName } from '@/components/ui';
+import { Chip, Rule, SectionTitle, T } from '@/components/ui';
 import { api, signOut } from '@/lib/api';
 import { config } from '@/lib/config';
 import { CATEGORY_LABEL } from '@/lib/format';
@@ -53,14 +52,14 @@ export default function Settings() {
   async function onNotify(v: boolean) {
     await set({ notify: v });
     if (v && !(await enablePush().catch(() => false))) {
-      Alert.alert('Notifications désactivées', "Autorise-les dans les réglages du téléphone pour recevoir les alertes.");
+      Alert.alert('Notifications désactivées', 'Autorise-les dans les réglages du téléphone pour recevoir les alertes.');
     }
   }
 
   function deleteAccount() {
     Alert.alert(
       'Supprimer mon compte ?',
-      "Tes réglages et favoris seront effacés. L’abonnement se gère et s’annule depuis ton compte App Store / Google Play.",
+      'Tes réglages et favoris seront effacés. L’abonnement se gère et se résilie depuis ton compte App Store ou Google Play.',
       [
         { text: 'Annuler', style: 'cancel' },
         {
@@ -77,47 +76,59 @@ export default function Settings() {
   }
 
   const until = me.entitlement.until ? new Date(me.entitlement.until) : null;
+  const trackColor = { true: p.accent, false: p.border };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: p.bg }} edges={['top']}>
       <ScrollView contentContainerStyle={s.wrap}>
         <View style={s.titleRow}>
           <T v="title">Réglages</T>
-          {saving ? <T v="small" color="muted">Enregistrement…</T> : null}
+          {saving ? (
+            <T v="small" color="muted">
+              Enregistrement…
+            </T>
+          ) : null}
         </View>
 
         <SectionTitle>Point de départ</SectionTitle>
-        <Row icon="navigate-outline" label={pr.home_label ?? '—'} onPress={() => router.push('/location')} chevron />
+        <Row label={pr.home_label ?? 'Non renseigné'} detail="Modifier" onPress={() => router.push('/location')} />
 
         <SectionTitle>Jusqu’où tu te déplaces</SectionTitle>
         <View style={s.chips}>
           {RADII.map((r) => (
-            <Chip key={r} label={`${r}\u00a0km`} active={pr.radius_km === r} onPress={() => set({ radius_km: r })} />
+            <Chip key={r} label={`${r} km`} active={pr.radius_km === r} onPress={() => set({ radius_km: r })} />
           ))}
         </View>
-        <Card style={{ marginTop: space.md }}>
-          <View style={s.switchRow}>
-            <View style={{ flex: 1, gap: 2 }}>
-              <T style={{ fontWeight: '600' }}>Inclure les annonces avec envoi</T>
-              <T v="small" color="muted">
-                Plus loin que ton rayon, si le vendeur expédie. Frais d’envoi déduits.
-              </T>
-            </View>
-            <Switch value={pr.include_shipping} onValueChange={(v) => set({ include_shipping: v })} trackColor={{ true: p.profit }} />
+        <View style={[s.switchRow, { marginTop: space.lg }]}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <T v="strong">Inclure les annonces avec envoi</T>
+            <T v="small" color="muted">
+              Plus loin que ton rayon, si le vendeur expédie. Frais d’envoi déduits.
+            </T>
           </View>
-        </Card>
+          <Switch value={pr.include_shipping} onValueChange={(v) => set({ include_shipping: v })} trackColor={trackColor} thumbColor={p.elevated} ios_backgroundColor={p.border} />
+        </View>
 
         <SectionTitle>Bénéfice minimum</SectionTitle>
         <View style={s.chips}>
           {PROFITS.map((v) => (
-            <Chip key={v} label={`${v}\u00a0€`} active={pr.min_profit === v} onPress={() => set({ min_profit: v })} />
+            <Chip key={v} label={`${v} €`} active={pr.min_profit === v} onPress={() => set({ min_profit: v })} />
           ))}
         </View>
         <T v="small" color="faint" style={{ marginTop: space.sm }}>
-          Pour les annonces lointaines, on exige plus de marge et plus de certitude, quoi qu’il arrive.
+          Pour les annonces lointaines, la marge et la certitude exigées restent plus élevées, quoi qu’il arrive.
         </T>
 
-        <SectionTitle right={pr.categories.length ? <Pressable onPress={() => set({ categories: [] })}><T v="small" color="muted">Tout</T></Pressable> : undefined}>
+        <SectionTitle
+          right={
+            pr.categories.length ? (
+              <Pressable onPress={() => set({ categories: [] })} hitSlop={8}>
+                <T v="label" color="muted">
+                  Tout cocher
+                </T>
+              </Pressable>
+            ) : undefined
+          }>
           Catégories
         </SectionTitle>
         <View style={s.chips}>
@@ -127,102 +138,78 @@ export default function Settings() {
               label={CATEGORY_LABEL[c]}
               active={pr.categories.length === 0 || pr.categories.includes(c)}
               onPress={() => toggleCat(c)}
+              soft
             />
           ))}
         </View>
 
         <SectionTitle>Alertes</SectionTitle>
-        <Card>
-          <View style={s.switchRow}>
-            <View style={{ flex: 1, gap: 2 }}>
-              <T style={{ fontWeight: '600' }}>Notifications</T>
-              <T v="small" color="muted">
-                Une alerte dès qu’une affaire correspond à tes critères.
-              </T>
-            </View>
-            <Switch value={pr.notify} onValueChange={onNotify} trackColor={{ true: p.profit }} />
+        <View style={s.switchRow}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <T v="strong">Notifications</T>
+            <T v="small" color="muted">
+              Un message dès qu’une affaire correspond à tes critères. Jamais la nuit.
+            </T>
           </View>
-        </Card>
+          <Switch value={pr.notify} onValueChange={onNotify} trackColor={trackColor} thumbColor={p.elevated} ios_backgroundColor={p.border} />
+        </View>
 
         <SectionTitle>Abonnement</SectionTitle>
-        <Card style={{ gap: space.md }}>
-          <View style={s.switchRow}>
-            <Ionicons name="checkmark-circle" size={20} color={p.profit} />
-            <T style={{ flex: 1, fontWeight: '600' }}>TechFlip Pro actif</T>
-            {until && until.getFullYear() < 2900 ? (
-              <T v="small" color="muted">
-                jusqu’au {until.toLocaleDateString('fr-FR')}
-              </T>
-            ) : null}
-          </View>
-        </Card>
-        <Row icon="card-outline" label="Gérer ou résilier mon abonnement" onPress={() => manageSubscription().catch(() => undefined)} chevron />
-        <Row
-          icon="refresh-outline"
-          label="Restaurer mes achats"
-          onPress={async () => {
-            try {
-              await restore();
-              await syncEntitlement();
-            } catch {
-              Alert.alert('Restauration impossible', 'Vérifie ta connexion et réessaie.');
-            }
-          }}
-        />
+        <T v="strong">TechFlip, abonnement actif</T>
+        {until && until.getFullYear() < 2900 ? (
+          <T v="small" color="muted">
+            {`Renouvellement ou fin le ${until.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+          </T>
+        ) : null}
+        <View style={{ marginTop: space.md }}>
+          <Row label="Gérer ou résilier mon abonnement" onPress={() => manageSubscription().catch(() => undefined)} />
+          <Rule />
+          <Row
+            label="Restaurer mes achats"
+            onPress={async () => {
+              try {
+                await restore();
+                await syncEntitlement();
+              } catch {
+                Alert.alert('Restauration impossible', 'Vérifie ta connexion et réessaie.');
+              }
+            }}
+          />
+        </View>
 
         <SectionTitle>À propos</SectionTitle>
-        <Row icon="document-text-outline" label="Conditions d’utilisation" onPress={() => WebBrowser.openBrowserAsync(config.termsUrl)} chevron />
-        <Row icon="lock-closed-outline" label="Confidentialité" onPress={() => WebBrowser.openBrowserAsync(config.privacyUrl)} chevron />
-        <Row icon="trash-outline" label="Supprimer mon compte" onPress={deleteAccount} danger />
+        <Row label="Conditions d’utilisation" onPress={() => WebBrowser.openBrowserAsync(config.termsUrl)} />
+        <Rule />
+        <Row label="Confidentialité" onPress={() => WebBrowser.openBrowserAsync(config.privacyUrl)} />
+        <Rule />
+        <Row label="Supprimer mon compte" onPress={deleteAccount} danger />
 
-        <T v="tiny" color="faint" style={{ textAlign: 'center', marginTop: space.xl }}>
-          TechFlip {Application.nativeApplicationVersion ?? ''} · Estimations indicatives, vérifie toujours avant d’acheter.
+        <T v="small" color="faint" style={{ textAlign: 'center', marginTop: space.xxl }}>
+          {`TechFlip ${Application.nativeApplicationVersion ?? ''}`.trim()}
+          {'\n'}Estimations indicatives : vérifie toujours avant d’acheter.
         </T>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Row({
-  icon,
-  label,
-  onPress,
-  chevron,
-  danger,
-}: {
-  icon: IconName;
-  label: string;
-  onPress: () => void;
-  chevron?: boolean;
-  danger?: boolean;
-}) {
-  const p = usePalette();
+function Row({ label, detail, onPress, danger }: { label: string; detail?: string; onPress: () => void; danger?: boolean }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [s.row, { backgroundColor: p.surface, borderColor: p.border, opacity: pressed ? 0.8 : 1 }]}>
-      <Ionicons name={icon} size={19} color={danger ? p.risk : p.textMuted} />
-      <T style={{ flex: 1, fontWeight: '600' }} color={danger ? 'risk' : 'text'}>
+    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.row, { opacity: pressed ? 0.6 : 1 }]}>
+      <T color={danger ? 'risk' : 'text'} style={{ flex: 1 }}>
         {label}
       </T>
-      {chevron ? <Ionicons name="chevron-forward" size={17} color={p.textFaint} /> : null}
+      <T v="small" color="faint">
+        {detail ?? '›'}
+      </T>
     </Pressable>
   );
 }
 
 const s = StyleSheet.create({
-  wrap: { padding: space.lg, paddingBottom: space.xxl * 2 },
+  wrap: { padding: space.xl, paddingBottom: space.xxl * 2 },
   titleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.md,
-    padding: space.lg,
-    borderRadius: 14,
-    borderWidth: StyleSheet.hairlineWidth,
-    marginBottom: space.sm,
-  },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.md },
 });

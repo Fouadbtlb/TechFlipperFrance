@@ -12,7 +12,7 @@ const config: ExpoConfig = {
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
-  backgroundColor: '#0B0D10',
+  backgroundColor: '#F3EEE4',
   ios: {
     bundleIdentifier: env.EXPO_PUBLIC_IOS_BUNDLE_ID ?? 'fr.techflip.app',
     supportsTablet: false,
@@ -28,7 +28,7 @@ const config: ExpoConfig = {
   android: {
     package: env.EXPO_PUBLIC_ANDROID_PACKAGE ?? 'fr.techflip.app',
     adaptiveIcon: {
-      backgroundColor: '#0B0D10',
+      backgroundColor: '#1F3B2D',
       foregroundImage: './assets/android-icon-foreground.png',
       backgroundImage: './assets/android-icon-background.png',
       monochromeImage: './assets/android-icon-monochrome.png',
@@ -43,13 +43,22 @@ const config: ExpoConfig = {
     'expo-image',
     'expo-system-ui',
     [
+      'expo-splash-screen',
+      {
+        image: './assets/splash-icon.png',
+        imageWidth: 180,
+        backgroundColor: '#F3EEE4',
+        dark: { image: './assets/splash-icon-dark.png', backgroundColor: '#111813' },
+      },
+    ],
+    [
       'expo-location',
       {
         locationWhenInUsePermission:
           "TechFlip utilise ta position pour calculer la distance et le coût d'aller chercher chaque affaire.",
       },
     ],
-    ['expo-notifications', { color: '#2BD576', defaultChannel: 'deals' }],
+    ['expo-notifications', { color: '#1F3B2D', defaultChannel: 'deals' }],
     [
       'react-native-maps',
       // Apple Maps on iOS needs no key. Android needs a Google Maps SDK key,

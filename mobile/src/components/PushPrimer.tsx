@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
@@ -11,7 +10,7 @@ import { Button, T } from './ui';
 
 /**
  * iOS shows the system permission prompt only once. Instead of firing it on
- * launch, this card explains the concrete benefit next to real deals, and the
+ * launch, this note explains the concrete benefit next to real deals, and the
  * system prompt only appears when the user taps "Activer".
  * When permission is already granted, it just (re)registers the push token.
  */
@@ -39,16 +38,9 @@ export function PushPrimer() {
 
   if (!show) return null;
   return (
-    <View style={[s.card, { backgroundColor: p.profitSoft, borderColor: p.profit }]}>
-      <View style={s.row}>
-        <Ionicons name="notifications" size={20} color={p.profit} />
-        <View style={{ flex: 1, gap: 2 }}>
-          <T style={{ fontWeight: '700' }}>Les bonnes affaires partent en quelques minutes</T>
-          <T v="small" color="muted">
-            Active les alertes : on te prévient dès qu’une affaire rentable pour toi est publiée.
-          </T>
-        </View>
-      </View>
+    <View style={[s.card, { borderColor: p.brass, backgroundColor: p.tint }]}>
+      <T v="h2">Les bonnes affaires partent vite</T>
+      <T color="muted">Active les alertes : un message dès qu’une affaire rentable pour toi est publiée.</T>
       <View style={s.row}>
         <Button
           label="Activer"
@@ -76,7 +68,7 @@ export function PushPrimer() {
 }
 
 const s = StyleSheet.create({
-  card: { borderRadius: radius.lg, borderWidth: 1, padding: space.lg, gap: space.md },
-  row: { flexDirection: 'row', gap: space.md, alignItems: 'center' },
+  card: { borderRadius: radius.md, borderWidth: StyleSheet.hairlineWidth, padding: space.lg, gap: space.sm },
+  row: { flexDirection: 'row', gap: space.md, alignItems: 'center', marginTop: space.sm },
   btn: { flex: 1, height: 44 },
 });

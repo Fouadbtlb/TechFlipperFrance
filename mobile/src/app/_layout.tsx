@@ -1,15 +1,23 @@
+import { EBGaramond_500Medium, EBGaramond_600SemiBold } from '@expo-google-fonts/eb-garamond';
+import { SourceSans3_400Regular, SourceSans3_500Medium, SourceSans3_600SemiBold } from '@expo-google-fonts/source-sans-3';
 import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query';
+import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, router } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, AppState, Platform, StyleSheet, View, useColorScheme } from 'react-native';
+import { AppState, Platform, StyleSheet, View, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Button, EmptyState } from '@/components/ui';
 import { ApiError } from '@/lib/api';
 import { SessionProvider, useSession } from '@/lib/session';
 import { usePalette } from '@/lib/theme';
+
+// Keep the native bookplate splash up until fonts and the session are ready,
+// so the first frame is already the real screen, in the real typeface.
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 function makeClient() {
   return new QueryClient({
@@ -52,18 +60,15 @@ function Gate() {
     return () => sub.remove();
   }, [stage]);
 
-  if (stage === 'loading') {
-    return (
-      <View style={[styles.center, { backgroundColor: p.bg }]}>
-        <ActivityIndicator color={p.profit} />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (stage !== 'loading') SplashScreen.hideAsync().catch(() => undefined);
+  }, [stage]);
+
+  if (stage === 'loading') return <View style={[styles.center, { backgroundColor: p.bg }]} />;
   if (stage === 'error') {
     return (
       <View style={[styles.center, { backgroundColor: p.bg }]}>
         <EmptyState
-          icon="cloud-offline-outline"
           title="Connexion impossible"
           body={error ?? undefined}
           action={<Button label="Réessayer" onPress={reload} style={{ marginTop: 8 }} />}
@@ -93,17 +98,25 @@ export default function RootLayout() {
   const [client] = useState(makeClient);
   const scheme = useColorScheme();
   const p = usePalette();
-  const base = scheme === 'light' ? DefaultTheme : DarkTheme;
+  const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
+  const [fontsLoaded, fontError] = useFonts({
+    EBGaramond_500Medium,
+    EBGaramond_600SemiBold,
+    SourceSans3_400Regular,
+    SourceSans3_500Medium,
+    SourceSans3_600SemiBold,
+  });
+  if (!fontsLoaded && !fontError) return null; // splash still showing
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={client}>
         <ThemeProvider
           value={{
             ...base,
-            colors: { ...base.colors, background: p.bg, card: p.bg, text: p.text, border: p.border, primary: p.profit },
+            colors: { ...base.colors, background: p.bg, card: p.bg, text: p.text, border: p.border, primary: p.accent },
           }}>
           <SessionProvider>
-            <StatusBar style={scheme === 'light' ? 'dark' : 'light'} />
+            <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
             <Gate />
           </SessionProvider>
         </ThemeProvider>

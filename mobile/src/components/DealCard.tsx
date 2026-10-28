@@ -1,88 +1,69 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ago, euros, km, signedEuros } from '@/lib/format';
-import { radius, space, usePalette, zoneColor } from '@/lib/theme';
+import { radius, space, usePalette } from '@/lib/theme';
 import type { DealCard as Deal } from '@/lib/types';
 import { useNow } from '@/lib/useNow';
 
 import { Pill, T } from './ui';
 
+/** One line of the ledger: the photo, what it is, and what it leaves you. */
 function DealCardBase({ deal, compact = false }: { deal: Deal; compact?: boolean }) {
   const p = usePalette();
+  const now = useNow();
   const drop = deal.prev_price ? deal.prev_price - deal.price : 0;
   // Real first-seen time, never invented urgency: good deals go in minutes.
-  const now = useNow();
   const fresh = !!deal.first_seen && now - Date.parse(deal.first_seen) < 30 * 60_000;
+  const where = deal.mode === 'ship' ? 'Envoi' : km(deal.distance_km);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${deal.title}, bénéfice ${signedEuros(deal.net)}`}
       onPress={() => router.push({ pathname: '/deal/[uid]', params: { uid: deal.uid } })}
       style={({ pressed }) => [
-        s.card,
-        { backgroundColor: p.surface, borderColor: p.border, opacity: deal.gone ? 0.5 : pressed ? 0.9 : 1 },
-        compact && s.compact,
+        s.row,
+        compact && [s.compact, { backgroundColor: p.surface, borderColor: p.border }],
+        { opacity: deal.gone ? 0.5 : pressed ? 0.75 : 1 },
       ]}>
-      <View>
-        <Image
-          source={deal.thumb ? { uri: deal.thumb } : null}
-          style={[s.thumb, { backgroundColor: p.elevated }, compact && s.thumbCompact]}
-          contentFit="cover"
-          transition={150}
-          recyclingKey={deal.uid}
-        />
-        <View style={[s.zoneDot, { backgroundColor: zoneColor(p, deal.zone), borderColor: p.surface }]} />
-      </View>
+      <Image
+        source={deal.thumb ? { uri: deal.thumb } : null}
+        style={[s.thumb, { backgroundColor: p.rule }, compact && s.thumbCompact]}
+        contentFit="cover"
+        transition={150}
+        recyclingKey={deal.uid}
+      />
 
       <View style={s.body}>
-        <View style={s.topRow}>
-          <T v="h2" color="profit" style={s.num}>
-            {signedEuros(deal.net)}
-          </T>
-          {deal.risk !== 'low' ? (
-            <Ionicons
-              name="alert-circle"
-              size={18}
-              color={deal.risk === 'high' ? p.risk : p.warn}
-              accessibilityLabel="Points de vigilance"
-            />
-          ) : null}
-        </View>
-
-        <T numberOfLines={compact ? 1 : 2} style={{ fontWeight: '600' }}>
+        <T v="strong" numberOfLines={2} style={{ lineHeight: 21 }}>
           {deal.title}
         </T>
-
-        <View style={s.meta}>
-          <T v="small" color="muted" style={s.num}>
-            {euros(deal.price)}
-          </T>
-          <T v="small" color="faint">·</T>
-          <Ionicons name={deal.mode === 'ship' ? 'cube-outline' : 'navigate-outline'} size={12} color={p.textMuted} />
-          <T v="small" color="muted">
-            {deal.mode === 'ship' ? 'Envoi' : km(deal.distance_km)}
-          </T>
-          {!compact ? (
-            <>
-              <T v="small" color="faint">·</T>
-              <T v="small" color="muted" numberOfLines={1} style={{ flexShrink: 1 }}>
-                {ago(deal.first_seen, now)}
-              </T>
-            </>
-          ) : null}
-        </View>
-
-        {(fresh || drop > 0) && !compact ? (
+        <T v="small" color="muted" numberOfLines={1} style={{ fontVariant: ['tabular-nums'] }}>
+          {euros(deal.price)} · {where}
+          {!compact && deal.city ? ` · ${deal.city}` : ''}
+        </T>
+        {!compact && (fresh || drop > 0 || deal.risk !== 'low' || deal.gone) ? (
           <View style={s.pills}>
-            {fresh ? <Pill tone="info" icon="sparkles" label="Nouveau" /> : null}
-            {drop > 0 ? <Pill tone="profit" icon="trending-down" label={`Baisse de ${euros(drop)}`} /> : null}
+            {fresh ? <Pill tone="brass" label="Nouveau" /> : null}
+            {drop > 0 ? <Pill tone="profit" label={`Baisse de ${euros(drop)}`} /> : null}
+            {deal.risk === 'high' ? <Pill tone="risk" label="Prudence" /> : null}
+            {deal.risk === 'medium' ? <Pill tone="warn" label="À vérifier" /> : null}
+            {deal.gone ? <Pill label="Plus disponible" /> : null}
           </View>
         ) : null}
-        {deal.gone ? <Pill label="Plus disponible" /> : null}
+      </View>
+
+      <View style={s.right}>
+        <T v="money" color="profit" style={{ fontVariant: ['tabular-nums'] }}>
+          {signedEuros(deal.net)}
+        </T>
+        {!compact ? (
+          <T v="small" color="faint">
+            {ago(deal.first_seen, now)}
+          </T>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -91,28 +72,18 @@ function DealCardBase({ deal, compact = false }: { deal: Deal; compact?: boolean
 export const DealCard = memo(DealCardBase);
 
 const s = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    gap: space.md,
-    padding: space.md,
+  row: { flexDirection: 'row', gap: space.md, paddingVertical: space.lg, alignItems: 'flex-start' },
+  compact: {
+    width: 310,
+    paddingHorizontal: space.md,
+    paddingVertical: space.md,
     borderRadius: radius.lg,
     borderWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
   },
-  compact: { width: 300 },
-  thumb: { width: 96, height: 96, borderRadius: radius.md },
-  thumbCompact: { width: 76, height: 76 },
-  zoneDot: {
-    position: 'absolute',
-    top: 6,
-    left: 6,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 2,
-  },
-  body: { flex: 1, gap: 4, justifyContent: 'center' },
-  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  meta: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  pills: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
-  num: { fontVariant: ['tabular-nums'] },
+  thumb: { width: 76, height: 76, borderRadius: radius.sm },
+  thumbCompact: { width: 60, height: 60 },
+  body: { flex: 1, gap: 4 },
+  right: { alignItems: 'flex-end', gap: 2, minWidth: 72 },
+  pills: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginTop: 4 },
 });

@@ -14,37 +14,43 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { radius, space, type as typo, usePalette } from '@/lib/theme';
+import { font, radius, space, type as typo, usePalette, type Palette } from '@/lib/theme';
 
 export type IconName = ComponentProps<typeof Ionicons>['name'];
 
 type Variant = keyof typeof typo;
+type Tone = 'text' | 'muted' | 'faint' | 'profit' | 'warn' | 'risk' | 'info' | 'brass' | 'accent' | 'onAccent';
 
-export function T({
-  v = 'body',
-  color,
-  style,
-  ...rest
-}: TextProps & { v?: Variant; color?: 'text' | 'muted' | 'faint' | 'profit' | 'warn' | 'risk' | 'onAccent' | 'info' }) {
-  const p = usePalette();
-  const c = {
+function toneColor(p: Palette, t: Tone) {
+  return {
     text: p.text,
     muted: p.textMuted,
     faint: p.textFaint,
     profit: p.profit,
     warn: p.warn,
     risk: p.risk,
-    onAccent: p.onAccent,
     info: p.info,
-  }[color ?? 'text'];
-  return <Text {...rest} style={[typo[v] as TextStyle, { color: c }, style]} />;
+    brass: p.brass,
+    accent: p.accent,
+    onAccent: p.onAccent,
+  }[t];
+}
+
+export function T({ v = 'body', color = 'text', style, ...rest }: TextProps & { v?: Variant; color?: Tone }) {
+  const p = usePalette();
+  return <Text {...rest} style={[typo[v] as TextStyle, { color: toneColor(p, color) }, style]} />;
+}
+
+/** A hairline rule: the house divider, used instead of boxes. */
+export function Rule({ style, brass }: { style?: StyleProp<ViewStyle>; brass?: boolean }) {
+  const p = usePalette();
+  return <View style={[{ height: StyleSheet.hairlineWidth, backgroundColor: brass ? p.brass : p.border }, style]} />;
 }
 
 export function Button({
   label,
   onPress,
   kind = 'primary',
-  icon,
   loading,
   disabled,
   style,
@@ -52,13 +58,11 @@ export function Button({
   label: string;
   onPress: () => void;
   kind?: 'primary' | 'secondary' | 'ghost';
-  icon?: IconName;
   loading?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
   const p = usePalette();
-  const bg = kind === 'primary' ? p.profit : kind === 'secondary' ? p.elevated : 'transparent';
   const fg = kind === 'primary' ? p.onAccent : p.text;
   return (
     <Pressable
@@ -70,34 +74,32 @@ export function Button({
       }}
       style={({ pressed }) => [
         s.btn,
-        { backgroundColor: bg, opacity: disabled ? 0.4 : pressed ? 0.85 : 1 },
-        kind === 'secondary' && { borderWidth: StyleSheet.hairlineWidth, borderColor: p.border },
+        kind === 'primary' && { backgroundColor: p.accent },
+        kind === 'secondary' && { borderWidth: 1, borderColor: p.text },
+        { opacity: disabled ? 0.4 : pressed ? 0.8 : 1 },
         style,
       ]}>
       {loading ? (
         <ActivityIndicator color={fg} />
       ) : (
-        <>
-          {icon ? <Ionicons name={icon} size={18} color={fg} /> : null}
-          <Text style={[typo.body, { color: fg, fontWeight: '700' }]}>{label}</Text>
-        </>
+        <Text
+          style={[
+            typo.label,
+            { color: fg, fontSize: 13, letterSpacing: 1.4 },
+            kind === 'ghost' && { textDecorationLine: 'underline', textTransform: 'none', letterSpacing: 0.2, fontSize: 15 },
+          ]}>
+          {label}
+        </Text>
       )}
     </Pressable>
   );
 }
 
-export function Chip({
-  label,
-  active,
-  onPress,
-  icon,
-}: {
-  label: string;
-  active?: boolean;
-  onPress: () => void;
-  icon?: IconName;
-}) {
+/** `soft`: for multi-select, where many chips are on at once and solid fills get heavy. */
+export function Chip({ label, active, onPress, soft }: { label: string; active?: boolean; onPress: () => void; soft?: boolean }) {
   const p = usePalette();
+  const bg = active ? (soft ? p.tint : p.accent) : 'transparent';
+  const fg = active ? (soft ? p.accent : p.onAccent) : p.text;
   return (
     <Pressable
       accessibilityRole="button"
@@ -106,20 +108,14 @@ export function Chip({
         Haptics.selectionAsync();
         onPress();
       }}
-      style={[
-        s.chip,
-        {
-          backgroundColor: active ? p.text : p.surface,
-          borderColor: active ? p.text : p.border,
-        },
-      ]}>
-      {icon ? <Ionicons name={icon} size={14} color={active ? p.bg : p.textMuted} /> : null}
-      <Text style={[typo.small, { color: active ? p.bg : p.text, fontWeight: '600' }]}>{label}</Text>
+      style={[s.chip, { borderColor: active ? p.accent : p.border, backgroundColor: bg }]}>
+      <Text style={[typo.small, { fontFamily: font.sansMedium, color: fg }]}>{label}</Text>
     </Pressable>
   );
 }
 
-export function Segmented<K extends string>({
+/** Text tabs with an underline, like a printed index. */
+export function Tabs<K extends string>({
   options,
   value,
   onChange,
@@ -130,22 +126,20 @@ export function Segmented<K extends string>({
 }) {
   const p = usePalette();
   return (
-    <View style={[s.seg, { backgroundColor: p.surface, borderColor: p.border }]}>
+    <View style={[s.tabs, { borderBottomColor: p.border }]}>
       {options.map((o) => {
         const on = o.key === value;
         return (
           <Pressable
             key={o.key}
-            accessibilityRole="button"
+            accessibilityRole="tab"
             accessibilityState={{ selected: on }}
             onPress={() => {
               Haptics.selectionAsync();
               onChange(o.key);
             }}
-            style={[s.segItem, on && { backgroundColor: p.elevated }]}>
-            <Text style={[typo.small, { color: on ? p.text : p.textMuted, fontWeight: on ? '700' : '600' }]}>
-              {o.label}
-            </Text>
+            style={[s.tab, on && { borderBottomColor: p.text }]}>
+            <Text style={[typo.label, { color: on ? p.text : p.textFaint }]}>{o.label}</Text>
           </Pressable>
         );
       })}
@@ -161,7 +155,7 @@ export function Card({ children, style }: { children: ReactNode; style?: StylePr
 export function SectionTitle({ children, right }: { children: string; right?: ReactNode }) {
   return (
     <View style={s.sectionTitle}>
-      <T v="tiny" color="muted" style={{ textTransform: 'uppercase' }}>
+      <T v="label" color="brass">
         {children}
       </T>
       {right}
@@ -169,65 +163,62 @@ export function SectionTitle({ children, right }: { children: string; right?: Re
   );
 }
 
-export function Pill({
+/** Label on the left, value on the right: the ledger line. */
+export function LedgerRow({
   label,
-  tone = 'neutral',
-  icon,
+  value,
+  strong,
+  tone,
 }: {
   label: string;
-  tone?: 'neutral' | 'profit' | 'warn' | 'risk' | 'info';
-  icon?: IconName;
+  value: string;
+  strong?: boolean;
+  tone?: Tone;
 }) {
-  const p = usePalette();
-  const map = {
-    neutral: [p.elevated, p.textMuted],
-    profit: [p.profitSoft, p.profit],
-    warn: [p.warnSoft, p.warn],
-    risk: [p.riskSoft, p.risk],
-    info: [p.elevated, p.info],
-  } as const;
-  const [bg, fg] = map[tone];
   return (
-    <View style={[s.pill, { backgroundColor: bg }]}>
-      {icon ? <Ionicons name={icon} size={12} color={fg} /> : null}
-      <Text style={[typo.tiny, { color: fg }]}>{label}</Text>
+    <View style={s.ledger}>
+      <T v={strong ? 'strong' : 'body'} color={strong ? 'text' : 'muted'} style={{ flex: 1 }}>
+        {label}
+      </T>
+      <T v={strong ? 'money' : 'strong'} color={tone ?? (strong ? 'profit' : 'text')} style={{ fontVariant: ['tabular-nums'] }}>
+        {value}
+      </T>
     </View>
   );
 }
 
-export function Skeleton({ h, w, r = radius.md, style }: { h: number; w?: number | `${number}%`; r?: number; style?: StyleProp<ViewStyle> }) {
+export function Pill({ label, tone = 'muted' }: { label: string; tone?: Tone }) {
+  const p = usePalette();
+  const c = toneColor(p, tone);
+  return (
+    <View style={[s.pill, { borderColor: c }]}>
+      <Text style={[typo.label, { color: c, fontSize: 10.5, letterSpacing: 1.2 }]}>{label}</Text>
+    </View>
+  );
+}
+
+export function Skeleton({ h, w, style }: { h: number; w?: number | `${number}%`; style?: StyleProp<ViewStyle> }) {
   const p = usePalette();
   const [o] = useState(() => new Animated.Value(0.5));
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(o, { toValue: 1, duration: 700, useNativeDriver: true }),
-        Animated.timing(o, { toValue: 0.5, duration: 700, useNativeDriver: true }),
+        Animated.timing(o, { toValue: 1, duration: 800, useNativeDriver: true }),
+        Animated.timing(o, { toValue: 0.5, duration: 800, useNativeDriver: true }),
       ]),
     );
     loop.start();
     return () => loop.stop();
   }, [o]);
-  return <Animated.View style={[{ height: h, width: w ?? '100%', borderRadius: r, backgroundColor: p.elevated, opacity: o }, style]} />;
+  return (
+    <Animated.View style={[{ height: h, width: w ?? '100%', borderRadius: radius.sm, backgroundColor: p.rule, opacity: o }, style]} />
+  );
 }
 
-export function EmptyState({
-  icon,
-  title,
-  body,
-  action,
-}: {
-  icon: IconName;
-  title: string;
-  body?: string;
-  action?: ReactNode;
-}) {
-  const p = usePalette();
+export function EmptyState({ title, body, action }: { title: string; body?: string; action?: ReactNode }) {
   return (
     <View style={s.empty}>
-      <View style={[s.emptyIcon, { backgroundColor: p.surface, borderColor: p.border }]}>
-        <Ionicons name={icon} size={28} color={p.textMuted} />
-      </View>
+      <Rule brass style={{ width: 40, marginBottom: space.sm }} />
       <T v="h2" style={{ textAlign: 'center' }}>
         {title}
       </T>
@@ -244,54 +235,36 @@ export function EmptyState({
 const s = StyleSheet.create({
   btn: {
     height: 52,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     paddingHorizontal: space.xl,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: space.sm,
   },
   chip: {
     height: 34,
     paddingHorizontal: 14,
-    borderRadius: radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  seg: {
-    flexDirection: 'row',
-    padding: 3,
     borderRadius: radius.md,
     borderWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  segItem: { flex: 1, height: 32, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  tabs: { flexDirection: 'row', gap: space.xl, borderBottomWidth: StyleSheet.hairlineWidth },
+  tab: { paddingBottom: 10, borderBottomWidth: 2, borderBottomColor: 'transparent', marginBottom: -StyleSheet.hairlineWidth },
   card: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, padding: space.lg },
   sectionTitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: space.sm,
-    marginTop: space.xl,
+    marginBottom: space.md,
+    marginTop: space.xxl,
   },
+  ledger: { flexDirection: 'row', alignItems: 'baseline', gap: space.md, paddingVertical: 6 },
   pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    height: 22,
-    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     alignSelf: 'flex-start',
   },
   empty: { alignItems: 'center', justifyContent: 'center', gap: space.md, padding: space.xxl, flex: 1 },
-  emptyIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    marginBottom: space.sm,
-  },
 });

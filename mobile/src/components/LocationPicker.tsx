@@ -1,9 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
-import { radius, space, usePalette } from '@/lib/theme';
+import { font, radius, space, usePalette } from '@/lib/theme';
 
 import { Button, T } from './ui';
 
@@ -72,9 +71,8 @@ export function LocationPicker({ onPick, cta = 'Utiliser ma position' }: { onPic
 
   return (
     <View style={{ gap: space.md }}>
-      <Button label={cta} icon="navigate" onPress={fromGps} loading={busy === 'gps'} />
-      <View style={[s.inputRow, { backgroundColor: p.surface, borderColor: p.border }]}>
-        <Ionicons name="search" size={18} color={p.textMuted} />
+      <Button label={cta} onPress={fromGps} loading={busy === 'gps'} />
+      <View style={[s.inputRow, { borderColor: p.border, backgroundColor: p.surface }]}>
         <TextInput
           value={query}
           onChangeText={setQuery}
@@ -85,7 +83,7 @@ export function LocationPicker({ onPick, cta = 'Utiliser ma position' }: { onPic
           autoCorrect={false}
           style={[s.input, { color: p.text }]}
         />
-        {query ? <Button label="OK" kind="ghost" onPress={fromSearch} loading={busy === 'search'} style={s.ok} /> : null}
+        {query ? <Button label="Valider" kind="ghost" onPress={fromSearch} loading={busy === 'search'} style={s.ok} /> : null}
       </View>
       {err ? (
         <T v="small" color="warn">
@@ -99,13 +97,12 @@ export function LocationPicker({ onPick, cta = 'Utiliser ma position' }: { onPic
 const s = StyleSheet.create({
   inputRow: {
     height: 52,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
     alignItems: 'center',
     paddingLeft: space.lg,
-    gap: space.sm,
   },
-  input: { flex: 1, fontSize: 16, height: '100%' },
+  input: { flex: 1, fontSize: 16, fontFamily: font.sans, height: '100%' },
   ok: { height: 40, paddingHorizontal: space.lg },
 });

@@ -3,9 +3,9 @@ import type { Category } from './types';
 const eur = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
 
 // Non-breaking space before units: "142 €" never wraps onto two lines.
-export const euros = (n: number | null | undefined) => (n == null ? '—' : `${eur.format(Math.round(n))}\u00a0€`);
+export const euros = (n: number | null | undefined) => (n == null ? 'n.c.' : `${eur.format(Math.round(n))}\u00a0€`);
 export const signedEuros = (n: number | null | undefined) =>
-  n == null ? '—' : `${n >= 0 ? '+' : '−'}${eur.format(Math.abs(Math.round(n)))}\u00a0€`;
+  n == null ? 'n.c.' : `${n >= 0 ? '+' : '−'}${eur.format(Math.abs(Math.round(n)))}\u00a0€`;
 
 export function km(d: number | null | undefined) {
   if (d == null) return 'Distance inconnue';
@@ -39,15 +39,3 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   other: 'Autre',
 };
 
-export const CATEGORY_ICON: Record<Category, string> = {
-  console: 'game-controller-outline',
-  pc: 'desktop-outline',
-  gpu: 'hardware-chip-outline',
-  cpu: 'hardware-chip-outline',
-  laptop: 'laptop-outline',
-  phone: 'phone-portrait-outline',
-  monitor: 'tv-outline',
-  parts: 'construct-outline',
-  accessory: 'headset-outline',
-  other: 'cube-outline',
-};

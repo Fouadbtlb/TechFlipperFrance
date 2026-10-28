@@ -6,7 +6,9 @@ so every push has to be worth it:
 - one message per user per cycle, bundling a burst into a single summary;
 - quiet hours (no buzzing at night): deals found then arrive as a morning
   digest, because "not yet notified" deals stay eligible for NOTIFY_WINDOW;
-- a daily ceiling per user.
+- a daily ceiling per user;
+- only "reliable" deals: the uncertain ones wait in the "À vérifier" tab;
+- or, for people who prefer calm, one evening summary a day ("daily").
 """
 from __future__ import annotations
 
@@ -28,6 +30,8 @@ QUIET_END = time(8, 0)
 MAX_PER_DAY = 8
 # A deal first seen longer ago than this is no longer news: never pushed.
 NOTIFY_WINDOW = timedelta(hours=12)
+DIGEST_HOUR = 18       # Paris time, for notify_mode="daily"
+DIGEST_WINDOW = timedelta(hours=24)
 NBSP = " "
 
 
@@ -59,21 +63,27 @@ class PushFanout:
             accounts.close()
 
     def _run(self, store: Store, accounts: Accounts, now: datetime) -> int:
-        cutoff = (now - NOTIFY_WINDOW).isoformat()
         messages, plan = [], []
+        paris_hour = now.astimezone(PARIS).hour
         for user in accounts.push_audience():
             viewer = viewer_for(user, self.settings)
-            if viewer is None or accounts.usage_today(user["id"], "push") >= MAX_PER_DAY:
+            sent_today = accounts.usage_today(user["id"], "push")
+            if viewer is None or sent_today >= MAX_PER_DAY:
                 continue
+            daily = (user["notify_mode"] or "instant") == "daily"
+            if daily and (paris_hour < DIGEST_HOUR or sent_today > 0):
+                continue
+            cutoff = (now - (DIGEST_WINDOW if daily else NOTIFY_WINDOW)).isoformat()
             items = [(r, j) for r, j in deals_for(store, viewer, self.max_age_days,
-                                                  hidden=accounts.hidden_uids(user["id"]))
+                                                  hidden=accounts.hidden_uids(user["id"]),
+                                                  bucket="reliable")
                      if (r["first_seen"] or "") >= cutoff]
             seen = accounts.notified_uids(user["id"], [r["uid"] for r, _ in items])
             fresh = sorted(((r, j) for r, j in items if r["uid"] not in seen),
                            key=lambda it: -(it[1].net or 0))
             if not fresh:
                 continue
-            messages.append(_message(user["push_token"], fresh))
+            messages.append(_message(user["push_token"], fresh, daily))
             plan.append((user["id"], [r["uid"] for r, _ in fresh]))
         if not messages:
             return 0
@@ -90,11 +100,15 @@ def _eur(x: float) -> str:
     return f"{x:,.0f}".replace(",", NBSP) + f"{NBSP}€"
 
 
-def _message(token: str, fresh) -> dict:
+def _message(token: str, fresh, daily: bool = False) -> dict:
     row, j = fresh[0]
     where = f"à {j.distance_km:.0f}{NBSP}km" if j.mode == "pickup" and j.distance_km is not None \
         else "avec envoi"
-    if len(fresh) == 1:
+    if daily:
+        title = f"Le relevé du jour : {len(fresh)} affaire{'s' if len(fresh) > 1 else ''} pour toi"
+        body = f"La meilleure : +{_eur(j.net)}, {row['title'][:40]}, {where}"
+        data = {"screen": "feed"}
+    elif len(fresh) == 1:
         title = f"+{_eur(j.net)} · {row['title'][:48]}"
         body = f"{_eur(row['price'])}, revente estimée {_eur(row['true_value'])}, {where}"
         data = {"uid": row["uid"]}

@@ -12,10 +12,17 @@
 - Paid-app backend: App Attest / Play Integrity, rotating device-bound tokens,
   RevenueCat entitlements + webhook, rate limits, push fanout, teaser endpoint.
 - Expo app: onboarding, paywall, feed, map, deal sheet, favorites, settings.
+- Departed listings re-checked and used as near-sale prices, with time to sell;
+  dead deals leave the feed on their own.
+- Subscribers rate estimates (too low / fair / too high) and report resale
+  prices: bounded crowd correction (+/-10 %, 5+ different people) and real
+  sales for the tracker.
+- Price floor ("même revendu au plus bas"), reliable vs "à vérifier" buckets,
+  repost detection, negotiation helper, evening digest option.
 
 ## Next
 - Grow `config/pricebook.yaml` (cases/PSUs/motherboards are still uncounted).
-- Learn from realized prices (listings that disappear) instead of asking prices.
+- Departure checks for 2ememain (Leboncoin only today).
 - Postgres when concurrent subscribers outgrow SQLite WAL.
 - "Mark as bought" + realized profit tracking in the app (flip journal).
 - Saved searches with their own alert bars.

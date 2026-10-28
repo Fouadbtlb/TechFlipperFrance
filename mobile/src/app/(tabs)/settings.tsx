@@ -153,6 +153,12 @@ export default function Settings() {
           </View>
           <Switch value={pr.notify} onValueChange={onNotify} trackColor={trackColor} thumbColor={p.elevated} ios_backgroundColor={p.border} />
         </View>
+        {pr.notify ? (
+          <View style={[s.chips, { marginTop: space.md }]}>
+            <Chip label="Dès qu’elles paraissent" active={pr.notify_mode !== 'daily'} onPress={() => set({ notify_mode: 'instant' })} />
+            <Chip label="Un relevé le soir" active={pr.notify_mode === 'daily'} onPress={() => set({ notify_mode: 'daily' })} />
+          </View>
+        ) : null}
 
         <SectionTitle>Abonnement</SectionTitle>
         <T v="strong">TechFlip, abonnement actif</T>

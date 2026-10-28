@@ -14,6 +14,7 @@ from __future__ import annotations
 import logging
 
 import lbc
+from lbc.exceptions import NotFoundError
 
 from ..config import SearchConfig
 from ..domain import Listing, SellerInfo
@@ -49,6 +50,19 @@ class LeboncoinSource:
             except Exception:
                 log.exception("Failed to normalize ad %s", getattr(ad, "id", "?"))
         return listings
+
+    def is_online(self, ad_id: str) -> bool | None:
+        """False when the ad is gone (404/410 or no longer active), True when it
+        is still up, None when we cannot tell. DataDome errors propagate so the
+        caller can back off."""
+        try:
+            ad = self.client.get_ad(ad_id)
+        except NotFoundError:
+            return False
+        status = getattr(ad, "status", None)
+        if status is None:
+            return None
+        return status == "active"
 
     def fetch_seller(self, seller_id: str) -> SellerInfo | None:
         """One extra request. Call only for listings that scored as deals."""

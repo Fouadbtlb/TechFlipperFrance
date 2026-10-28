@@ -43,18 +43,36 @@ def since_iso(max_age_days: int) -> str:
     return (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
 
 
+# Below this, or with a serious risk signal, a deal goes to "À vérifier"
+# instead of mixing with the solid ones.
+RELIABLE_CONFIDENCE = 0.4
+BUCKETS = ("reliable", "check")
+
+
+def is_reliable(row) -> bool:
+    return (row["confidence"] or 0) >= RELIABLE_CONFIDENCE and risk_level(_appraisal(row)) != "high"
+
+
 def deals_for(store: Store, viewer: Viewer, max_age_days: int, hidden: set[str] = frozenset(),
-              category: str | None = None, uids=None) -> list[tuple[dict, Judgement]]:
-    out = []
+              category: str | None = None, uids=None,
+              bucket: str | None = None) -> list[tuple[dict, Judgement]]:
+    best: dict[str, tuple] = {}
     for row in store.candidates(since_iso(max_age_days), 0.0, uids=uids):
         if row["uid"] in hidden:
             continue
         if category and row["category"] != category:
             continue
+        if bucket and (bucket == "reliable") != is_reliable(row):
+            continue
         j = judge(row, viewer)
-        if j.alert:
-            out.append((row, j))
-    return out
+        if not j.alert:
+            continue
+        # A reposted item shows once: its latest listing.
+        group = row["repost_of"] or row["uid"]
+        kept = best.get(group)
+        if kept is None or (row["first_seen"] or "") > (kept[0]["first_seen"] or ""):
+            best[group] = (row, j)
+    return list(best.values())
 
 
 def sort_deals(items, sort: str):
@@ -121,6 +139,9 @@ def card(row, j: Judgement) -> dict:
         "lat": row["lat"],
         "lng": row["lng"],
         "source": row["source"],
+        "reliable": is_reliable(row),
+        "reposts": row["reposts"] or 0,
+        "days_to_sell": appr.get("days_to_sell"),
     }
 
 
@@ -129,7 +150,39 @@ def pin(row, j: Judgement) -> dict:
             "zone": j.decision.zone, "category": row["category"]}
 
 
-def detail(store: Store, row, j: Judgement, saved: bool) -> dict:
+def _round5(x: float) -> int:
+    return int(x // 5 * 5)
+
+
+def negotiation(row, j: Judgement, viewer: Viewer) -> dict | None:
+    """The most this viewer should pay to keep their own margin, an opening
+    offer, and a polite message to the seller (who is addressed as "vous")."""
+    value, price, logistics = row["true_value"], row["price"], j.logistics
+    if value is None or price is None or logistics is None:
+        return None
+    bar = viewer.policy.bars[j.decision.zone]
+    max_price = _round5(value - logistics - bar)
+    if max_price <= 0:
+        return None
+    # Room to ask depends on the listing's own signals, never below 75 % of the ask.
+    reposts = row["reposts"] or 0
+    pct = 0.82 if reposts else 0.88
+    opening = min(_round5(max(0.75 * price, min(price * pct, max_price))), max_price)
+    if opening >= price:
+        opening = None
+    title = (row["title"] or "article")[:60]
+    if j.mode == "ship":
+        how = "Je peux régler tout de suite avec le paiement sécurisé et l’envoi."
+    else:
+        how = "Je peux passer le récupérer rapidement et payer avec le paiement sécurisé."
+    ask = f" Seriez-vous d’accord pour {opening}\u00a0€\u00a0?" if opening else ""
+    message = f"Bonjour, votre annonce « {title} » est-elle toujours disponible\u00a0? {how}{ask} Merci et bonne journée."
+    return {"max_price": max_price, "opening": opening, "message": message,
+            "leverage": "Annonce déjà remise en ligne\u00a0: le vendeur peine peut-être à vendre." if reposts else None}
+
+
+def detail(store: Store, row, j: Judgement, saved: bool, viewer: Viewer | None = None,
+           user_id: str | None = None) -> dict:
     appr = _appraisal(row)
     raw = _raw(row)
     out = card(row, j)
@@ -143,9 +196,14 @@ def detail(store: Store, row, j: Judgement, saved: bool) -> dict:
         "parts": [
             {"label": b.get("label") or b.get("key"), "qty": b.get("qty", 1),
              "value": _r(b.get("value")), "source": b.get("source"), "n": b.get("n", 0),
-             "condition": b.get("condition", "working")}
+             "condition": b.get("condition", "working"), "days_to_sell": b.get("days_to_sell")}
             for b in appr.get("breakdown") or []
         ],
+        "floor": _r(appr.get("floor")),
+        "floor_net": _r(appr["floor"] - row["price"] - j.logistics)
+        if appr.get("floor") is not None and j.logistics is not None else None,
+        "negotiation": negotiation(row, j, viewer) if viewer else None,
+        "feedback": store.feedback_summary(row["uid"], user_id),
         "photo_checked": bool(appr.get("photo_checked")),
         "shippable": bool(appr.get("shippable", True)),
         "scam_score": appr.get("risk"),

@@ -26,6 +26,9 @@ export interface DealCard {
   lat: number | null;
   lng: number | null;
   source: string;
+  reliable: boolean;
+  reposts: number;
+  days_to_sell: number | null;
   gone?: boolean;
 }
 
@@ -33,7 +36,7 @@ export interface Part {
   label: string;
   qty: number;
   value: number | null;
-  source: 'learned' | 'blend' | 'seed' | 'ai' | 'unknown';
+  source: 'sold' | 'learned' | 'blend' | 'seed' | 'ai' | 'unknown';
   n: number;
   condition: string;
 }
@@ -65,6 +68,20 @@ export interface DealDetail extends DealCard {
   reasons: string[];
   price_history: { price: number; at: string }[];
   saved: boolean;
+  floor: number | null;
+  floor_net: number | null;
+  negotiation: { max_price: number; opening: number | null; message: string; leverage: string | null } | null;
+  feedback: Feedback;
+}
+
+export type Verdict = 'low' | 'fair' | 'high';
+
+export interface Feedback {
+  low: number;
+  fair: number;
+  high: number;
+  mine: Verdict | null;
+  my_resale: number | null;
 }
 
 export interface Prefs {
@@ -76,6 +93,7 @@ export interface Prefs {
   min_profit: number | null;
   categories: Category[];
   notify: boolean;
+  notify_mode: 'instant' | 'daily';
 }
 
 export interface Me {
@@ -91,5 +109,10 @@ export interface Teaser {
   by_category: Record<string, number>;
 }
 
-export interface Page<T> { total: number; items: T[]; next_offset: number | null }
+export interface Page<T> {
+  total: number;
+  items: T[];
+  next_offset: number | null;
+  counts?: { reliable: number; check: number };
+}
 export interface Pin { uid: string; lat: number; lng: number; net: number; zone: Zone; category: Category; card: DealCard }

@@ -8,13 +8,21 @@ Tables:
 - listings      : everything scraped, plus its location-independent appraisal
 - price_history : one row per observed price change (feeds "prix en baisse")
 - alerts        : listings already sent to the owner's Telegram (never twice)
+- price_feedback: subscribers' verdicts on our estimates and their real
+                  resale prices, one row per user and listing
+
+A listing that leaves the site ("partie") is the closest thing to a sale we can
+observe: its last price feeds the tracker ahead of asking prices, and how long
+it stayed up gives the time to sell.
 """
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 import threading
-from datetime import datetime, timezone
+import unicodedata
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from .domain import Listing
@@ -72,6 +80,16 @@ CREATE TABLE IF NOT EXISTS alerts (
     net_profit REAL,
     tier       TEXT DEFAULT 'confirmed'
 );
+
+CREATE TABLE IF NOT EXISTS price_feedback (
+    user_id      TEXT NOT NULL,
+    uid          TEXT NOT NULL,
+    verdict      TEXT,               -- low | fair | high: our estimate is too low / right / too high
+    resale_price REAL,               -- what they actually resold it for, if they did
+    created_at   TEXT NOT NULL,
+    PRIMARY KEY (user_id, uid)
+);
+CREATE INDEX IF NOT EXISTS idx_feedback_uid ON price_feedback(uid);
 """
 
 # Columns added after the first release; applied in place on old databases.
@@ -85,7 +103,24 @@ _LISTING_MIGRATIONS = (
     ("appraised_at", "TEXT"),
     ("llm_verdict", "TEXT"),       # cached vision-LLM verdict ...
     ("llm_price", "REAL"),         # ... valid while the price is unchanged
+    ("last_checked", "TEXT"),      # last time we confirmed it was still online
+    ("disappeared_at", "TEXT"),
+    ("days_on_market", "REAL"),
+    ("title_key", "TEXT"),         # normalized title, for repost detection
+    ("repost_of", "TEXT"),         # uid of the first listing of this item
+    ("reposts", "INTEGER"),        # how many times it was put back online
 )
+
+# Crowd correction of the estimates: at most +/-10 %, and only once enough
+# different subscribers agree.
+FEEDBACK_MIN_VOTES = 5
+FEEDBACK_MAX_SHIFT = 0.10
+
+
+def title_key(title: str | None) -> str:
+    t = unicodedata.normalize("NFKD", title or "")
+    t = "".join(c for c in t if not unicodedata.combining(c)).lower()
+    return " ".join(re.findall(r"[a-z0-9]+", t))
 
 _init_lock = threading.Lock()
 _initialized: set[str] = set()
@@ -123,6 +158,7 @@ class Store:
             if col not in lcols:
                 self.conn.execute(f"ALTER TABLE listings ADD COLUMN {col} {typ}")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_margin ON listings(margin)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_titlekey ON listings(title_key)")
         self.conn.commit()
 
     # ---------- listings ----------
@@ -166,6 +202,8 @@ class Store:
                 (l.price, l.url, l.title, l.fetched_at, raw, l.fetched_at,
                  int(changed), old_price, l.uid),
             )
+        if is_new:
+            self._link_repost(l)
         if is_new or (l.price is not None and l.price != old_price):
             self.conn.execute(
                 "INSERT INTO price_history (uid, price, seen_at) VALUES (?,?,?)",
@@ -173,6 +211,37 @@ class Store:
             )
         self.conn.commit()
         return is_new
+
+    def _link_repost(self, l: Listing):
+        """Same seller, same title (or, without seller ids, same title, city and
+        a close price) within 60 days: the item was put back online. Unsold
+        reposts are negotiation leverage, and duplicates are hidden."""
+        key = title_key(l.title)
+        if len(key) < 6:
+            self.conn.execute("UPDATE listings SET title_key=? WHERE uid=?", (key, l.uid))
+            return
+        since = datetime.fromisoformat(l.fetched_at.replace("Z", "+00:00"))
+        since = (since - timedelta(days=60)).isoformat()
+        if l.seller_id:
+            prev = self.conn.execute(
+                "SELECT uid, repost_of, reposts FROM listings WHERE title_key=? AND source=? "
+                "AND seller_id=? AND uid<>? AND first_seen>=? ORDER BY first_seen LIMIT 1",
+                (key, l.source, l.seller_id, l.uid, since)).fetchone()
+        elif l.price:
+            prev = self.conn.execute(
+                "SELECT uid, repost_of, reposts FROM listings WHERE title_key=? AND source=? "
+                "AND seller_id IS NULL AND city IS ? AND price BETWEEN ? AND ? AND uid<>? "
+                "AND first_seen>=? ORDER BY first_seen LIMIT 1",
+                (key, l.source, l.city, 0.85 * l.price, 1.15 * l.price, l.uid, since)).fetchone()
+        else:
+            prev = None
+        if prev is None:
+            self.conn.execute("UPDATE listings SET title_key=? WHERE uid=?", (key, l.uid))
+            return
+        root = prev["repost_of"] or prev["uid"]
+        n = self.conn.execute("SELECT COUNT(*) c FROM listings WHERE repost_of=?", (root,)).fetchone()["c"] + 1
+        self.conn.execute("UPDATE listings SET title_key=?, repost_of=?, reposts=? WHERE uid=?",
+                          (key, root, n, l.uid))
 
     def set_position(self, uid: str, lat: float | None, lng: float | None):
         self.conn.execute("UPDATE listings SET lat=?, lng=? WHERE uid=?", (lat, lng, uid))
@@ -228,9 +297,102 @@ class Store:
         )
         self.conn.commit()
 
-    def mark_gone(self, uid: str):
-        self.conn.execute("UPDATE listings SET status='gone' WHERE uid=?", (uid,))
+    def mark_gone(self, uid: str, at: str | None = None):
+        """The listing left the site (or two subscribers reported it sold)."""
+        at = at or _now()
+        row = self.conn.execute("SELECT first_seen, status FROM listings WHERE uid=?", (uid,)).fetchone()
+        if row is None or row["status"] == "gone":
+            return
+        days = None
+        try:
+            days = round((datetime.fromisoformat(at) - datetime.fromisoformat(row["first_seen"]))
+                         .total_seconds() / 86400, 2)
+        except (TypeError, ValueError):
+            pass
+        self.conn.execute(
+            "UPDATE listings SET status='gone', disappeared_at=?, days_on_market=?, last_checked=? "
+            "WHERE uid=?", (at, days, at, uid))
         self.conn.commit()
+
+    def mark_checked(self, uid: str):
+        self.conn.execute("UPDATE listings SET last_checked=? WHERE uid=?", (_now(), uid))
+        self.conn.commit()
+
+    def due_for_check(self, limit: int, source: str) -> list[sqlite3.Row]:
+        """Which active listings to re-check, most useful first: deals people
+        can see (every 3 h, so dead deals leave the feed), then single items
+        that teach the tracker (every 2 days)."""
+        now = datetime.now(timezone.utc)
+        deals_before = (now - timedelta(hours=3)).isoformat()
+        comps_before = (now - timedelta(days=2)).isoformat()
+        horizon = (now - timedelta(days=60)).isoformat()
+        return self.conn.execute(
+            """SELECT uid, source_id, url FROM listings
+               WHERE status='active' AND source=? AND first_seen>=?
+                 AND ((margin > 0 AND appraisal IS NOT NULL AND IFNULL(last_checked, first_seen) < ?)
+                      OR (primary_component IS NOT NULL AND IFNULL(last_checked, first_seen) < ?))
+               ORDER BY (margin > 0) DESC, IFNULL(last_checked, first_seen)
+               LIMIT ?""",
+            (source, horizon, deals_before, comps_before, limit)).fetchall()
+
+    def sold_prices(self, key: str, since_iso: str, exclude_uid: str | None = None) -> list[float]:
+        """Closest thing to sale prices: last price of single items that left
+        the site, plus resale prices subscribers reported for that item."""
+        rows = self.conn.execute(
+            """SELECT price AS p FROM listings
+               WHERE primary_component=? AND status='gone' AND price IS NOT NULL
+                 AND disappeared_at>=? AND uid IS NOT ?
+               UNION ALL
+               SELECT f.resale_price AS p FROM price_feedback f JOIN listings l ON l.uid=f.uid
+               WHERE l.primary_component=? AND f.resale_price IS NOT NULL AND f.created_at>=?""",
+            (key, since_iso, exclude_uid, key, since_iso)).fetchall()
+        return [r["p"] for r in rows]
+
+    def days_to_sell(self, key: str, since_iso: str) -> list[float]:
+        rows = self.conn.execute(
+            "SELECT days_on_market d FROM listings WHERE primary_component=? AND status='gone' "
+            "AND days_on_market IS NOT NULL AND disappeared_at>=?", (key, since_iso)).fetchall()
+        return [r["d"] for r in rows]
+
+    def feedback_factor(self, key: str, since_iso: str) -> float:
+        """Subscribers' verdicts on single-item estimates for this component,
+        turned into a bounded correction: 'too high' pulls the value down."""
+        rows = self.conn.execute(
+            """SELECT f.verdict v, COUNT(DISTINCT f.user_id) n FROM price_feedback f
+               JOIN listings l ON l.uid=f.uid
+               WHERE l.primary_component=? AND f.verdict IS NOT NULL AND f.created_at>=?
+               GROUP BY f.verdict""", (key, since_iso)).fetchall()
+        votes = {r["v"]: r["n"] for r in rows}
+        total = sum(votes.values())
+        if total < FEEDBACK_MIN_VOTES:
+            return 1.0
+        lean = (votes.get("low", 0) - votes.get("high", 0)) / total
+        return round(1.0 + FEEDBACK_MAX_SHIFT * lean, 4)
+
+    def add_feedback(self, user_id: str, uid: str, verdict: str | None, resale_price: float | None):
+        self.conn.execute(
+            """INSERT INTO price_feedback (user_id, uid, verdict, resale_price, created_at)
+               VALUES (?,?,?,?,?)
+               ON CONFLICT(user_id, uid) DO UPDATE SET
+                 verdict=COALESCE(excluded.verdict, verdict),
+                 resale_price=COALESCE(excluded.resale_price, resale_price),
+                 created_at=excluded.created_at""",
+            (user_id, uid, verdict, resale_price, _now()))
+        self.conn.commit()
+
+    def feedback_summary(self, uid: str, user_id: str | None = None) -> dict:
+        rows = self.conn.execute(
+            "SELECT verdict, COUNT(*) n FROM price_feedback WHERE uid=? AND verdict IS NOT NULL "
+            "GROUP BY verdict", (uid,)).fetchall()
+        out = {"low": 0, "fair": 0, "high": 0, "mine": None, "my_resale": None}
+        for r in rows:
+            out[r["verdict"]] = r["n"]
+        if user_id:
+            me = self.conn.execute("SELECT verdict, resale_price FROM price_feedback WHERE uid=? AND user_id=?",
+                                   (uid, user_id)).fetchone()
+            if me:
+                out["mine"], out["my_resale"] = me["verdict"], me["resale_price"]
+        return out
 
     def component_prices(self, key: str, since_iso: str,
                          exclude_uid: str | None = None) -> list[float]:

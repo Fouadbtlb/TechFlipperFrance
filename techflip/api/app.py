@@ -32,7 +32,7 @@ from ..config import ApiSettings, Settings
 from ..storage import Store
 from .accounts import Accounts, TokenReuse
 from .attest import AppleAppAttest, AttestationError, PlayIntegrity
-from .deals import CATEGORIES, SORTS, card, deals_for, detail, pin, sort_deals, teaser, viewer_for
+from .deals import BUCKETS, CATEGORIES, SORTS, card, deals_for, detail, is_reliable, pin, sort_deals, teaser, viewer_for
 from .entitlements import Entitlements
 from ..notify.push import is_expo_token
 from ..viewer import judge
@@ -68,6 +68,7 @@ class PrefsIn(BaseModel):
     min_profit: float | None = Field(default=None, ge=0, le=5000)
     categories: list[str] | None = None
     notify: bool | None = None
+    notify_mode: Literal["instant", "daily"] | None = None
 
     @field_validator("categories")
     @classmethod
@@ -83,6 +84,12 @@ class PushTokenIn(BaseModel):
 
 class HideIn(BaseModel):
     reason: Literal["not_interested", "sold"] = "not_interested"
+
+
+class FeedbackIn(BaseModel):
+    """Is our estimate right? And, once they resold it, for how much."""
+    verdict: Literal["low", "fair", "high"] | None = None
+    resale_price: float | None = Field(default=None, gt=0, le=20000)
 
 
 def _err(status: int, code: str, message: str = "") -> HTTPException:
@@ -282,6 +289,7 @@ def create_app(settings: Settings, api: ApiSettings, *, apple: AppleAppAttest | 
                 "min_profit": user["min_profit"],
                 "categories": json.loads(user["categories"] or "[]"),
                 "notify": bool(user["notify"]),
+                "notify_mode": user["notify_mode"] or "instant",
             },
             "entitlement": {"active": active, "until": user["entitled_until"] if active else None,
                             "product": user["entitlement_product"] if active else None},
@@ -334,16 +342,19 @@ def create_app(settings: Settings, api: ApiSettings, *, apple: AppleAppAttest | 
 
     @app.get("/v1/deals")
     def list_deals(sort: str = Query("profit"), category: str | None = Query(None),
+                   bucket: str = Query("reliable"),
                    limit: int = Query(30, ge=1, le=100), offset: int = Query(0, ge=0, le=5000),
                    user=Depends(throttle), store: Store = Depends(get_store),
                    accounts: Accounts = Depends(get_accounts)):
-        if sort not in SORTS or (category and category not in CATEGORIES):
+        if sort not in SORTS or bucket not in BUCKETS or (category and category not in CATEGORIES):
             raise _err(400, "bad_query")
-        items = deals_for(store, need_viewer(user), api.deals_max_age_days,
+        every = deals_for(store, need_viewer(user), api.deals_max_age_days,
                           hidden=accounts.hidden_uids(user["id"]), category=category)
-        items = sort_deals(items, sort)
+        reliable = [it for it in every if is_reliable(it[0])]
+        items = sort_deals(reliable if bucket == "reliable" else [it for it in every if not is_reliable(it[0])], sort)
         page = items[offset:offset + limit]
         return {"total": len(items), "items": [card(r, j) for r, j in page],
+                "counts": {"reliable": len(reliable), "check": len(every) - len(reliable)},
                 "next_offset": offset + limit if offset + limit < len(items) else None}
 
     @app.get("/v1/deals/map")
@@ -363,8 +374,25 @@ def create_app(settings: Settings, api: ApiSettings, *, apple: AppleAppAttest | 
         row = store.get(uid)
         if row is None or not row["appraisal"]:
             raise _err(404, "not_found", "Cette annonce a été retirée ou n’existe plus.")
-        j = judge(row, need_viewer(user))
-        return detail(store, row, j, uid in accounts.saved_uids(user["id"]))
+        viewer = need_viewer(user)
+        return detail(store, row, judge(row, viewer), uid in accounts.saved_uids(user["id"]),
+                      viewer=viewer, user_id=user["id"])
+
+    @app.post("/v1/deals/{uid:path}/feedback")
+    def feedback(uid: str, body: FeedbackIn, user=Depends(paid_user), store: Store = Depends(get_store)):
+        """One voice per subscriber and listing (a new vote replaces the old).
+        The tracker only shifts an estimate once several different people
+        agree, and never by more than 10 %."""
+        row = store.get(uid)
+        if row is None or not row["appraisal"]:
+            raise _err(404, "not_found", "Cette annonce a été retirée ou n’existe plus.")
+        if body.verdict is None and body.resale_price is None:
+            raise _err(400, "empty_feedback")
+        if body.resale_price is not None and row["true_value"]:
+            if not (0.3 * row["true_value"] <= body.resale_price <= 3 * row["true_value"]):
+                raise _err(400, "implausible_price", "Ce prix semble très éloigné de la valeur de l’objet.")
+        store.add_feedback(user["id"], uid, body.verdict, body.resale_price)
+        return store.feedback_summary(uid, user["id"])
 
     @app.get("/v1/saved")
     def saved(user=Depends(throttle), store: Store = Depends(get_store),

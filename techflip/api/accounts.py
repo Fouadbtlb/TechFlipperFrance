@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS users (
     min_profit       REAL DEFAULT 30,
     categories       TEXT DEFAULT '[]',
     notify           INTEGER DEFAULT 1,
+    notify_mode      TEXT DEFAULT 'instant',              -- instant | daily
     push_token       TEXT,
     entitled_until   TEXT,                                -- ISO, NULL = never
     entitlement_product TEXT,
@@ -97,7 +98,7 @@ CREATE TABLE IF NOT EXISTS usage (
 """
 
 PREF_FIELDS = ("home_lat", "home_lng", "home_label", "radius_km", "include_shipping",
-               "min_profit", "categories", "notify")
+               "min_profit", "categories", "notify", "notify_mode")
 
 _init_lock = threading.Lock()
 _initialized: set[str] = set()
@@ -128,6 +129,9 @@ class Accounts:
             if self.db_path not in _initialized:
                 self.conn.execute("PRAGMA journal_mode=WAL")
                 self.conn.executescript(_SCHEMA)
+                cols = {r["name"] for r in self.conn.execute("PRAGMA table_info(users)")}
+                if "notify_mode" not in cols:
+                    self.conn.execute("ALTER TABLE users ADD COLUMN notify_mode TEXT DEFAULT 'instant'")
                 self.conn.commit()
                 _initialized.add(self.db_path)
 

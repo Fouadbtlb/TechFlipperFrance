@@ -1,16 +1,17 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 
 import { api } from './api';
-import type { Category, DealCard, DealDetail, Page, Pin, Teaser } from './types';
+import type { Category, DealCard, DealDetail, Feedback, Page, Pin, Teaser, Verdict } from './types';
 
 export type Sort = 'profit' | 'distance' | 'recent';
+export type Bucket = 'reliable' | 'check';
 
-export function useFeed(sort: Sort, category: Category | null) {
+export function useFeed(sort: Sort, category: Category | null, bucket: Bucket = 'reliable') {
   return useInfiniteQuery({
-    queryKey: ['feed', sort, category],
+    queryKey: ['feed', sort, category, bucket],
     initialPageParam: 0,
     queryFn: ({ pageParam }) => {
-      const q = new URLSearchParams({ sort, limit: '30', offset: String(pageParam) });
+      const q = new URLSearchParams({ sort, bucket, limit: '30', offset: String(pageParam) });
       if (category) q.set('category', category);
       return api<Page<DealCard>>(`/v1/deals?${q}`);
     },
@@ -76,4 +77,15 @@ export function useHide(uid: string) {
 export function useInvalidateDeals() {
   const qc = useQueryClient();
   return () => invalidateLists(qc);
+}
+
+export function useFeedback(uid: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { verdict?: Verdict; resale_price?: number }) =>
+      api<Feedback>(`/v1/deals/${encodeURIComponent(uid)}/feedback`, { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: (feedback) => {
+      qc.setQueryData<DealDetail>(['deal', uid], (d) => (d ? { ...d, feedback } : d));
+    },
+  });
 }

@@ -44,12 +44,13 @@ function DealCardBase({ deal, compact = false }: { deal: Deal; compact?: boolean
           {euros(deal.price)} · {where}
           {!compact && deal.city ? ` · ${deal.city}` : ''}
         </T>
-        {!compact && (fresh || drop > 0 || deal.risk !== 'low' || deal.gone) ? (
+        {!compact && (fresh || drop > 0 || deal.reposts > 0 || deal.risk !== 'low' || deal.gone) ? (
           <View style={s.pills}>
             {fresh ? <Pill tone="brass" label="Nouveau" /> : null}
             {drop > 0 ? <Pill tone="profit" label={`Baisse de ${euros(drop)}`} /> : null}
+            {deal.reposts > 0 ? <Pill tone="info" label="Remise en ligne" /> : null}
             {deal.risk === 'high' ? <Pill tone="risk" label="Prudence" /> : null}
-            {deal.risk === 'medium' ? <Pill tone="warn" label="À vérifier" /> : null}
+            {deal.risk === 'medium' ? <Pill tone="warn" label="Vigilance" /> : null}
             {deal.gone ? <Pill label="Plus disponible" /> : null}
           </View>
         ) : null}

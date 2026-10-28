@@ -7,7 +7,7 @@ import { DealCard } from '@/components/DealCard';
 import { PushPrimer } from '@/components/PushPrimer';
 import { Button, Chip, EmptyState, Rule, Skeleton, T, Tabs } from '@/components/ui';
 import { CATEGORY_LABEL, signedEuros } from '@/lib/format';
-import { useFeed, type Sort } from '@/lib/queries';
+import { useFeed, type Bucket, type Sort } from '@/lib/queries';
 import { useSession } from '@/lib/session';
 import { space, usePalette } from '@/lib/theme';
 import type { Category } from '@/lib/types';
@@ -25,7 +25,9 @@ export default function Feed() {
   const { me } = useSession();
   const [sort, setSort] = useState<Sort>('profit');
   const [cat, setCat] = useState<Category | null>(null);
-  const q = useFeed(sort, cat);
+  const [bucket, setBucket] = useState<Bucket>('reliable');
+  const q = useFeed(sort, cat, bucket);
+  const counts = q.data?.pages[0]?.counts;
 
   const items = useMemo(() => q.data?.pages.flatMap((pg) => pg.items) ?? [], [q.data]);
   const total = q.data?.pages[0]?.total ?? 0;
@@ -50,12 +52,22 @@ export default function Feed() {
               {signedEuros(best)}
             </T>
             <T v="small" color="muted">
-              {`la meilleure sur ${total}`}
+              {bucket === 'reliable' ? `la meilleure sur ${total}` : `${total} à vérifier`}
             </T>
           </View>
         ) : null}
       </View>
       {me?.prefs.notify && total > 0 ? <PushPrimer /> : null}
+      <View style={s.buckets}>
+        <BucketLink label="Fiables" n={counts?.reliable} active={bucket === 'reliable'} onPress={() => setBucket('reliable')} />
+        <T v="small" color="faint">·</T>
+        <BucketLink label="À vérifier" n={counts?.check} active={bucket === 'check'} onPress={() => setBucket('check')} />
+      </View>
+      {bucket === 'check' ? (
+        <T v="small" color="muted">
+          Estimation moins sûre ou point de vigilance : regarde bien les photos et pose des questions avant de te déplacer.
+        </T>
+      ) : null}
       <Tabs options={SORTS} value={sort} onChange={setSort} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.chips}>
         <Chip label="Tout" active={cat === null} onPress={() => setCat(null)} />
@@ -110,7 +122,18 @@ export default function Feed() {
   );
 }
 
+function BucketLink({ label, n, active, onPress }: { label: string; n?: number; active: boolean; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="tab" accessibilityState={{ selected: active }} onPress={onPress} hitSlop={8}>
+      <T v="strong" color={active ? 'text' : 'faint'} style={active ? { textDecorationLine: 'underline' } : undefined}>
+        {n != null ? `${label} (${n})` : label}
+      </T>
+    </Pressable>
+  );
+}
+
 const s = StyleSheet.create({
+  buckets: { flexDirection: 'row', gap: space.sm, alignItems: 'center' },
   list: { padding: space.xl, paddingBottom: space.xxl, flexGrow: 1 },
   titleRow: { flexDirection: 'row', alignItems: 'flex-end' },
   chips: { gap: space.sm, paddingRight: space.lg },

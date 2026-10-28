@@ -53,6 +53,11 @@ class Appraisal:
     breakdown: tuple[dict, ...]
     n_priced: int
     n_unpriced: int
+    # What it fetches even sold at the low end of recent comparables (None when
+    # a part has too little data). "Au pire, il te reste..."
+    floor_value: float | None = None
+    # Days the main part usually stays online before it goes.
+    days_to_sell: float | None = None
 
 
 def listing_condition(llm_json: dict | None, text: str = "") -> str:
@@ -90,28 +95,37 @@ def appraise(items, tracker, realization_factor: float = 0.85,
     breakdown: list[dict] = []
     n_priced = 0
     n_unpriced = 0
+    floor: float | None = 0.0
+    main_val, main_days = -1.0, None
     for it in items:
         q = tracker.price(it.key, exclude_uid) if exclude_uid else tracker.price(it.key)
         if q.unit_value is None:
             n_unpriced += 1
             breakdown.append({"key": it.key, "label": it.label, "value": None, "source": "unknown"})
+            floor = None
             continue
         mult = CONDITION_MULT.get(it.condition, 0.7)
         val = q.unit_value * it.qty * mult
         gross += val
         net += val * REALIZATION.get(it.category, realization_factor)
         n_priced += 1
-        if q.source in ("learned", "blend"):
+        if q.source in ("sold", "learned", "blend"):
             backed += val
+        if floor is not None:
+            floor = None if q.low is None else floor + q.low * it.qty * mult * REALIZATION.get(it.category, realization_factor)
+        if val > main_val:
+            main_val, main_days = val, q.days_to_sell
         lines.append(_line(it, q, val))
         breakdown.append({
             "key": it.key, "label": it.label, "qty": it.qty, "condition": it.condition,
             "unit": q.unit_value, "value": round(val, 2), "source": q.source, "n": q.n,
+            "low": q.low, "days_to_sell": q.days_to_sell,
         })
     true_value = round(net, 2)
     confidence = round(backed / gross, 2) if gross > 0 else 0.0
+    floor_value = round(floor, 2) if floor and n_priced and not n_unpriced else None
     return Appraisal(true_value, round(gross, 2), confidence, tuple(lines),
-                     tuple(breakdown), n_priced, n_unpriced)
+                     tuple(breakdown), n_priced, n_unpriced, floor_value, main_days)
 
 
 def _cond_for(category: str, condition: str) -> str:
@@ -143,7 +157,7 @@ def _llm_extras(llm_json, catalog, console_family) -> list[Item]:
 
 
 def _line(it: Item, q, val: float) -> str:
-    tag = {"learned": "marché", "blend": "estim+", "seed": "estim"}.get(q.source, "?")
+    tag = {"sold": "parties", "learned": "marché", "blend": "estim+", "seed": "estim"}.get(q.source, "?")
     qty = f" x{it.qty}" if it.qty > 1 else ""
     cond = "" if it.condition == "working" else f" [{it.condition}]"
     return f"{it.label or it.key}{qty}{cond}: {val:.0f}€ ({tag})"

@@ -67,6 +67,8 @@ class Settings:
     hard_bar: float = 120
     min_conf_medium: float = 0.4
     min_conf_hard: float = 0.6
+    # listings re-checked per cycle to learn what left the site (sold or withdrawn)
+    departure_checks: int = 12
     searches: tuple[SearchConfig, ...] = field(default_factory=tuple)
 
 
@@ -126,6 +128,7 @@ def load_settings(searches_file: str | Path = "config/searches.yaml") -> Setting
         hard_bar=_f("HARD_BAR", 120),
         min_conf_medium=_f("MIN_CONF_MEDIUM", 0.4),
         min_conf_hard=_f("MIN_CONF_HARD", 0.6),
+        departure_checks=int(os.environ.get("DEPARTURE_CHECKS", 12)),
         searches=tuple(searches),
     )
 

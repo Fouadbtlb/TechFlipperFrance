@@ -147,7 +147,10 @@ class Pipeline:
             time.sleep(random.uniform(2.0, 6.0))
 
         stats["alerts"] += self._resweep()
-        if self.fanout and self._fresh:
+        stats["departed"] = self._watch_departures()
+        # Always run: it also delivers deals held back by quiet hours or a
+        # failed cycle, not only this cycle's fresh ones.
+        if self.fanout:
             try:
                 self.fanout(list(dict.fromkeys(self._fresh)))
             except Exception:
@@ -182,6 +185,38 @@ class Pipeline:
         if n:
             log.info("resweep: %d annonce(s) devenue(s) bonne(s) affaire(s)", n)
         return n
+
+    # ---------- departures ----------
+
+    def _watch_departures(self) -> int:
+        """Re-check a few listings per cycle. One that left the site gives the
+        tracker a near-sale price and a time to sell, and stops being shown as
+        a deal. Small budget, jittered: one extra request every few seconds."""
+        budget = self.settings.departure_checks
+        gone = 0
+        for name, source in self.sources.items():
+            check = getattr(source, "is_online", None)
+            if not check or budget <= 0:
+                continue
+            for row in self.store.due_for_check(budget, name):
+                budget -= 1
+                try:
+                    online = check(row["source_id"])
+                except DatadomeError:
+                    log.warning("DataDome on departure checks, stopping for this cycle")
+                    return gone
+                except Exception:
+                    log.debug("departure check failed for %s", row["uid"], exc_info=True)
+                    continue
+                if online is False:
+                    self.store.mark_gone(row["uid"])
+                    gone += 1
+                elif online is True:
+                    self.store.mark_checked(row["uid"])
+                time.sleep(random.uniform(2.0, 5.0))
+        if gone:
+            log.info("departures: %d annonce(s) partie(s)", gone)
+        return gone
 
     # ---------- valuation ----------
 
@@ -288,7 +323,7 @@ class Pipeline:
             self._store(l, true_value, confidence, category, {
                 "method": method, "breakdown": breakdown, "lines": list(lines),
                 "risk": None, "shippable": shippable, "ship_class": ship_cls,
-                "n_priced": n_priced})
+                "n_priced": n_priced, "floor": appr.floor_value, "days_to_sell": appr.days_to_sell})
             return False
 
         appraisal = {
@@ -296,6 +331,8 @@ class Pipeline:
             "risk": risk, "shippable": shippable, "ship_class": ship_cls,
             "n_priced": n_priced,
             "photo_checked": verdict is not None,
+            "floor": appr.floor_value if method != "ai" else None,
+            "days_to_sell": appr.days_to_sell,
         }
         if true_value > l.price:
             appraisal["seller"] = self._seller(l, true_value)

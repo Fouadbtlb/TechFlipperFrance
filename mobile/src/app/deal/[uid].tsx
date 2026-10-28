@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { ActionSheetIOS, Alert, FlatList, Platform, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EstimateFeedback, Negotiation } from '@/components/DealExtras';
 import { Button, EmptyState, LedgerRow, Rule, SectionTitle, Skeleton, T } from '@/components/ui';
 import { ApiError } from '@/lib/api';
 import { noteListingOpened } from '@/lib/engagement';
@@ -16,6 +17,7 @@ import { radius, space, usePalette } from '@/lib/theme';
 import type { DealDetail, Part } from '@/lib/types';
 
 const SOURCE_LABEL: Record<Part['source'], string> = {
+  sold: 'prix des annonces parties',
   learned: 'prix du marché',
   blend: 'marché et estimation',
   seed: 'estimation',
@@ -188,6 +190,20 @@ function Detail({ d, bottomPad }: { d: DealDetail; bottomPad: number }) {
         />
         <Rule style={{ marginVertical: space.sm }} />
         <LedgerRow label="Bénéfice net" value={signedEuros(d.net)} strong />
+        {d.floor_net != null ? (
+          <LedgerRow
+            label="Même revendu au plus bas"
+            value={signedEuros(d.floor_net)}
+            tone={d.floor_net > 0 ? 'profit' : 'risk'}
+          />
+        ) : null}
+        {d.days_to_sell != null ? (
+          <T v="small" color="faint">
+            {`Ce type d’article part en général en ${Math.max(1, Math.round(d.days_to_sell))}\u00a0jour${Math.round(d.days_to_sell) > 1 ? 's' : ''}.`}
+          </T>
+        ) : null}
+
+        {d.negotiation ? <Negotiation n={d.negotiation} /> : null}
 
         {d.parts.length ? (
           <>
@@ -261,6 +277,8 @@ function Detail({ d, bottomPad }: { d: DealDetail; bottomPad: number }) {
             </T>
           </View>
         ) : null}
+
+        <EstimateFeedback d={d} />
 
         {d.description ? (
           <>

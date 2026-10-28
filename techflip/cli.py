@@ -6,7 +6,7 @@
   python -m techflip.cli serve [port]       run the app API (default 8000)
   python -m techflip.cli health             is the scanner alive, what is in the database
   python -m techflip.cli bootstrap [pages]  one-shot market warm-up (default 3 pages)
-  python -m techflip.cli top [n]            best stored deals for the owner
+  python -m techflip.cli top [n] [km]       best stored deals for the owner (within km of home)
   python -m techflip.cli price <query>      what the tracker thinks a part is worth
   python -m techflip.cli try <query>        value live listings for a query (no alert)
 """
@@ -94,12 +94,17 @@ def cmd_bootstrap(settings: Settings) -> None:
 
 
 def cmd_top(settings: Settings) -> None:
+    limit, km = int(_arg(2, "10")), _arg(3)
+    near = " AND distance_km <= ?" if km else ""
     rows = Store(settings.db_path).conn.execute(
         "SELECT title, price, true_value, net_profit, zone, confidence, city, distance_km, url "
-        "FROM listings WHERE net_profit IS NOT NULL AND status='active' "
-        "ORDER BY net_profit DESC LIMIT ?", (int(_arg(2, "10")),)).fetchall()
+        f"FROM listings WHERE net_profit IS NOT NULL AND status='active'{near} "
+        "ORDER BY net_profit DESC LIMIT ?", (*([float(km)] if km else []), limit)).fetchall()
+    where = f" à moins de {float(km):.0f} km de {settings.home_label}" if km else ""
     if not rows:
-        print("Aucune annonce valorisée encore : lance `bootstrap` puis `once`.")
+        print(f"Aucune annonce valorisée{where} : lance `bootstrap` puis `once`.")
+    elif km:
+        print(f"Meilleures affaires{where} :")
     for r in rows:
         dist = f"{r['distance_km']:.0f}km" if r["distance_km"] is not None else "?"
         print(f"\n[+{r['net_profit']:.0f}€ · {r['zone']} {dist}] {r['title'][:60]}")

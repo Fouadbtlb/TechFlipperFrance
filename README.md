@@ -73,7 +73,7 @@ python -m techflip.cli check              # validate config + ping Telegram
 python -m techflip.cli bootstrap          # warm up the price tracker
 python -m techflip.cli loop               # run continuously (APP_BACKEND=1 to push to app users)
 python -m techflip.cli health             # is the scanner alive, database counters
-python -m techflip.cli top [n]            # best stored deals
+python -m techflip.cli top 15 60          # 15 best stored deals within 60 km of home
 python -m techflip.cli price rtx 4070     # what the tracker thinks a part is worth
 ```
 

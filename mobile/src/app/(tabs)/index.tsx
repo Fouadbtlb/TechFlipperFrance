@@ -1,13 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DealCard } from '@/components/DealCard';
+import { PushPrimer } from '@/components/PushPrimer';
 import { Button, Chip, EmptyState, Segmented, Skeleton, T } from '@/components/ui';
 import { CATEGORY_ICON, CATEGORY_LABEL, signedEuros } from '@/lib/format';
-import { enablePush } from '@/lib/notifications';
 import { useFeed, type Sort } from '@/lib/queries';
 import { useSession } from '@/lib/session';
 import { space, usePalette } from '@/lib/theme';
@@ -27,11 +27,6 @@ export default function Feed() {
   const [sort, setSort] = useState<Sort>('profit');
   const [cat, setCat] = useState<Category | null>(null);
   const q = useFeed(sort, cat);
-
-  // First time in the app: ask for push once, now that the user has seen value.
-  useEffect(() => {
-    if (me?.prefs.notify) enablePush().catch(() => undefined);
-  }, [me?.prefs.notify]);
 
   const items = useMemo(() => q.data?.pages.flatMap((pg) => pg.items) ?? [], [q.data]);
   const total = q.data?.pages[0]?.total ?? 0;
@@ -61,6 +56,7 @@ export default function Feed() {
           </View>
         ) : null}
       </View>
+      {me?.prefs.notify && total > 0 ? <PushPrimer /> : null}
       <Segmented options={SORTS} value={sort} onChange={setSort} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.chips}>
         <Chip label="Tout" active={cat === null} onPress={() => setCat(null)} />
@@ -108,10 +104,10 @@ export default function Feed() {
           ) : (
             <EmptyState
               icon="sparkles-outline"
-              title="Rien pour l'instant"
+              title="Rien pour l’instant"
               body={
                 cat
-                  ? 'Aucune affaire dans cette catégorie. Le scanner tourne, tu seras notifié.'
+                  ? 'Aucune affaire dans cette catégorie pour l’instant. Le scanner tourne : on te prévient dès qu’il en trouve une.'
                   : 'Le scanner tourne en continu. Élargis ton rayon ou baisse ton bénéfice minimum dans les réglages.'
               }
               action={<Button label="Ajuster mes critères" kind="secondary" onPress={() => router.push('/settings')} />}

@@ -7,12 +7,16 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ago, euros, km, signedEuros } from '@/lib/format';
 import { radius, space, usePalette, zoneColor } from '@/lib/theme';
 import type { DealCard as Deal } from '@/lib/types';
+import { useNow } from '@/lib/useNow';
 
 import { Pill, T } from './ui';
 
 function DealCardBase({ deal, compact = false }: { deal: Deal; compact?: boolean }) {
   const p = usePalette();
   const drop = deal.prev_price ? deal.prev_price - deal.price : 0;
+  // Real first-seen time, never invented urgency: good deals go in minutes.
+  const now = useNow();
+  const fresh = !!deal.first_seen && now - Date.parse(deal.first_seen) < 30 * 60_000;
   return (
     <Pressable
       accessibilityRole="button"
@@ -66,13 +70,18 @@ function DealCardBase({ deal, compact = false }: { deal: Deal; compact?: boolean
             <>
               <T v="small" color="faint">·</T>
               <T v="small" color="muted" numberOfLines={1} style={{ flexShrink: 1 }}>
-                {ago(deal.first_seen)}
+                {ago(deal.first_seen, now)}
               </T>
             </>
           ) : null}
         </View>
 
-        {drop > 0 && !compact ? <Pill tone="profit" icon="trending-down" label={`Baisse de ${euros(drop)}`} /> : null}
+        {(fresh || drop > 0) && !compact ? (
+          <View style={s.pills}>
+            {fresh ? <Pill tone="info" icon="sparkles" label="Nouveau" /> : null}
+            {drop > 0 ? <Pill tone="profit" icon="trending-down" label={`Baisse de ${euros(drop)}`} /> : null}
+          </View>
+        ) : null}
         {deal.gone ? <Pill label="Plus disponible" /> : null}
       </View>
     </Pressable>
@@ -104,5 +113,6 @@ const s = StyleSheet.create({
   body: { flex: 1, gap: 4, justifyContent: 'center' },
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  pills: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
   num: { fontVariant: ['tabular-nums'] },
 });

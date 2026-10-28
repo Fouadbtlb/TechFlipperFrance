@@ -60,7 +60,7 @@ beyond) plus that viewer's own minimum profit, radius and categories.
 ```bash
 pip install -e ".[dev]"
 cp .env.example .env
-python -m pytest                          # 87 tests
+python -m pytest                          # 89 tests
 ```
 
 Scanner:

@@ -78,7 +78,7 @@ export function LocationPicker({ onPick, cta = 'Utiliser ma position' }: { onPic
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="Ou ta ville / code postal"
+          placeholder="Ou ta ville, ton code postal"
           placeholderTextColor={p.textFaint}
           returnKeyType="search"
           onSubmitEditing={fromSearch}

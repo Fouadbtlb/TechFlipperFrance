@@ -84,13 +84,13 @@ def seller_summary(
     if age_days is not None and age_days < 30:
         if discount >= 20:
             flags.append({"level": "risk",
-                          "text": f"Compte créé il y a {age_days} j et prix très bas"})
+                          "text": f"Compte créé il y a {age_days} jours, prix très bas"})
         else:
-            flags.append({"level": "warn", "text": f"Compte créé il y a {age_days} j"})
+            flags.append({"level": "warn", "text": f"Compte créé il y a {age_days} jours"})
     if seller.total_ads is not None and seller.total_ads <= 1 and discount >= 20:
         flags.append({"level": "warn", "text": "Première annonce de ce vendeur"})
     if seller.account_type == "pro" and discount >= 25:
-        flags.append({"level": "warn", "text": "Pro très sous le marché, à vérifier"})
+        flags.append({"level": "warn", "text": "Vendeur pro très en dessous du marché : à vérifier"})
     return {
         "known": True,
         "name": seller.name,

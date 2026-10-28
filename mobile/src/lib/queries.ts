@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 
 import { api } from './api';
 import type { Category, DealCard, DealDetail, Page, Pin, Teaser } from './types';
@@ -60,7 +60,16 @@ export function useHide(uid: string) {
   return useMutation({
     mutationFn: (reason: 'not_interested' | 'sold') =>
       api(`/v1/hidden/${encodeURIComponent(uid)}`, { method: 'POST', body: JSON.stringify({ reason }) }),
-    onSuccess: () => invalidateLists(qc),
+    onMutate: () => {
+      qc.setQueriesData<InfiniteData<Page<DealCard>>>({ queryKey: ['feed'] }, (data) =>
+        data && {
+          ...data,
+          pages: data.pages.map((pg) => ({ ...pg, total: pg.total - 1, items: pg.items.filter((d) => d.uid !== uid) })),
+        },
+      );
+      qc.setQueryData<{ items: Pin[] }>(['pins'], (data) => data && { items: data.items.filter((x) => x.uid !== uid) });
+    },
+    onSettled: () => invalidateLists(qc),
   });
 }
 

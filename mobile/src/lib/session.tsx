@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-import { api, ensureSession } from './api';
+import { ApiError, api, ensureSession } from './api';
 import { setupPurchases } from './purchases';
 import type { Me, Prefs } from './types';
 
@@ -17,6 +17,12 @@ type Session = {
 };
 
 const Ctx = createContext<Session | null>(null);
+
+function errorText(e: unknown): string {
+  // fetch() rejects with an English TypeError when offline
+  if (e instanceof ApiError || (e instanceof Error && /[àâçéèêëîïôûù]/i.test(e.message))) return e.message;
+  return 'Vérifie ta connexion internet et réessaie.';
+}
 
 async function loadMe(): Promise<Me> {
   const uid = await ensureSession();
@@ -40,7 +46,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setMe(await loadMe());
       setError(null);
     } catch (e: any) {
-      setError(e?.message ?? 'Erreur réseau');
+      setError(errorText(e));
     }
   }, []);
 
@@ -48,7 +54,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     let alive = true;
     loadMe()
       .then((m) => alive && setMe(m))
-      .catch((e) => alive && setError(e?.message ?? 'Erreur réseau'));
+      .catch((e) => alive && setError(errorText(e)));
     return () => {
       alive = false;
     };

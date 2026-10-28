@@ -53,14 +53,14 @@ export default function Settings() {
   async function onNotify(v: boolean) {
     await set({ notify: v });
     if (v && !(await enablePush().catch(() => false))) {
-      Alert.alert('Notifications désactivées', "Autorise-les dans les réglages du téléphone pour être alerté.");
+      Alert.alert('Notifications désactivées', "Autorise-les dans les réglages du téléphone pour recevoir les alertes.");
     }
   }
 
   function deleteAccount() {
     Alert.alert(
-      'Supprimer mon compte ?',
-      "Tes réglages et favoris seront effacés. L'abonnement se gère et s'annule depuis ton compte App Store / Google Play.",
+      'Supprimer mon compte ?',
+      "Tes réglages et favoris seront effacés. L’abonnement se gère et s’annule depuis ton compte App Store / Google Play.",
       [
         { text: 'Annuler', style: 'cancel' },
         {
@@ -89,10 +89,10 @@ export default function Settings() {
         <SectionTitle>Point de départ</SectionTitle>
         <Row icon="navigate-outline" label={pr.home_label ?? '—'} onPress={() => router.push('/location')} chevron />
 
-        <SectionTitle>Rayon de retrait</SectionTitle>
+        <SectionTitle>Jusqu’où tu te déplaces</SectionTitle>
         <View style={s.chips}>
           {RADII.map((r) => (
-            <Chip key={r} label={`${r} km`} active={pr.radius_km === r} onPress={() => set({ radius_km: r })} />
+            <Chip key={r} label={`${r}\u00a0km`} active={pr.radius_km === r} onPress={() => set({ radius_km: r })} />
           ))}
         </View>
         <Card style={{ marginTop: space.md }}>
@@ -110,7 +110,7 @@ export default function Settings() {
         <SectionTitle>Bénéfice minimum</SectionTitle>
         <View style={s.chips}>
           {PROFITS.map((v) => (
-            <Chip key={v} label={`${v} €`} active={pr.min_profit === v} onPress={() => set({ min_profit: v })} />
+            <Chip key={v} label={`${v}\u00a0€`} active={pr.min_profit === v} onPress={() => set({ min_profit: v })} />
           ))}
         </View>
         <T v="small" color="faint" style={{ marginTop: space.sm }}>
@@ -156,7 +156,7 @@ export default function Settings() {
             ) : null}
           </View>
         </Card>
-        <Row icon="card-outline" label="Gérer mon abonnement" onPress={() => manageSubscription().catch(() => undefined)} chevron />
+        <Row icon="card-outline" label="Gérer ou résilier mon abonnement" onPress={() => manageSubscription().catch(() => undefined)} chevron />
         <Row
           icon="refresh-outline"
           label="Restaurer mes achats"
@@ -165,13 +165,13 @@ export default function Settings() {
               await restore();
               await syncEntitlement();
             } catch {
-              Alert.alert('Restauration impossible');
+              Alert.alert('Restauration impossible', 'Vérifie ta connexion et réessaie.');
             }
           }}
         />
 
         <SectionTitle>À propos</SectionTitle>
-        <Row icon="document-text-outline" label="Conditions d'utilisation" onPress={() => WebBrowser.openBrowserAsync(config.termsUrl)} chevron />
+        <Row icon="document-text-outline" label="Conditions d’utilisation" onPress={() => WebBrowser.openBrowserAsync(config.termsUrl)} chevron />
         <Row icon="lock-closed-outline" label="Confidentialité" onPress={() => WebBrowser.openBrowserAsync(config.privacyUrl)} chevron />
         <Row icon="trash-outline" label="Supprimer mon compte" onPress={deleteAccount} danger />
 

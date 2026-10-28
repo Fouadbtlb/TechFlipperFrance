@@ -332,6 +332,11 @@ class Accounts:
 
     # ---------- usage counters (abuse ceilings) ----------
 
+    def usage_today(self, user_id: str, kind: str) -> int:
+        row = self.conn.execute("SELECT n FROM usage WHERE user_id=? AND day=? AND kind=?",
+                                (user_id, _now().strftime("%Y-%m-%d"), kind)).fetchone()
+        return row["n"] if row else 0
+
     def bump_usage(self, user_id: str, kind: str) -> int:
         day = _now().strftime("%Y-%m-%d")
         self.conn.execute(

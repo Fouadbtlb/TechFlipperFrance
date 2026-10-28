@@ -23,7 +23,7 @@ export default function ChangeLocation() {
           </Pressable>
         </View>
         <T color="muted">
-          Actuellement : <T style={{ fontWeight: '700' }}>{me?.prefs.home_label ?? '—'}</T>
+          Actuellement : <T style={{ fontWeight: '700' }}>{me?.prefs.home_label ?? '—'}</T>
         </T>
         <LocationPicker
           onPick={async (pl) => {

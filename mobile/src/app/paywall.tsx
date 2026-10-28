@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Skeleton, T } from '@/components/ui';
 import { config } from '@/lib/config';
+import { reminderDate, scheduleTrialReminder, trialEnd } from '@/lib/engagement';
 import { CATEGORY_ICON, CATEGORY_LABEL } from '@/lib/format';
 import { buy, getPackages, purchasesAvailable, restore } from '@/lib/purchases';
 import { useTeaser } from '@/lib/queries';
@@ -17,18 +18,20 @@ import { useSession } from '@/lib/session';
 import { radius, space, usePalette } from '@/lib/theme';
 import type { Category } from '@/lib/types';
 
-const UNIT: Record<string, [string, string]> = {
-  DAY: ['jour', 'jours'],
-  WEEK: ['semaine', 'semaines'],
-  MONTH: ['mois', 'mois'],
-  YEAR: ['an', 'ans'],
+// [singular, plural, feminine?] so the adjective agrees: "1 semaine gratuite", "3 jours gratuits".
+const UNIT: Record<string, [string, string, boolean]> = {
+  DAY: ['jour', 'jours', false],
+  WEEK: ['semaine', 'semaines', true],
+  MONTH: ['mois', 'mois', false],
+  YEAR: ['an', 'ans', false],
 };
 
 function trialLabel(pkg: PurchasesPackage): string | null {
   const intro = pkg.product.introPrice;
   if (!intro || intro.price > 0) return null;
-  const [one, many] = UNIT[intro.periodUnit] ?? ['', ''];
-  return `${intro.periodNumberOfUnits} ${intro.periodNumberOfUnits > 1 ? many : one} gratuit${intro.periodNumberOfUnits > 1 ? 's' : ''}`;
+  const [one, many, fem] = UNIT[intro.periodUnit] ?? ['', '', false];
+  const n = intro.periodNumberOfUnits;
+  return `${n}\u00a0${n > 1 ? many : one} gratuit${fem ? 'e' : ''}${n > 1 ? 's' : ''}`;
 }
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -69,12 +72,19 @@ export default function Paywall() {
     setBusy('buy');
     try {
       if (await buy(pkg)) {
+        const intro = pkg.product.introPrice;
+        if (intro && intro.price === 0) {
+          // keep the promise made on the timeline above
+          scheduleTrialReminder(trialEnd(intro.periodUnit, intro.periodNumberOfUnits), pkg.product.priceString).catch(
+            () => undefined,
+          );
+        }
         if (!(await unlock())) {
-          Alert.alert('Paiement reçu', "L'activation prend quelques secondes de plus. Rouvre l'app dans un instant.");
+          Alert.alert('Paiement reçu', "L’activation prend quelques secondes de plus. Rouvre l’app dans un instant.");
         }
       }
-    } catch (e: any) {
-      Alert.alert('Achat impossible', e?.message ?? 'Réessaie dans un instant.');
+    } catch {
+      Alert.alert('Achat impossible', 'Le paiement n’a pas abouti. Aucun montant n’a été débité. Réessaie dans un instant.');
     } finally {
       setBusy(null);
     }
@@ -84,9 +94,9 @@ export default function Paywall() {
     setBusy('restore');
     try {
       await restore();
-      if (!(await unlock())) Alert.alert('Aucun abonnement trouvé', 'Aucun achat actif sur ce compte store.');
-    } catch (e: any) {
-      Alert.alert('Restauration impossible', e?.message ?? 'Réessaie dans un instant.');
+      if (!(await unlock())) Alert.alert('Aucun abonnement trouvé', 'Aucun abonnement actif sur ce compte App Store ou Google Play.');
+    } catch {
+      Alert.alert('Restauration impossible', 'Vérifie ta connexion et réessaie.');
     } finally {
       setBusy(null);
     }
@@ -114,7 +124,7 @@ export default function Paywall() {
               {t.count} affaire{t.count > 1 ? 's' : ''} rentable{t.count > 1 ? 's' : ''} autour de {place} cette semaine
               {t.best_net ? (
                 <T v="title" color="profit">
-                  {`, jusqu'à +${t.best_net} €`}
+                  {`, jusqu’à +${t.best_net} €`}
                 </T>
               ) : null}
             </T>
@@ -133,7 +143,7 @@ export default function Paywall() {
                 </View>
                 <View style={{ flex: 1, gap: 6 }}>
                   <T style={{ fontWeight: '800', fontSize: 18 }} color="profit">
-                    +•• €
+                    +•• €
                   </T>
                   <T v="small" color="muted">
                     {CATEGORY_LABEL[c]}
@@ -151,10 +161,10 @@ export default function Paywall() {
 
           <View style={{ gap: space.md, marginTop: space.lg }}>
             {[
-              ['flash', 'Alertes instantanées sur les affaires pour toi'],
+              ['flash', 'Alertes instantanées, calculées pour toi'],
               ['map', 'Carte des bonnes affaires autour de toi'],
               ['layers', 'Valeur détaillée pièce par pièce'],
-              ['shield-checkmark', 'Vérification photo et vendeur anti-arnaque'],
+              ['shield-checkmark', 'Photos et vendeur vérifiés contre les arnaques'],
             ].map(([icon, label]) => (
               <View key={label} style={s.benefit}>
                 <Ionicons name={icon as any} size={18} color={p.profit} />
@@ -218,15 +228,17 @@ export default function Paywall() {
             )}
           </View>
 
+          {pkgs?.[selected] && trialLabel(pkgs[selected]) ? <TrialTimeline pkg={pkgs[selected]} /> : null}
+
           <Button
-            label={pkgs?.[selected] && trialLabel(pkgs[selected]) ? "Commencer l'essai gratuit" : 'Débloquer TechFlip Pro'}
+            label={pkgs?.[selected] && trialLabel(pkgs[selected]) ? "Commencer l’essai gratuit" : 'Débloquer TechFlip Pro'}
             onPress={onBuy}
             loading={busy === 'buy'}
             disabled={!pkgs?.length || busy !== null}
             style={{ marginTop: space.lg }}
           />
           <T v="tiny" color="faint" style={{ textAlign: 'center', marginTop: space.sm }}>
-            Sans engagement. Annulable à tout moment depuis ton compte store.
+            Sans engagement. Résiliable à tout moment depuis ton compte App Store ou Google Play.
           </T>
 
           <View style={s.footer}>
@@ -250,7 +262,46 @@ export default function Paywall() {
   );
 }
 
+const fmtDay = (d: Date) => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+
+/** No surprise charge: the exact dates, stated before the user commits. */
+function TrialTimeline({ pkg }: { pkg: PurchasesPackage }) {
+  const p = usePalette();
+  const intro = pkg.product.introPrice!;
+  const now = new Date();
+  const end = trialEnd(intro.periodUnit, intro.periodNumberOfUnits, now);
+  const steps = [
+    { icon: 'lock-open', title: 'Aujourd’hui', body: 'Accès complet, sans payer.' },
+    { icon: 'notifications', title: fmtDay(reminderDate(end, now)), body: 'On te rappelle que l’essai se termine.' },
+    { icon: 'card', title: fmtDay(end), body: `Premier paiement de ${pkg.product.priceString}, sauf si tu résilies avant.` },
+  ] as const;
+  return (
+    <View style={[s.timeline, { backgroundColor: p.surface, borderColor: p.border }]}>
+      {steps.map((st, i) => (
+        <View key={st.title} style={s.step}>
+          <View style={{ alignItems: 'center' }}>
+            <View style={[s.stepDot, { backgroundColor: i === 0 ? p.profit : p.elevated }]}>
+              <Ionicons name={st.icon} size={14} color={i === 0 ? p.onAccent : p.textMuted} />
+            </View>
+            {i < steps.length - 1 ? <View style={[s.stepLine, { backgroundColor: p.border }]} /> : null}
+          </View>
+          <View style={{ flex: 1, paddingBottom: i < steps.length - 1 ? space.md : 0 }}>
+            <T style={{ fontWeight: '700' }}>{st.title}</T>
+            <T v="small" color="muted">
+              {st.body}
+            </T>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 const s = StyleSheet.create({
+  timeline: { marginTop: space.lg, padding: space.lg, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth },
+  step: { flexDirection: 'row', gap: space.md },
+  stepDot: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  stepLine: { width: 2, flex: 1, marginVertical: 4 },
   wrap: { padding: space.xl, paddingBottom: space.xxl },
   preview: { marginTop: space.xl, gap: space.sm, borderRadius: radius.lg, overflow: 'hidden' },
   fake: {

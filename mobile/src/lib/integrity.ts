@@ -34,7 +34,7 @@ function prepareAndroid() {
 export async function registerProof(challenge: string, freshKey = false): Promise<RegisterProof> {
   if (config.insecureDevAuth) return { platform: 'dev' };
   if (Platform.OS === 'ios') {
-    if (!AppIntegrity.isSupported) throw new Error('App Attest indisponible sur cet appareil');
+    if (!AppIntegrity.isSupported) throw new Error('Cet appareil ne permet pas de vérifier l’application.');
     let keyId = freshKey ? null : await secure.get(KEY_ID);
     if (!keyId) {
       keyId = await AppIntegrity.generateKeyAsync();
@@ -51,7 +51,7 @@ export async function refreshProof(challenge: string): Promise<RefreshProof> {
   if (config.insecureDevAuth) return {};
   if (Platform.OS === 'ios') {
     const keyId = await secure.get(KEY_ID);
-    if (!keyId) throw new Error('missing attested key');
+    if (!keyId) throw new Error('Session à renouveler, redémarre l’application.');
     return { assertion: await AppIntegrity.generateAssertionAsync(keyId, challenge) };
   }
   await prepareAndroid();

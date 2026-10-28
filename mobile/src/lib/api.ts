@@ -37,7 +37,14 @@ async function call(path: string, init: RequestInit = {}, token: string | null =
 
 function fail(status: number, body: any): never {
   const d = body?.detail;
-  throw new ApiError(status, d?.code ?? (typeof d === 'string' ? d : 'error'), d?.message);
+  throw new ApiError(status, d?.code ?? (typeof d === 'string' ? d : 'error'), d?.message || frenchFallback(status));
+}
+
+// The server's codes are for code; people only ever see French.
+function frenchFallback(status: number): string {
+  if (status === 429) return 'Trop de demandes, réessaie dans un instant.';
+  if (status >= 500) return 'Le service est momentanément indisponible.';
+  return 'Une erreur est survenue.';
 }
 
 async function challenge(): Promise<string> {

@@ -9,13 +9,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, EmptyState, Pill, SectionTitle, Skeleton, T } from '@/components/ui';
 import { ApiError } from '@/lib/api';
+import { noteListingOpened } from '@/lib/engagement';
 import { ago, euros, km, signedEuros } from '@/lib/format';
 import { useDeal, useHide, useToggleSave } from '@/lib/queries';
 import { radius, space, usePalette, zoneColor } from '@/lib/theme';
 import type { DealDetail, Part } from '@/lib/types';
 
 const SOURCE_LABEL: Record<Part['source'], string> = {
-  learned: 'prix marché',
+  learned: 'prix du marché',
   blend: 'marché + estimation',
   seed: 'estimation',
   ai: 'estimation IA',
@@ -32,10 +33,13 @@ export default function DealScreen() {
 
   function more() {
     const run = (i: number) => {
-      if (i === 0) hide.mutate('sold', { onSuccess: () => router.back() });
-      if (i === 1) hide.mutate('not_interested', { onSuccess: () => router.back() });
+      // optimistic: the card leaves the lists at once, the server catches up
+      if (i === 0 || i === 1) {
+        hide.mutate(i === 0 ? 'sold' : 'not_interested');
+        router.back();
+      }
     };
-    const options = ['Déjà vendu', 'Pas intéressé', 'Annuler'];
+    const options = ['Déjà vendu', 'Ça ne m’intéresse pas', 'Annuler'];
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions({ options, cancelButtonIndex: 2, destructiveButtonIndex: 0 }, run);
     } else {
@@ -70,7 +74,7 @@ export default function DealScreen() {
       {/* floating header */}
       <View style={[s.header, { top: insets.top + 6 }]} pointerEvents="box-none">
         <RoundButton icon="chevron-back" label="Retour" onPress={() => router.back()} />
-        {d ? <RoundButton icon="ellipsis-horizontal" label="Plus d'options" onPress={more} /> : null}
+        {d ? <RoundButton icon="ellipsis-horizontal" label="Plus d’options" onPress={more} /> : null}
       </View>
 
       {d ? (
@@ -88,7 +92,10 @@ export default function DealScreen() {
           <Button
             label={`Voir sur ${d.source === '2ememain' ? '2ememain' : 'Leboncoin'}`}
             icon="open-outline"
-            onPress={() => WebBrowser.openBrowserAsync(d.url)}
+            onPress={async () => {
+              await WebBrowser.openBrowserAsync(d.url);
+              noteListingOpened(d.uid).catch(() => undefined);
+            }}
             style={{ flex: 1 }}
           />
         </View>
@@ -162,7 +169,7 @@ function Detail({ d, bottomPad }: { d: DealDetail; bottomPad: number }) {
           </View>
         </View>
         <T v="small" color="muted">
-          Bénéfice net estimé après {d.mode === 'ship' ? "frais d'envoi" : 'trajet'}
+          Bénéfice net estimé après {d.mode === 'ship' ? "frais d’envoi" : 'trajet'}
         </T>
         <T v="h2" style={{ marginTop: space.md }}>
           {d.title}
@@ -201,7 +208,7 @@ function Detail({ d, bottomPad }: { d: DealDetail; bottomPad: number }) {
             value={`− ${euros(d.logistics)}`}
           />
           <View style={[s.rule, { backgroundColor: p.border }]} />
-          <MathRow label="Ce qu'il te reste" value={signedEuros(d.net)} strong />
+          <MathRow label="Ce qu’il te reste" value={signedEuros(d.net)} strong />
         </Card>
 
         {/* parts */}
@@ -234,9 +241,9 @@ function Detail({ d, bottomPad }: { d: DealDetail; bottomPad: number }) {
                 <>
                   <View style={[s.rule, { backgroundColor: p.border }]} />
                   <MathRow label="Total au prix du marché" value={euros(partsTotal)} />
-                  <MathRow label="Décote revente rapide" value={`− ${euros(partsTotal - d.value)}`} />
+                  <MathRow label="Décote pour revente rapide" value={`− ${euros(partsTotal - d.value)}`} />
                   <T v="tiny" color="faint">
-                    Ce qu’on perd en vendant vite, selon la catégorie (une console part au prix, une alim se brade).
+                    Ce qu’on cède pour vendre vite : une console se revend presque au prix, une alimentation se brade.
                   </T>
                 </>
               ) : null}
@@ -255,14 +262,14 @@ function Detail({ d, bottomPad }: { d: DealDetail; bottomPad: number }) {
           />
           <TrustRow
             icon="camera-outline"
-            label="Photos vérifiées par IA"
+            label="Photos vérifiées par l’IA"
             value={d.photo_checked ? 'Oui' : 'Non'}
             tone={d.photo_checked ? 'profit' : 'muted'}
           />
           {d.scam_score != null ? (
             <TrustRow
               icon="shield-checkmark-outline"
-              label="Risque d'arnaque"
+              label="Risque d’arnaque"
               value={`${Math.round(d.scam_score)}/10`}
               tone={d.scam_score >= 6 ? 'risk' : d.scam_score >= 3 ? 'warn' : 'profit'}
             />
@@ -272,7 +279,7 @@ function Detail({ d, bottomPad }: { d: DealDetail; bottomPad: number }) {
               icon="person-outline"
               label={`Vendeur ${d.seller.kind ?? ''}`.trim()}
               value={[
-                d.seller.age_days != null ? (d.seller.age_days >= 365 ? `${Math.floor(d.seller.age_days / 365)} an(s)` : `${d.seller.age_days} j`) : null,
+                d.seller.age_days != null ? (d.seller.age_days >= 365 ? `${Math.floor(d.seller.age_days / 365)}\u00a0an${d.seller.age_days >= 730 ? 's' : ''}` : `${d.seller.age_days}\u00a0j`) : null,
                 d.seller.rating != null && d.seller.reviews ? `★ ${d.seller.rating.toFixed(1)} (${d.seller.reviews})` : null,
               ]
                 .filter(Boolean)
@@ -292,7 +299,7 @@ function Detail({ d, bottomPad }: { d: DealDetail; bottomPad: number }) {
             <View style={s.flag}>
               <Ionicons name="hand-left-outline" size={16} color={p.textMuted} />
               <T v="small" color="muted" style={{ flex: 1 }}>
-                Remise en main propre uniquement : vérifie et teste sur place.
+                Remise en main propre uniquement : vérifie et teste sur place.
               </T>
             </View>
           ) : null}

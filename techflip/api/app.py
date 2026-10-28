@@ -168,7 +168,7 @@ def create_app(settings: Settings, api: ApiSettings, *, apple: AppleAppAttest | 
         while q and now - q[0] > 60:
             q.popleft()
         if len(q) >= api.list_calls_per_minute:
-            raise _err(429, "rate_limited", "Trop de requêtes, réessaie dans une minute")
+            raise _err(429, "rate_limited", "Trop de demandes d’un coup, réessaie dans une minute")
         q.append(now)
         return user
 
@@ -185,7 +185,7 @@ def create_app(settings: Settings, api: ApiSettings, *, apple: AppleAppAttest | 
     async def _attest_failed(request: Request, exc: AttestationError):
         log.warning("attestation failed: %s", exc)
         return JSONResponse(status_code=401, content={"detail": {
-            "code": "attestation_failed", "message": "Appareil ou application non vérifié"}})
+            "code": "attestation_failed", "message": "Impossible de vérifier ton appareil ou l’application"}})
 
     @app.middleware("http")
     async def _no_store(request: Request, call_next):
@@ -359,10 +359,10 @@ def create_app(settings: Settings, api: ApiSettings, *, apple: AppleAppAttest | 
                  accounts: Accounts = Depends(get_accounts)):
         if accounts.bump_usage(user["id"], "detail") > api.detail_views_per_day:
             log.warning("detail ceiling hit by %s", user["id"])
-            raise _err(429, "daily_limit", "Limite quotidienne atteinte")
+            raise _err(429, "daily_limit", "Tu as consulté beaucoup de fiches aujourd’hui. La limite se réinitialise demain.")
         row = store.get(uid)
         if row is None or not row["appraisal"]:
-            raise _err(404, "not_found")
+            raise _err(404, "not_found", "Cette annonce a été retirée ou n’existe plus.")
         j = judge(row, need_viewer(user))
         return detail(store, row, j, uid in accounts.saved_uids(user["id"]))
 
@@ -384,7 +384,7 @@ def create_app(settings: Settings, api: ApiSettings, *, apple: AppleAppAttest | 
     def save(uid: str, user=Depends(paid_user), store: Store = Depends(get_store),
              accounts: Accounts = Depends(get_accounts)):
         if store.get(uid) is None:
-            raise _err(404, "not_found")
+            raise _err(404, "not_found", "Cette annonce a été retirée ou n’existe plus.")
         accounts.save(user["id"], uid)
         return {"ok": True}
 
@@ -397,7 +397,7 @@ def create_app(settings: Settings, api: ApiSettings, *, apple: AppleAppAttest | 
     def hide(uid: str, body: HideIn, user=Depends(paid_user), store: Store = Depends(get_store),
              accounts: Accounts = Depends(get_accounts)):
         if store.get(uid) is None:
-            raise _err(404, "not_found")
+            raise _err(404, "not_found", "Cette annonce a été retirée ou n’existe plus.")
         if accounts.hide(user["id"], uid, body.reason) >= 2:
             store.mark_gone(uid)   # two independent "vendu" reports: gone for everyone
         return {"ok": True}

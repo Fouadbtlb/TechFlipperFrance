@@ -268,10 +268,51 @@ def test_push_fanout_once_per_user_and_deal(tmp_path):
     acc.set_entitlement(paid, datetime.now(timezone.utc) + timedelta(days=3), "m")
     free = acc.create_user("dev", "d2")
     acc.update_prefs(free, {"home_lat": LILLE[0], "home_lng": LILLE[1]})
-    acc.set_push_token(free, "ExponentPushToken[def]")
+    acc.set_push_token(free, "ExponentPushToken[def]")  # never entitled: never pushed
 
     push = FakePush()
-    fan = PushFanout(settings, push=push)
+    fan = PushFanout(settings, push=push, clock=lambda: _paris(12))
     assert fan([uid]) == 1
-    assert push.sent[0]["to"] == "ExponentPushToken[abc]" and push.sent[0]["data"]["uid"] == uid
+    msg = push.sent[0]
+    assert msg["to"] == "ExponentPushToken[abc]" and msg["data"]["uid"] == uid
+    assert "revente estimée" in msg["body"] and "~" not in msg["body"]
     assert fan([uid]) == 0   # never twice
+
+
+def _paris(hour):
+    from zoneinfo import ZoneInfo
+    return datetime.now(ZoneInfo("Europe/Paris")).replace(hour=hour, minute=0)
+
+
+def _push_user(acc, did):
+    u = acc.create_user("dev", did)
+    acc.update_prefs(u, {"home_lat": LILLE[0], "home_lng": LILLE[1]})
+    acc.set_push_token(u, f"ExponentPushToken[{did}]")
+    acc.set_entitlement(u, datetime.now(timezone.utc) + timedelta(days=3), "m")
+    return u
+
+
+def test_quiet_hours_hold_pushes_for_a_morning_digest(tmp_path):
+    from techflip.api.fanout import in_quiet_hours
+    assert in_quiet_hours(_paris(23)) and in_quiet_hours(_paris(6)) and not in_quiet_hours(_paris(9))
+    settings = _settings(tmp_path)
+    a, b = _seed_deal(settings.db_path, "1"), _seed_deal(settings.db_path, "2", price=260)
+    _push_user(Accounts(settings.db_path), "d1")
+    push = FakePush()
+    assert PushFanout(settings, push=push, clock=lambda: _paris(23))([a, b]) == 0
+    # next morning's cycle found nothing new, but last night's deals still go out, bundled
+    assert PushFanout(settings, push=push, clock=lambda: _paris(9))([]) == 1
+    assert push.sent[0]["title"].startswith("2 nouvelles affaires")
+
+
+def test_daily_push_ceiling(tmp_path):
+    from techflip.api import fanout as fo
+    settings = _settings(tmp_path)
+    acc = Accounts(settings.db_path)
+    _push_user(acc, "d1")
+    push = FakePush()
+    fan = PushFanout(settings, push=push, clock=lambda: _paris(12))
+    for i in range(fo.MAX_PER_DAY + 2):
+        _seed_deal(settings.db_path, f"x{i}")
+        fan([])
+    assert len(push.sent) == fo.MAX_PER_DAY

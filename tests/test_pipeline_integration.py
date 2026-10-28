@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from techflip import pipeline as pipe
-from techflip.config import Settings, SearchConfig
+from techflip.config import SearchConfig, Settings
 from techflip.domain import Listing
 
 
@@ -98,7 +98,7 @@ def test_whole_item_llm_estimate_for_unrecognized_local(tmp_path, monkeypatch):
     monkeypatch.setattr(pipe.time, "sleep", lambda *a: None)
     p = pipe.Pipeline(settings)
     p.notifier = FakeNotifier()
-    p._run_llm = lambda l: {"valeur_revente_rapide": 700, "risque_arnaque": 1, "is_trade": False}
+    p.valuer.classify = lambda l: {"valeur_revente_rapide": 700, "risque_arnaque": 1, "is_trade": False}
 
     p.run_once()
 

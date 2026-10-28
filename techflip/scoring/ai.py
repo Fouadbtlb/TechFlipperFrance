@@ -1,4 +1,4 @@
-"""Local AI vetting stage (multimodal) — runs on DEALS ONLY.
+"""Local vision model (multimodal): runs on deal candidates only.
 
 One call per deal: description + up to N photos → structured verdict
 (visible defects, text/photo incoherences, scam risk). Zero external deps
@@ -68,25 +68,17 @@ class AIVetter:
         self.max_images = max_images
         self.timeout = timeout
 
-    def vet(self, l: Listing, market_price: float | None, discount_pct: float | None) -> list[str]:
-        """Returns alert lines. Empty list when unavailable — never raises."""
-        try:
-            images = self._download_images(l.image_urls[: self.max_images])
-            raw = self._chat(self._prompt(l, market_price, discount_pct), images)
-            verdict = _parse_verdict(raw)
-            return _format_lines(verdict, n_images=len(images))
-        except Exception:
-            log.warning("AI vetting unavailable, skipping", exc_info=True)
-            return []
+    def classify(self, l: Listing) -> dict | None:
+        """One model call on the description + photos -> structured verdict
+        (components seen, condition, scam risk). Raises on transport errors;
+        the caller decides what a failure means."""
+        images = self._download_images(l.image_urls[: self.max_images])
+        return parse_verdict(self._chat(self._prompt(l), images)) or None
 
-    # ----------
-
-    def _prompt(self, l: Listing, market: float | None, discount: float | None) -> str:
+    def _prompt(self, l: Listing) -> str:
         return _PROMPT.format(
-            title=l.title, price=f"{l.price:,.0f}".replace(",", " "),
-            market=f"{market:,.0f}".replace(",", " ") if market else "?",
-            discount=discount if discount is not None else "?",
-            condition=l.condition or "?",
+            title=l.title,
+            price=f"{l.price:,.0f}".replace(",", " "),
             description=(l.description or "(vide)")[:1500],
         )
 
@@ -112,7 +104,7 @@ class AIVetter:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 return json.loads(resp.read())["choices"][0]["message"]["content"]
         except urllib.error.HTTPError as e:
-            print("OLLAMA HTTP ERROR:", e.read().decode())
+            log.warning("vision model HTTP %s: %s", e.code, e.read()[:300])
             raise
 
     def _download_images(self, urls: tuple[str, ...]) -> list[str]:
@@ -129,7 +121,7 @@ class AIVetter:
 
 # ---------- pure, testable ----------
 
-def _parse_verdict(raw: str) -> dict:
+def parse_verdict(raw: str) -> dict:
     """Lenient JSON extraction (models sometimes fence or pad output)."""
     raw = raw.strip()
     if raw.startswith("```"):
@@ -140,19 +132,3 @@ def _parse_verdict(raw: str) -> dict:
         m = re.search(r"\{.*\}", raw, re.DOTALL)
         d = json.loads(m.group()) if m else {}
     return d if isinstance(d, dict) else {}
-
-
-def _format_lines(v: dict, n_images: int = 0) -> list[str]:
-    lines: list[str] = []
-    risk = v.get("risque_arnaque")
-    if isinstance(risk, (int, float)) and risk >= 7:
-        lines.append(f"🚩 IA: risque arnaque {int(risk)}/10")
-    for d in (v.get("defauts") or [])[:4]:
-        lines.append(f"🔧 {d}")
-    for i in (v.get("incoherences") or [])[:3]:
-        lines.append(f"⚠️ {i}")
-    if v.get("avis"):
-        lines.append(f"🤖 {v['avis']}")
-    if lines and n_images == 0:
-        lines.append("(analyse texte seule — photos indisponibles)")
-    return lines

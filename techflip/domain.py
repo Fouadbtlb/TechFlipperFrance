@@ -6,7 +6,7 @@ touches the rest of the pipeline.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
 
@@ -57,7 +57,7 @@ class Listing:
         return d
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Listing":
+    def from_dict(cls, d: dict) -> Listing:
         known = {f for f in cls.__dataclass_fields__}
         clean = {k: v for k, v in d.items() if k in known}
         clean["image_urls"] = tuple(clean.get("image_urls") or ())
@@ -88,4 +88,3 @@ class ScoreResult:
     net_profit: float | None        # total value - (price + logistics)
     bundle_details: dict | None     # raw JSON from LLM
     reasons: tuple[str, ...] = ()   # human-readable explanation
-    delivery_fee_applied: float = 0.0

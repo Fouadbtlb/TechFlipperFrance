@@ -98,7 +98,7 @@ def appraise(items, tracker, realization_factor: float = 0.85,
     floor: float | None = 0.0
     main_val, main_days = -1.0, None
     for it in items:
-        q = tracker.price(it.key, exclude_uid) if exclude_uid else tracker.price(it.key)
+        q = tracker.price(it.key, exclude_uid)
         if q.unit_value is None:
             n_unpriced += 1
             breakdown.append({"key": it.key, "label": it.label, "value": None, "source": "unknown"})

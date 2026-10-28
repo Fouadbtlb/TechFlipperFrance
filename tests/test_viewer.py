@@ -102,7 +102,7 @@ def test_llm_verdict_is_cached_across_resweeps_and_fanout_gets_deals(tmp_path, m
         return {"components": [{"type": "console", "model": "PS5", "qty": 1}],
                 "risque_arnaque": 1, "is_trade": False}
 
-    p._run_llm = fake_llm
+    p.valuer.classify = fake_llm
     p.run_once()
     p.run_once()
     assert calls == ["leboncoin:9"]           # second cycle reused the cached verdict

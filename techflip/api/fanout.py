@@ -13,9 +13,10 @@ so every push has to be worth it:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
+from .. import tuning
 from ..config import Settings
 from ..notify.push import ExpoPush
 from ..storage import Store
@@ -25,13 +26,10 @@ from .deals import deals_for, viewer_for
 log = logging.getLogger(__name__)
 
 PARIS = ZoneInfo("Europe/Paris")
-QUIET_START = time(22, 0)
-QUIET_END = time(8, 0)
-MAX_PER_DAY = 8
-# A deal first seen longer ago than this is no longer news: never pushed.
-NOTIFY_WINDOW = timedelta(hours=12)
-DIGEST_HOUR = 18       # Paris time, for notify_mode="daily"
-DIGEST_WINDOW = timedelta(hours=24)
+QUIET_START, QUIET_END = tuning.QUIET_START, tuning.QUIET_END
+MAX_PER_DAY = tuning.MAX_PUSHES_PER_DAY
+NOTIFY_WINDOW, DIGEST_WINDOW = tuning.NOTIFY_WINDOW, tuning.DIGEST_WINDOW
+DIGEST_HOUR = tuning.DIGEST_HOUR
 NBSP = " "
 
 
@@ -47,6 +45,7 @@ class PushFanout:
         self.max_age_days = max_age_days
         self.push = push or ExpoPush()
         self.clock = clock
+        self._pruned_on = None
 
     def __call__(self, uids: list[str] | None = None) -> int:
         """`uids` (this cycle's fresh deals) is only a hint: every recent deal
@@ -57,9 +56,12 @@ class PushFanout:
         store = Store(self.settings.db_path)
         accounts = Accounts(self.settings.db_path)
         try:
+            if self._pruned_on != now.date():
+                accounts.prune()
+                self._pruned_on = now.date()
             return self._run(store, accounts, now)
         finally:
-            store.conn.close()
+            store.close()
             accounts.close()
 
     def _run(self, store: Store, accounts: Accounts, now: datetime) -> int:

@@ -306,13 +306,13 @@ def test_quiet_hours_hold_pushes_for_a_morning_digest(tmp_path):
 
 
 def test_daily_push_ceiling(tmp_path):
-    from techflip.api import fanout as fo
+    from techflip import tuning
     settings = _settings(tmp_path)
     acc = Accounts(settings.db_path)
     _push_user(acc, "d1")
     push = FakePush()
     fan = PushFanout(settings, push=push, clock=lambda: _paris(12))
-    for i in range(fo.MAX_PER_DAY + 2):
+    for i in range(tuning.MAX_PUSHES_PER_DAY + 2):
         _seed_deal(settings.db_path, f"x{i}")
         fan([])
-    assert len(push.sent) == fo.MAX_PER_DAY
+    assert len(push.sent) == tuning.MAX_PUSHES_PER_DAY

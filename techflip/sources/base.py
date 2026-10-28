@@ -1,4 +1,4 @@
-"""Source interface — implement this to plug in a new site (La Centrale...).
+"""Source interface: implement this to plug in a new site.
 
 Contract:
 - `name`: short source id, stored on every Listing (`Listing.source`).

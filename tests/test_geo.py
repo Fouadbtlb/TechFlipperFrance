@@ -1,4 +1,4 @@
-from techflip.geo import haversine, zone_for_distance, logistics_cost, Locator, LILLE
+from techflip.geo import LILLE, Locator, haversine, logistics_cost, zone_for_distance
 
 
 def test_haversine_known_distances():

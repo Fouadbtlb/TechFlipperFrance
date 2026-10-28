@@ -20,13 +20,18 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
-import threading
 import unicodedata
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from . import tuning
+from .db import connect, open_db
 from .domain import Listing
 
+__all__ = ["Store", "connect", "title_key"]
+
+# The whole schema. Future changes are appended to MIGRATIONS as new steps
+# (see db.py); this first step is the fresh-install schema.
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS listings (
     uid            TEXT PRIMARY KEY,
@@ -35,7 +40,9 @@ CREATE TABLE IF NOT EXISTS listings (
     search_name    TEXT,
     url            TEXT,
     title          TEXT,
+    title_key      TEXT,          -- normalized title, for repost detection
     price          REAL,
+    last_price     REAL,          -- previous price when it changed (price drops)
     brand          TEXT,
     model          TEXT,
     condition      TEXT,
@@ -43,27 +50,40 @@ CREATE TABLE IF NOT EXISTS listings (
     zipcode        TEXT,
     department     TEXT,
     country        TEXT,
+    lat            REAL,
+    lng            REAL,
     owner_type     TEXT,
     has_phone      INTEGER,
     seller_id      TEXT,
     published_at   TEXT,
     fetched_at     TEXT,
-    raw_json       TEXT,
+    raw_json       TEXT,          -- the normalized Listing, for re-valuation and detail
     first_seen     TEXT,
     last_seen      TEXT,
-    status         TEXT DEFAULT 'active',
-    last_price     REAL,
-    true_value     REAL,
-    net_profit     REAL,
-    bundle_details TEXT,
-    primary_component TEXT,
+    status         TEXT DEFAULT 'active',   -- active | gone
+    last_checked   TEXT,          -- last time we confirmed it was still online
+    disappeared_at TEXT,
+    days_on_market REAL,
+    repost_of      TEXT,          -- uid of the first listing of this item
+    reposts        INTEGER,       -- how many times it was put back online
+    primary_component TEXT,       -- set for single-item listings: they teach the tracker
     is_single      INTEGER,
-    zone           TEXT,
+    category       TEXT,
+    true_value     REAL,
+    margin         REAL,          -- true_value - price, before anyone's logistics
     confidence     REAL,
+    appraisal      TEXT,          -- JSON: breakdown, risk, shipping, seller, floor...
+    appraised_at   TEXT,
+    llm_verdict    TEXT,          -- cached vision verdict ...
+    llm_price      REAL,          -- ... valid while the price is unchanged
+    net_profit     REAL,          -- the owner's (Telegram) view, for `cli top`
+    zone           TEXT,
     distance_km    REAL
 );
 CREATE INDEX IF NOT EXISTS idx_listings_seen ON listings(fetched_at);
 CREATE INDEX IF NOT EXISTS idx_listings_primary ON listings(primary_component);
+CREATE INDEX IF NOT EXISTS idx_listings_margin ON listings(margin);
+CREATE INDEX IF NOT EXISTS idx_listings_titlekey ON listings(title_key);
 
 CREATE TABLE IF NOT EXISTS price_history (
     id      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,37 +104,21 @@ CREATE TABLE IF NOT EXISTS alerts (
 CREATE TABLE IF NOT EXISTS price_feedback (
     user_id      TEXT NOT NULL,
     uid          TEXT NOT NULL,
-    verdict      TEXT,               -- low | fair | high: our estimate is too low / right / too high
-    resale_price REAL,               -- what they actually resold it for, if they did
+    verdict      TEXT,            -- low | fair | high: our estimate is too low / right / too high
+    resale_price REAL,            -- what they actually resold it for, if they did
     created_at   TEXT NOT NULL,
     PRIMARY KEY (user_id, uid)
 );
 CREATE INDEX IF NOT EXISTS idx_feedback_uid ON price_feedback(uid);
+
+CREATE TABLE IF NOT EXISTS meta (
+    key        TEXT PRIMARY KEY,
+    value      TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
 """
 
-# Columns added after the first release; applied in place on old databases.
-_LISTING_MIGRATIONS = (
-    ("country", "TEXT"), ("primary_component", "TEXT"), ("is_single", "INTEGER"),
-    ("zone", "TEXT"), ("confidence", "REAL"), ("distance_km", "REAL"),
-    ("lat", "REAL"), ("lng", "REAL"),
-    ("category", "TEXT"),
-    ("margin", "REAL"),            # true_value - price, before anyone's logistics
-    ("appraisal", "TEXT"),         # JSON: breakdown, risk, flags, shipping, seller
-    ("appraised_at", "TEXT"),
-    ("llm_verdict", "TEXT"),       # cached vision-LLM verdict ...
-    ("llm_price", "REAL"),         # ... valid while the price is unchanged
-    ("last_checked", "TEXT"),      # last time we confirmed it was still online
-    ("disappeared_at", "TEXT"),
-    ("days_on_market", "REAL"),
-    ("title_key", "TEXT"),         # normalized title, for repost detection
-    ("repost_of", "TEXT"),         # uid of the first listing of this item
-    ("reposts", "INTEGER"),        # how many times it was put back online
-)
-
-# Crowd correction of the estimates: at most +/-10 %, and only once enough
-# different subscribers agree.
-FEEDBACK_MIN_VOTES = 5
-FEEDBACK_MAX_SHIFT = 0.10
+MIGRATIONS = (("store/001_schema", _SCHEMA),)
 
 
 def title_key(title: str | None) -> str:
@@ -122,44 +126,39 @@ def title_key(title: str | None) -> str:
     t = "".join(c for c in t if not unicodedata.combining(c)).lower()
     return " ".join(re.findall(r"[a-z0-9]+", t))
 
-_init_lock = threading.Lock()
-_initialized: set[str] = set()
-
-
-def connect(db_path: str | Path) -> sqlite3.Connection:
-    conn = sqlite3.connect(str(db_path), timeout=10, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA busy_timeout=10000")
-    conn.execute("PRAGMA foreign_keys=ON")
-    return conn
-
-
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _days_between(start: str | None, end: str) -> float | None:
+    try:
+        return round((datetime.fromisoformat(end) - datetime.fromisoformat(start)).total_seconds() / 86400, 2)
+    except (TypeError, ValueError):
+        return None
 
 
 class Store:
     def __init__(self, db_path: str | Path):
         self.db_path = str(db_path)
-        self.conn = connect(db_path)
-        with _init_lock:
-            if self.db_path not in _initialized:
-                self.conn.execute("PRAGMA journal_mode=WAL")
-                self.conn.executescript(_SCHEMA)
-                self._migrate()
-                _initialized.add(self.db_path)
+        self.conn = open_db(db_path, "store", MIGRATIONS)
 
-    def _migrate(self):
-        acols = {r["name"] for r in self.conn.execute("PRAGMA table_info(alerts)")}
-        if "tier" not in acols:
-            self.conn.execute("ALTER TABLE alerts ADD COLUMN tier TEXT DEFAULT 'confirmed'")
-        lcols = {r["name"] for r in self.conn.execute("PRAGMA table_info(listings)")}
-        for col, typ in _LISTING_MIGRATIONS:
-            if col not in lcols:
-                self.conn.execute(f"ALTER TABLE listings ADD COLUMN {col} {typ}")
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_margin ON listings(margin)")
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_titlekey ON listings(title_key)")
+    def close(self) -> None:
+        self.conn.close()
+
+    # ---------- meta (scanner heartbeat, small state) ----------
+
+    def set_meta(self, key: str, value: dict) -> None:
+        self.conn.execute(
+            "INSERT INTO meta (key, value, updated_at) VALUES (?,?,?) "
+            "ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at",
+            (key, json.dumps(value, ensure_ascii=False), _now()))
         self.conn.commit()
+
+    def get_meta(self, key: str) -> dict | None:
+        row = self.conn.execute("SELECT value, updated_at FROM meta WHERE key=?", (key,)).fetchone()
+        if row is None:
+            return None
+        return {**json.loads(row["value"]), "updated_at": row["updated_at"]}
 
     # ---------- listings ----------
 
@@ -221,7 +220,7 @@ class Store:
             self.conn.execute("UPDATE listings SET title_key=? WHERE uid=?", (key, l.uid))
             return
         since = datetime.fromisoformat(l.fetched_at.replace("Z", "+00:00"))
-        since = (since - timedelta(days=60)).isoformat()
+        since = (since - tuning.REPOST_WINDOW).isoformat()
         if l.seller_id:
             prev = self.conn.execute(
                 "SELECT uid, repost_of, reposts FROM listings WHERE title_key=? AND source=? "
@@ -303,12 +302,7 @@ class Store:
         row = self.conn.execute("SELECT first_seen, status FROM listings WHERE uid=?", (uid,)).fetchone()
         if row is None or row["status"] == "gone":
             return
-        days = None
-        try:
-            days = round((datetime.fromisoformat(at) - datetime.fromisoformat(row["first_seen"]))
-                         .total_seconds() / 86400, 2)
-        except (TypeError, ValueError):
-            pass
+        days = _days_between(row["first_seen"], at)
         self.conn.execute(
             "UPDATE listings SET status='gone', disappeared_at=?, days_on_market=?, last_checked=? "
             "WHERE uid=?", (at, days, at, uid))
@@ -323,9 +317,9 @@ class Store:
         can see (every 3 h, so dead deals leave the feed), then single items
         that teach the tracker (every 2 days)."""
         now = datetime.now(timezone.utc)
-        deals_before = (now - timedelta(hours=3)).isoformat()
-        comps_before = (now - timedelta(days=2)).isoformat()
-        horizon = (now - timedelta(days=60)).isoformat()
+        deals_before = (now - tuning.RECHECK_DEALS_EVERY).isoformat()
+        comps_before = (now - tuning.RECHECK_COMPONENTS_EVERY).isoformat()
+        horizon = (now - tuning.RECHECK_HORIZON).isoformat()
         return self.conn.execute(
             """SELECT uid, source_id, url FROM listings
                WHERE status='active' AND source=? AND first_seen>=?
@@ -364,10 +358,10 @@ class Store:
                GROUP BY f.verdict""", (key, since_iso)).fetchall()
         votes = {r["v"]: r["n"] for r in rows}
         total = sum(votes.values())
-        if total < FEEDBACK_MIN_VOTES:
+        if total < tuning.FEEDBACK_MIN_VOTES:
             return 1.0
         lean = (votes.get("low", 0) - votes.get("high", 0)) / total
-        return round(1.0 + FEEDBACK_MAX_SHIFT * lean, 4)
+        return round(1.0 + tuning.FEEDBACK_MAX_SHIFT * lean, 4)
 
     def add_feedback(self, user_id: str, uid: str, verdict: str | None, resale_price: float | None):
         self.conn.execute(
@@ -432,9 +426,6 @@ class Store:
 
     # ---------- owner alerts ----------
 
-    def already_alerted(self, uid: str) -> bool:
-        return self.alert_tier(uid) is not None
-
     def alert_tier(self, uid: str) -> str | None:
         row = self.conn.execute("SELECT tier FROM alerts WHERE uid = ?", (uid,)).fetchone()
         return (row["tier"] or "confirmed") if row else None
@@ -456,6 +447,30 @@ class Store:
                WHERE a.uid IS NULL AND l.status='active' AND l.published_at >= ?""",
             (since_iso,),
         ).fetchall()
+
+    # ---------- retention ----------
+
+    def prune(self, keep_days: int = 90) -> dict:
+        """Keep the database small: what is older than the tracker's window is
+        never read again. Gone listings past the window, and listings nobody
+        appraised or learned from that have not been seen for that long, are
+        deleted with their price history. Feedback stays (it is sale data)."""
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=keep_days)).isoformat()
+        conn = self.conn
+        doomed = """SELECT uid FROM listings WHERE
+                      (status='gone' AND disappeared_at < :c)
+                   OR (last_seen < :c AND primary_component IS NULL AND (margin IS NULL OR margin <= 0))"""
+        history = conn.execute(f"DELETE FROM price_history WHERE uid IN ({doomed})", {"c": cutoff}).rowcount
+        alerts = conn.execute(f"DELETE FROM alerts WHERE uid IN ({doomed})", {"c": cutoff}).rowcount
+        listings = conn.execute(f"DELETE FROM listings WHERE uid IN ({doomed})", {"c": cutoff}).rowcount
+        # Cached vision verdicts and the full listing JSON are only needed while
+        # a listing is online.
+        conn.execute("UPDATE listings SET llm_verdict=NULL, raw_json=NULL "
+                     "WHERE status='gone' AND raw_json IS NOT NULL AND disappeared_at < :c",
+                     {"c": (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()})
+        conn.commit()
+        conn.execute("PRAGMA incremental_vacuum")
+        return {"listings": listings, "price_history": history, "alerts": alerts}
 
     # ---------- stats ----------
 

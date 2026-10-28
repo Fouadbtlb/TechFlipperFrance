@@ -1,5 +1,5 @@
-from techflip.sources.deuxememain import DeuxiemeMainSource, _with_offset
 from techflip.geo import Locator
+from techflip.sources.deuxememain import DeuxiemeMainSource, _with_offset
 
 
 def test_normalize_captures_latlng_and_price():

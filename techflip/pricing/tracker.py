@@ -47,11 +47,11 @@ class PriceTracker:
         since = (datetime.now(timezone.utc) - timedelta(days=self.window_days)).isoformat()
         band = (lambda p: 0.5 * seed <= p <= 2 * seed) if seed else (lambda p: True)
 
-        sold = [p for p in self._optional("sold_prices", key, since, exclude_uid) if p is not None and band(p)]
-        asking = [p for p in self._prices(key, since, exclude_uid) if p is not None and band(p)]
-        days = self._optional("days_to_sell", key, since)
+        sold = [p for p in self.store.sold_prices(key, since, exclude_uid) if p is not None and band(p)]
+        asking = [p for p in self.store.component_prices(key, since, exclude_uid) if p is not None and band(p)]
+        days = self.store.days_to_sell(key, since)
         dts = round(median(days), 1) if len(days) >= 3 else None
-        crowd = self._crowd(key, since)
+        crowd = self.store.feedback_factor(key, since)
 
         if len(sold) >= self.min_comparables:
             base, source, n, pool = median(sold), "sold", len(sold), sold
@@ -65,17 +65,3 @@ class PriceTracker:
 
         low = round(_p20(pool) * crowd, 2) if pool and len(pool) >= self.min_comparables else None
         return PriceQuote(key, round(base * crowd, 2), source, n, low, dts, crowd)
-
-    def _prices(self, key, since, exclude_uid):
-        if exclude_uid is None:
-            return self.store.component_prices(key, since)
-        return self.store.component_prices(key, since, exclude_uid=exclude_uid)
-
-    def _optional(self, method: str, *args):
-        """Richer evidence when the store provides it (tests use bare fakes)."""
-        fn = getattr(self.store, method, None)
-        return fn(*args) if fn else []
-
-    def _crowd(self, key: str, since: str) -> float:
-        fn = getattr(self.store, "feedback_factor", None)
-        return fn(key, since) if fn else 1.0

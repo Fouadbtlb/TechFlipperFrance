@@ -13,6 +13,7 @@ conservative choice.
 from __future__ import annotations
 
 import logging
+import math
 from math import asin, cos, radians, sin, sqrt
 
 log = logging.getLogger(__name__)
@@ -148,7 +149,7 @@ def _pgeocode_resolver():
     def query(z: str):
         r = nomi.query_postal_code(z)
         lat, lon = r["latitude"], r["longitude"]
-        if lat != lat or lon != lon:  # NaN when unknown
+        if math.isnan(lat) or math.isnan(lon):  # unknown postcode
             return None
         return (float(lat), float(lon))
 

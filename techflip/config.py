@@ -72,9 +72,19 @@ class Settings:
     searches: tuple[SearchConfig, ...] = field(default_factory=tuple)
 
 
-def _f(name: str, default: float) -> float:
+def _float(name: str, default: float) -> float:
     v = os.environ.get(name)
     return float(v) if v else default
+
+
+def _int(name: str, default: int) -> int:
+    v = os.environ.get(name)
+    return int(v) if v else default
+
+
+def _bool(name: str, default: bool) -> bool:
+    v = os.environ.get(name)
+    return default if not v else v not in ("0", "false", "no")
 
 
 def load_settings(searches_file: str | Path = "config/searches.yaml") -> Settings:
@@ -83,8 +93,7 @@ def load_settings(searches_file: str | Path = "config/searches.yaml") -> Setting
     if path.exists():
         raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         default_exclude = tuple(raw.get("default_exclude", []))
-        env_cap = os.environ.get("MAX_PRICE")
-        price_cap = float(env_cap) if env_cap else None
+        price_cap = _float("MAX_PRICE", 0) or None
         for item in raw.get("searches", []):
             mp = item.get("max_price")
             if price_cap is not None:
@@ -106,29 +115,29 @@ def load_settings(searches_file: str | Path = "config/searches.yaml") -> Setting
         telegram_token=os.environ.get("TELEGRAM_BOT_TOKEN", ""),
         telegram_chat_id=os.environ.get("TELEGRAM_CHAT_ID", ""),
         db_path=Path(os.environ.get("TECHFLIP_DB", "techflip.db")),
-        poll_seconds_min=int(os.environ.get("POLL_SECONDS_MIN", 90)),
-        poll_seconds_max=int(os.environ.get("POLL_SECONDS_MAX", 240)),
-        night_pause=os.environ.get("NIGHT_PAUSE", "1") != "0",
+        poll_seconds_min=_int("POLL_SECONDS_MIN", 90),
+        poll_seconds_max=_int("POLL_SECONDS_MAX", 240),
+        night_pause=_bool("NIGHT_PAUSE", True),
         impersonate=os.environ.get("LBC_IMPERSONATE", "safari_ios"),
         ai_url=os.environ.get("AI_URL", "http://localhost:11434/v1"),
         ai_model=os.environ.get("AI_MODEL", "qwen2.5vl:7b"),
-        ai_max_images=int(os.environ.get("AI_MAX_IMAGES", 1)),
+        ai_max_images=_int("AI_MAX_IMAGES", 1),
         pricebook_path=os.environ.get("PRICEBOOK", "config/pricebook.yaml"),
-        min_comparables=int(os.environ.get("MIN_COMPARABLES", 5)),
-        window_days=int(os.environ.get("WINDOW_DAYS", 90)),
-        realization_factor=_f("REALIZATION_FACTOR", 0.85),
-        max_eval_price=_f("MAX_EVAL_PRICE", 1500),
-        home=(_f("HOME_LAT", 50.6292), _f("HOME_LNG", 3.0573)),
+        min_comparables=_int("MIN_COMPARABLES", 5),
+        window_days=_int("WINDOW_DAYS", 90),
+        realization_factor=_float("REALIZATION_FACTOR", 0.85),
+        max_eval_price=_float("MAX_EVAL_PRICE", 1500),
+        home=(_float("HOME_LAT", 50.6292), _float("HOME_LNG", 3.0573)),
         home_label=os.environ.get("HOME_LABEL", "Lille"),
-        easy_km=_f("EASY_KM", 60),
-        medium_km=_f("MEDIUM_KM", 150),
-        cost_per_km=_f("COST_PER_KM", 0.25),
-        easy_bar=_f("EASY_BAR", 30),
-        medium_bar=_f("MEDIUM_BAR", 80),
-        hard_bar=_f("HARD_BAR", 120),
-        min_conf_medium=_f("MIN_CONF_MEDIUM", 0.4),
-        min_conf_hard=_f("MIN_CONF_HARD", 0.6),
-        departure_checks=int(os.environ.get("DEPARTURE_CHECKS", 12)),
+        easy_km=_float("EASY_KM", 60),
+        medium_km=_float("MEDIUM_KM", 150),
+        cost_per_km=_float("COST_PER_KM", 0.25),
+        easy_bar=_float("EASY_BAR", 30),
+        medium_bar=_float("MEDIUM_BAR", 80),
+        hard_bar=_float("HARD_BAR", 120),
+        min_conf_medium=_float("MIN_CONF_MEDIUM", 0.4),
+        min_conf_hard=_float("MIN_CONF_HARD", 0.6),
+        departure_checks=_int("DEPARTURE_CHECKS", 12),
         searches=tuple(searches),
     )
 
@@ -165,8 +174,8 @@ def load_api_settings() -> ApiSettings:
                            "(python -c 'import secrets;print(secrets.token_urlsafe(48))')")
     return ApiSettings(
         jwt_secret=secret,
-        access_ttl_s=int(os.environ.get("ACCESS_TTL_S", 900)),
-        refresh_ttl_s=int(os.environ.get("REFRESH_TTL_S", 60 * 86400)),
+        access_ttl_s=_int("ACCESS_TTL_S", 900),
+        refresh_ttl_s=_int("REFRESH_TTL_S", 60 * 86400),
         attest_mode=os.environ.get("ATTEST_MODE", "enforce"),
         ios_app_id=os.environ.get("IOS_APP_ID", ""),
         ios_attest_env=os.environ.get("IOS_ATTEST_ENV", "production"),
@@ -174,13 +183,13 @@ def load_api_settings() -> ApiSettings:
             "APPLE_ROOT_CA", "config/Apple_App_Attestation_Root_CA.pem"),
         android_package=os.environ.get("ANDROID_PACKAGE", ""),
         play_service_account_json=os.environ.get("PLAY_SERVICE_ACCOUNT_JSON", ""),
-        play_require_licensed=os.environ.get("PLAY_REQUIRE_LICENSED", "1") != "0",
+        play_require_licensed=_bool("PLAY_REQUIRE_LICENSED", True),
         revenuecat_secret_key=os.environ.get("REVENUECAT_SECRET_KEY", ""),
         revenuecat_entitlement=os.environ.get("REVENUECAT_ENTITLEMENT", "pro"),
         revenuecat_webhook_auth=os.environ.get("REVENUECAT_WEBHOOK_AUTH", ""),
         expo_access_token=os.environ.get("EXPO_ACCESS_TOKEN", ""),
-        deals_max_age_days=int(os.environ.get("DEALS_MAX_AGE_DAYS", 7)),
-        detail_views_per_day=int(os.environ.get("DETAIL_VIEWS_PER_DAY", 400)),
-        list_calls_per_minute=int(os.environ.get("LIST_CALLS_PER_MINUTE", 60)),
+        deals_max_age_days=_int("DEALS_MAX_AGE_DAYS", 7),
+        detail_views_per_day=_int("DETAIL_VIEWS_PER_DAY", 400),
+        list_calls_per_minute=_int("LIST_CALLS_PER_MINUTE", 60),
         cors_origins=tuple(o for o in os.environ.get("CORS_ORIGINS", "").split(",") if o),
     )

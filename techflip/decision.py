@@ -24,6 +24,14 @@ class Decision:
     reasons: tuple[str, ...]
 
 
+def policy_from_settings(settings) -> ZonePolicy:
+    """The house bars and confidence floors from the deployment settings."""
+    return ZonePolicy(
+        bars={"EASY": settings.easy_bar, "MEDIUM": settings.medium_bar, "HARD": settings.hard_bar},
+        min_conf={"EASY": 0.0, "MEDIUM": settings.min_conf_medium, "HARD": settings.min_conf_hard},
+    )
+
+
 def default_policy() -> ZonePolicy:
     return ZonePolicy(
         bars={"EASY": 30.0, "MEDIUM": 80.0, "HARD": 120.0},

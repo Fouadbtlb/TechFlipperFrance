@@ -21,7 +21,7 @@ api = [
     "cryptography>=42",
     "google-auth[requests]>=2.30",
 ]
-dev = ["pytest>=8.0", "techflip[api]"]
+dev = ["pytest>=8.0", "ruff>=0.6", "techflip[api]"]
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -32,3 +32,13 @@ include = ["techflip*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+# F/E9: real errors, B: likely bugs, UP: modern syntax, SIM: simpler code,
+# I: one import order everywhere.
+select = ["F", "E9", "B", "UP", "SIM", "I"]
+ignore = ["SIM108"]  # ternaries are not always clearer

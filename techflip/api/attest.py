@@ -145,7 +145,7 @@ def _check_chain(chain: list[x509.Certificate], root: x509.Certificate,
                  now: datetime | None) -> None:
     now = now or datetime.now(timezone.utc)
     issuers = chain[1:] + [root]
-    for cert, issuer in zip(chain, issuers):
+    for cert, issuer in zip(chain, issuers, strict=True):
         if not (cert.not_valid_before_utc <= now <= cert.not_valid_after_utc):
             raise AttestationError("certificate expired or not yet valid")
         try:

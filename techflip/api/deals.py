@@ -8,8 +8,9 @@ from __future__ import annotations
 import json
 from datetime import datetime, timedelta, timezone
 
+from .. import tuning
 from ..config import Settings
-from ..decision import ZonePolicy
+from ..decision import policy_from_settings
 from ..storage import Store
 from ..viewer import Judgement, Viewer, judge, policy_for
 
@@ -18,19 +19,12 @@ CATEGORIES = ("console", "pc", "gpu", "cpu", "laptop", "phone", "monitor", "part
               "accessory", "other")
 
 
-def default_policy(settings: Settings) -> ZonePolicy:
-    return ZonePolicy(
-        bars={"EASY": settings.easy_bar, "MEDIUM": settings.medium_bar, "HARD": settings.hard_bar},
-        min_conf={"EASY": 0.0, "MEDIUM": settings.min_conf_medium, "HARD": settings.min_conf_hard},
-    )
-
-
 def viewer_for(user, settings: Settings) -> Viewer | None:
     if user["home_lat"] is None or user["home_lng"] is None:
         return None
     return Viewer(
         home=(user["home_lat"], user["home_lng"]),
-        policy=policy_for(user["min_profit"], default_policy(settings)),
+        policy=policy_for(user["min_profit"], policy_from_settings(settings)),
         easy_km=settings.easy_km, medium_km=settings.medium_km,
         cost_per_km=settings.cost_per_km,
         radius_km=user["radius_km"],
@@ -45,7 +39,7 @@ def since_iso(max_age_days: int) -> str:
 
 # Below this, or with a serious risk signal, a deal goes to "À vérifier"
 # instead of mixing with the solid ones.
-RELIABLE_CONFIDENCE = 0.4
+RELIABLE_CONFIDENCE = tuning.RELIABLE_CONFIDENCE
 BUCKETS = ("reliable", "check")
 
 
@@ -166,8 +160,8 @@ def negotiation(row, j: Judgement, viewer: Viewer) -> dict | None:
         return None
     # Room to ask depends on the listing's own signals, never below 75 % of the ask.
     reposts = row["reposts"] or 0
-    pct = 0.82 if reposts else 0.88
-    opening = min(_round5(max(0.75 * price, min(price * pct, max_price))), max_price)
+    pct = 1 - (tuning.OPENING_DISCOUNT_REPOSTED if reposts else tuning.OPENING_DISCOUNT)
+    opening = min(_round5(max(tuning.OPENING_FLOOR * price, min(price * pct, max_price))), max_price)
     if opening >= price:
         opening = None
     title = (row["title"] or "article")[:60]

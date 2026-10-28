@@ -1,6 +1,7 @@
 import time
+
 from techflip.domain import Listing
-from techflip.scoring.ai import AIVetter, _parse_verdict
+from techflip.scoring.ai import AIVetter
 
 v = AIVetter(url="http://localhost:11434/v1", model="qwen2.5vl:7b", max_images=0, timeout=180)
 l = Listing(
@@ -13,9 +14,6 @@ l = Listing(
     city="Lille", zipcode="59000",
 )
 t = time.time()
-raw = v._chat(v._prompt(l, None, None), [])
-dt = time.time() - t
-print(f"--- RAW ({dt:.1f}s) ---")
-print(raw[:900])
-print("--- PARSED ---")
-print(_parse_verdict(raw))
+verdict = v.classify(l)
+print(f"--- VERDICT ({time.time() - t:.1f}s) ---")
+print(verdict)

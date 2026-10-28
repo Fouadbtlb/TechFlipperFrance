@@ -43,7 +43,8 @@ class ExpoPush:
             except Exception:
                 log.warning("Expo push failed for %d message(s)", len(chunk), exc_info=True)
                 continue
-            for msg, t in zip(chunk, tickets):
+            # Expo answers one ticket per message, in order.
+            for msg, t in zip(chunk, tickets, strict=False):
                 if t.get("status") == "error" and \
                         (t.get("details") or {}).get("error") == "DeviceNotRegistered":
                     dead.append(msg["to"])

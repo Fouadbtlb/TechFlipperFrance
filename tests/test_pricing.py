@@ -1,7 +1,7 @@
+from techflip.pricing.appraise import Item, appraise, build_items
 from techflip.pricing.catalog import load_catalog
 from techflip.pricing.extract import extract_components, primary_key, recognize
 from techflip.pricing.tracker import PriceTracker
-from techflip.pricing.appraise import appraise, build_items, Item
 
 CATALOG = load_catalog("config/pricebook.yaml")
 
@@ -57,8 +57,17 @@ class FakeStore:
     def __init__(self, data):
         self.data = data
 
-    def component_prices(self, key, since):
+    def component_prices(self, key, since, exclude_uid=None):
         return self.data.get(key, [])
+
+    def sold_prices(self, key, since, exclude_uid=None):
+        return []
+
+    def days_to_sell(self, key, since):
+        return []
+
+    def feedback_factor(self, key, since):
+        return 1.0
 
 
 def test_tracker_seed_when_no_data():
@@ -95,7 +104,7 @@ class FixedTracker:
     def __init__(self, quotes):
         self.quotes = quotes
 
-    def price(self, key):
+    def price(self, key, exclude_uid=None):
         return self.quotes[key]
 
 

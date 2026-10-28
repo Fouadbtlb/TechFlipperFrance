@@ -1,4 +1,4 @@
-"""Telegram alerts via the raw Bot API (stdlib urllib — zero extra deps).
+"""Telegram alerts via the raw Bot API (stdlib urllib, no extra dependency).
 
 Setup (one-time, free):
 1. Talk to @BotFather on Telegram → /newbot → copy the token
@@ -14,9 +14,6 @@ import urllib.parse
 import urllib.request
 
 from ..domain import Listing, ScoreResult
-
-
-
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +45,7 @@ class TelegramNotifier:
         badge = "🎯"
 
         lines = [
-            f"{badge} <b>PROFIT: +{s.net_profit:,.0f}€</b> — {_esc(l.title[:55])}",
+            f"{badge} <b>PROFIT: +{s.net_profit:,.0f}€</b> · {_esc(l.title[:55])}",
             f"<b>{l.price:,.0f} €</b> · Revente estimée {s.true_value:,.0f} €".replace(",", " "),
             f"{l.condition or '?'} · {loc}",
         ]
@@ -56,7 +53,7 @@ class TelegramNotifier:
         lines += [f"{_esc(r)}" for r in s.reasons if r[:2] in ("🚩", "⚠️")]
 
         for x in extra_lines:
-            if not x or x[:1] in (" ", "—") or x.lstrip()[:1] == "·":
+            if not x or x[:1] == " " or x.lstrip()[:1] == "·":
                 continue
             lines.append(_esc(x if len(x) <= 78 else x[:77] + "…"))
 

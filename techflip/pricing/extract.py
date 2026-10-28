@@ -8,7 +8,6 @@ condition on top of this.
 from __future__ import annotations
 
 import re
-
 from dataclasses import dataclass
 
 from .catalog import Catalog
@@ -52,7 +51,7 @@ _BUNDLE_TOKENS = {"pc", "tour", "setup", "ordinateur", "config", "lot",
                   "bundle", "unite", "unité", "combo", "pack"}
 
 
-def _is_bundle(title: str) -> bool:
+def is_bundle(title: str) -> bool:
     toks = set(re.split(r"[^0-9a-zà-ÿ]+", (title or "").lower()))
     return bool(toks & _BUNDLE_TOKENS)
 
@@ -79,7 +78,7 @@ def recognize(title: str, description: str, catalog: Catalog) -> list[Component]
     # Only a whole-machine/bundle listing absorbs parts named in its description.
     # A single-item sale ("RTX 4070 videokaart", "manette PS5") is valued on its
     # title alone, so context/compatibility mentions can't inflate it.
-    if _is_bundle(title):
+    if is_bundle(title):
         all_comps = extract_components(f"{title or ''} {description or ''}", catalog)
     else:
         all_comps = title_comps

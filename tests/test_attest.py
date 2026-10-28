@@ -1,8 +1,7 @@
 import pytest
 from cryptography.hazmat.primitives import serialization
 
-from techflip.api.attest import (AAGUID_DEV, AppleAppAttest, AttestationError,
-                                 check_play_verdict)
+from techflip.api.attest import AAGUID_DEV, AppleAppAttest, AttestationError, check_play_verdict
 from tests.attest_fixtures import APP_ID, FakeApple, FakeDevice
 
 

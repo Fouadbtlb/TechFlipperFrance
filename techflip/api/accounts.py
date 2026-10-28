@@ -12,14 +12,13 @@ import hashlib
 import json
 import secrets
 import sqlite3
-import threading
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from ..storage import connect
+from ..db import open_db
 
-_SCHEMA = """
+_BASE = """
 CREATE TABLE IF NOT EXISTS users (
     id               TEXT PRIMARY KEY,
     created_at       TEXT NOT NULL,
@@ -100,8 +99,8 @@ CREATE TABLE IF NOT EXISTS usage (
 PREF_FIELDS = ("home_lat", "home_lng", "home_label", "radius_km", "include_shipping",
                "min_profit", "categories", "notify", "notify_mode")
 
-_init_lock = threading.Lock()
-_initialized: set[str] = set()
+# Append only; never edit a shipped step (see techflip/db.py).
+MIGRATIONS = (("accounts/001_schema", _BASE),)
 
 
 def _now() -> datetime:
@@ -124,16 +123,7 @@ class TokenReuse(Exception):
 class Accounts:
     def __init__(self, db_path: str | Path):
         self.db_path = str(db_path)
-        self.conn: sqlite3.Connection = connect(db_path)
-        with _init_lock:
-            if self.db_path not in _initialized:
-                self.conn.execute("PRAGMA journal_mode=WAL")
-                self.conn.executescript(_SCHEMA)
-                cols = {r["name"] for r in self.conn.execute("PRAGMA table_info(users)")}
-                if "notify_mode" not in cols:
-                    self.conn.execute("ALTER TABLE users ADD COLUMN notify_mode TEXT DEFAULT 'instant'")
-                self.conn.commit()
-                _initialized.add(self.db_path)
+        self.conn: sqlite3.Connection = open_db(db_path, "accounts", MIGRATIONS)
 
     def close(self):
         self.conn.close()
@@ -332,6 +322,19 @@ class Accounts:
         self.conn.executemany(
             "INSERT OR IGNORE INTO notified (user_id, uid, sent_at) VALUES (?,?,?)",
             [(user_id, u, now) for u in uids])
+        self.conn.commit()
+
+    # ---------- retention ----------
+
+    def prune(self, keep_days: int = 30) -> None:
+        """Drop bookkeeping that only matters for a few days: push and usage
+        logs, expired challenges and refresh tokens."""
+        now = _now()
+        cutoff = _iso(now - timedelta(days=keep_days))
+        self.conn.execute("DELETE FROM notified WHERE sent_at < ?", (cutoff,))
+        self.conn.execute("DELETE FROM usage WHERE day < ?", (cutoff[:10],))
+        self.conn.execute("DELETE FROM challenges WHERE expires_at < ?", (_iso(now),))
+        self.conn.execute("DELETE FROM refresh_tokens WHERE expires_at < ?", (_iso(now),))
         self.conn.commit()
 
     # ---------- usage counters (abuse ceilings) ----------

@@ -22,10 +22,13 @@ shipping. Ships as a paid iOS/Android app, with Telegram alerts for the owner.
 | Path | What |
 |------|------|
 | `techflip/` | Scanner + valuation engine (Python) |
+| `techflip/valuation.py` | What a listing is worth, in named steps with explicit rejections |
 | `techflip/viewer.py` | Per-viewer decision: same listing, different profit per home |
-| `techflip/api/` | Paid-app backend: auth, attestation, entitlements, deals, push |
+| `techflip/tuning.py` | Every business rule you may want to adjust, in one file |
+| `techflip/api/` | Paid-app backend: routes per domain, dependency chain, services |
 | `mobile/` | Expo / React Native app (iOS + Android) |
 | `deploy/` | Docker Compose + Caddy for a single VPS |
+| `docs/ARCHITECTURE.md` | Where everything is and how to change it (French) |
 | `docs/SECURITY.md` | Why a cracked app gets nothing |
 | `docs/DEPLOY.md` | Step-by-step to the stores |
 | `docs/DESIGN.md` | Valuation design |
@@ -60,7 +63,7 @@ beyond) plus that viewer's own minimum profit, radius and categories.
 ```bash
 pip install -e ".[dev]"
 cp .env.example .env
-python -m pytest                          # 98 tests
+scripts/check.sh                          # lint + 107 tests (+ app types and lint)
 ```
 
 Scanner:
@@ -69,6 +72,7 @@ Scanner:
 python -m techflip.cli check              # validate config + ping Telegram
 python -m techflip.cli bootstrap          # warm up the price tracker
 python -m techflip.cli loop               # run continuously (APP_BACKEND=1 to push to app users)
+python -m techflip.cli health             # is the scanner alive, database counters
 python -m techflip.cli top [n]            # best stored deals
 python -m techflip.cli price rtx 4070     # what the tracker thinks a part is worth
 ```

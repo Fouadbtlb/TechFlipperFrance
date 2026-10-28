@@ -67,3 +67,36 @@ def _account_age_days(
     today = today or dt.date.today()
     created = dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
     return max(0, (today - created).days)
+
+
+def seller_summary(
+    seller: SellerInfo | None,
+    discount_pct: float | None,
+    today: dt.date | None = None,
+) -> dict:
+    """Structured version of seller_lines() for the app. `flags` levels:
+    "risk" (scam pattern) and "warn" (worth a question to the seller)."""
+    if seller is None:
+        return {"known": False, "flags": [{"level": "warn", "text": "Profil vendeur non vérifiable"}]}
+    discount = discount_pct or 0.0
+    age_days = _account_age_days(seller.registered_at, today)
+    flags: list[dict] = []
+    if age_days is not None and age_days < 30:
+        if discount >= 20:
+            flags.append({"level": "risk",
+                          "text": f"Compte créé il y a {age_days} j et prix très bas"})
+        else:
+            flags.append({"level": "warn", "text": f"Compte créé il y a {age_days} j"})
+    if seller.total_ads is not None and seller.total_ads <= 1 and discount >= 20:
+        flags.append({"level": "warn", "text": "Première annonce de ce vendeur"})
+    if seller.account_type == "pro" and discount >= 25:
+        flags.append({"level": "warn", "text": "Pro très sous le marché, à vérifier"})
+    return {
+        "known": True,
+        "name": seller.name,
+        "kind": {"private": "particulier", "pro": "pro"}.get(seller.account_type or ""),
+        "age_days": age_days,
+        "rating": seller.feedback_score,
+        "reviews": seller.feedback_count,
+        "flags": flags,
+    }

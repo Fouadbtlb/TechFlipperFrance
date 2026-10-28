@@ -2,7 +2,8 @@
 
   python -m techflip.cli check              validate config, ping Telegram
   python -m techflip.cli once               one polling cycle (good first test)
-  python -m techflip.cli loop               run forever (the real thing)
+  python -m techflip.cli loop               run the scanner forever (+ app pushes)
+  python -m techflip.cli serve [port]       run the app API (default 8000)
   python -m techflip.cli bootstrap [pages]  one-shot market warm-up (default 3)
   python -m techflip.cli top [n]            best stored deals, in the terminal
   python -m techflip.cli price <query>      what the tracker thinks a part is worth
@@ -11,11 +12,11 @@
 """
 from __future__ import annotations
 
-import json
 import logging
+import os
 import sys
 
-from .config import SearchConfig, load_settings
+from .config import SearchConfig, load_api_settings, load_settings
 from .domain import Listing, ScoreResult
 from .pipeline import Pipeline
 from .pricing.appraise import appraise, build_items
@@ -55,7 +56,7 @@ def main():
             listing_uid="leboncoin:123", true_value=780.0, net_profit=248.0,
             bundle_details={}, reasons=(),
         )
-        extra = ["🟢 EASY · 0km de Lille · logistique 10€ (retrait sur place)",
+        extra = [f"🟢 EASY · 0km de {settings.home_label} · logistique 10€ (retrait sur place)",
                  "RTX 4070: 450€ (marché) · Ryzen 5 5600: 100€ (estim)"]
         try:
             p.notifier.send_deal(fake, score, extra)
@@ -67,7 +68,10 @@ def main():
         print(f"Cycle terminé: {Pipeline(settings).run_once()}")
 
     elif cmd == "loop":
-        Pipeline(settings).run_forever()
+        _pipeline_with_app(settings).run_forever()
+
+    elif cmd == "serve":
+        _serve(settings, int(sys.argv[2]) if len(sys.argv) > 2 else 8000)
 
     elif cmd == "bootstrap":
         pages = int(sys.argv[2]) if len(sys.argv) > 2 else 3
@@ -88,6 +92,39 @@ def main():
     else:
         print(__doc__)
         sys.exit(1)
+
+
+def _pipeline_with_app(settings) -> Pipeline:
+    """With APP_BACKEND=1 the scanner also pushes deals to subscribers and
+    spends LLM time where subscribers actually live."""
+    if os.environ.get("APP_BACKEND") != "1":
+        return Pipeline(settings)
+    from .api.accounts import Accounts
+    from .api.fanout import PushFanout
+    from .notify.push import ExpoPush
+
+    api = load_api_settings()
+    fanout = PushFanout(settings, api.deals_max_age_days, ExpoPush(api.expo_access_token))
+
+    def origins():
+        a = Accounts(settings.db_path)
+        try:
+            return [settings.home, *a.active_origins()]
+        finally:
+            a.close()
+
+    return Pipeline(settings, fanout=fanout, origins=origins)
+
+
+def _serve(settings, port: int):
+    import uvicorn
+
+    from .api.app import create_app
+
+    api = load_api_settings()
+    app = create_app(settings, api, dev_unlock_all=os.environ.get("DEV_UNLOCK_ALL") == "1")
+    uvicorn.run(app, host=os.environ.get("API_HOST", "127.0.0.1"), port=port,
+                proxy_headers=True, forwarded_allow_ips=os.environ.get("FORWARDED_ALLOW_IPS", "127.0.0.1"))
 
 
 def _print_top(settings, n: int):

@@ -1,0 +1,19 @@
+{
+  "cli": { "appVersionSource": "remote" },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": { "EXPO_PUBLIC_APP_ATTEST_ENV": "development" }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": { "EXPO_PUBLIC_APP_ATTEST_ENV": "production" }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": { "EXPO_PUBLIC_APP_ATTEST_ENV": "production", "EXPO_PUBLIC_INSECURE_DEV_AUTH": "0" }
+    }
+  },
+  "submit": { "production": {} }
+}

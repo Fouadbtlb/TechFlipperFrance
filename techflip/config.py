@@ -1,8 +1,11 @@
 """Configuration.
 
 Two layers:
-- .env                 -> secrets & runtime knobs (Telegram token, thresholds)
+- .env                 -> secrets & runtime knobs (tokens, thresholds, API keys)
 - config/searches.yaml -> the searches to monitor (paste Leboncoin URLs)
+
+The API's settings live in their own dataclass (ApiSettings) so the scanner can
+run on a box that has none of the app secrets.
 """
 from __future__ import annotations
 
@@ -51,6 +54,9 @@ class Settings:
     window_days: int = 90
     realization_factor: float = 0.85
     max_eval_price: float = 1500
+    # owner's home: origin for Telegram alerts and the default app origin
+    home: tuple[float, float] = (50.6292, 3.0573)
+    home_label: str = "Lille"
     # geo (km) + logistics
     easy_km: float = 60
     medium_km: float = 150
@@ -110,6 +116,8 @@ def load_settings(searches_file: str | Path = "config/searches.yaml") -> Setting
         window_days=int(os.environ.get("WINDOW_DAYS", 90)),
         realization_factor=_f("REALIZATION_FACTOR", 0.85),
         max_eval_price=_f("MAX_EVAL_PRICE", 1500),
+        home=(_f("HOME_LAT", 50.6292), _f("HOME_LNG", 3.0573)),
+        home_label=os.environ.get("HOME_LABEL", "Lille"),
         easy_km=_f("EASY_KM", 60),
         medium_km=_f("MEDIUM_KM", 150),
         cost_per_km=_f("COST_PER_KM", 0.25),
@@ -119,4 +127,57 @@ def load_settings(searches_file: str | Path = "config/searches.yaml") -> Setting
         min_conf_medium=_f("MIN_CONF_MEDIUM", 0.4),
         min_conf_hard=_f("MIN_CONF_HARD", 0.6),
         searches=tuple(searches),
+    )
+
+
+@dataclass(frozen=True)
+class ApiSettings:
+    """Everything the paid-app backend needs. See docs/SECURITY.md."""
+    jwt_secret: str
+    access_ttl_s: int = 900                 # 15 min: a stolen token dies fast
+    refresh_ttl_s: int = 60 * 86400
+    # "enforce" in production. "off" only for local dev / simulators, where
+    # neither App Attest nor Play Integrity exist.
+    attest_mode: str = "enforce"
+    ios_app_id: str = ""                    # TEAMID.bundle.id
+    ios_attest_env: str = "production"      # or "development"
+    apple_root_ca_path: str = "config/Apple_App_Attestation_Root_CA.pem"
+    android_package: str = ""
+    play_service_account_json: str = ""     # path to a GCP service-account key
+    play_require_licensed: bool = True
+    revenuecat_secret_key: str = ""         # sk_... (server-only, never in the app)
+    revenuecat_entitlement: str = "pro"
+    revenuecat_webhook_auth: str = ""       # value RevenueCat sends in Authorization
+    expo_access_token: str = ""             # optional, enables Expo push security
+    deals_max_age_days: int = 7
+    detail_views_per_day: int = 400         # abuse ceiling, far above human use
+    list_calls_per_minute: int = 60
+    cors_origins: tuple[str, ...] = ()
+
+
+def load_api_settings() -> ApiSettings:
+    secret = os.environ.get("JWT_SECRET", "")
+    if len(secret) < 32:
+        raise RuntimeError("JWT_SECRET must be set to a random string of 32+ chars "
+                           "(python -c 'import secrets;print(secrets.token_urlsafe(48))')")
+    return ApiSettings(
+        jwt_secret=secret,
+        access_ttl_s=int(os.environ.get("ACCESS_TTL_S", 900)),
+        refresh_ttl_s=int(os.environ.get("REFRESH_TTL_S", 60 * 86400)),
+        attest_mode=os.environ.get("ATTEST_MODE", "enforce"),
+        ios_app_id=os.environ.get("IOS_APP_ID", ""),
+        ios_attest_env=os.environ.get("IOS_ATTEST_ENV", "production"),
+        apple_root_ca_path=os.environ.get(
+            "APPLE_ROOT_CA", "config/Apple_App_Attestation_Root_CA.pem"),
+        android_package=os.environ.get("ANDROID_PACKAGE", ""),
+        play_service_account_json=os.environ.get("PLAY_SERVICE_ACCOUNT_JSON", ""),
+        play_require_licensed=os.environ.get("PLAY_REQUIRE_LICENSED", "1") != "0",
+        revenuecat_secret_key=os.environ.get("REVENUECAT_SECRET_KEY", ""),
+        revenuecat_entitlement=os.environ.get("REVENUECAT_ENTITLEMENT", "pro"),
+        revenuecat_webhook_auth=os.environ.get("REVENUECAT_WEBHOOK_AUTH", ""),
+        expo_access_token=os.environ.get("EXPO_ACCESS_TOKEN", ""),
+        deals_max_age_days=int(os.environ.get("DEALS_MAX_AGE_DAYS", 7)),
+        detail_views_per_day=int(os.environ.get("DETAIL_VIEWS_PER_DAY", 400)),
+        list_calls_per_minute=int(os.environ.get("LIST_CALLS_PER_MINUTE", 60)),
+        cors_origins=tuple(o for o in os.environ.get("CORS_ORIGINS", "").split(",") if o),
     )

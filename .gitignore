@@ -13,3 +13,6 @@ venv/
 
 # Local editor / tooling
 .claude/settings.local.json
+
+# App backend secrets (service-account keys, etc.)
+secrets/

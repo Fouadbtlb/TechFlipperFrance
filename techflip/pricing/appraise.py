@@ -80,7 +80,9 @@ def build_items(text_components, llm_json, catalog, text: str = "") -> list[Item
     return items
 
 
-def appraise(items, tracker, realization_factor: float = 0.85) -> Appraisal:
+def appraise(items, tracker, realization_factor: float = 0.85,
+             exclude_uid: str | None = None) -> Appraisal:
+    """`exclude_uid`: the listing being valued, kept out of its own comparables."""
     gross = 0.0
     backed = 0.0
     net = 0.0
@@ -89,7 +91,7 @@ def appraise(items, tracker, realization_factor: float = 0.85) -> Appraisal:
     n_priced = 0
     n_unpriced = 0
     for it in items:
-        q = tracker.price(it.key)
+        q = tracker.price(it.key, exclude_uid) if exclude_uid else tracker.price(it.key)
         if q.unit_value is None:
             n_unpriced += 1
             breakdown.append({"key": it.key, "label": it.label, "value": None, "source": "unknown"})

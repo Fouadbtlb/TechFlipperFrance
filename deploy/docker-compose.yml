@@ -1,0 +1,38 @@
+# One small VPS runs everything: the scanner, the API, and Caddy for HTTPS.
+#   cp ../.env.example ../.env   (fill it in, see docs/DEPLOY.md)
+#   docker compose up -d --build
+services:
+  api:
+    build: ..
+    env_file: ../.env
+    environment:
+      API_HOST: 0.0.0.0
+      FORWARDED_ALLOW_IPS: "*"     # only Caddy can reach this port
+    command: ["python", "-m", "techflip.cli", "serve", "8000"]
+    volumes:
+      - data:/data
+      - ../secrets:/app/secrets:ro
+      - ../config/Apple_App_Attestation_Root_CA.pem:/app/config/Apple_App_Attestation_Root_CA.pem:ro
+    restart: unless-stopped
+
+  scanner:
+    build: ..
+    env_file: ../.env
+    environment:
+      APP_BACKEND: "1"             # push deals to subscribers, gate LLM by where they live
+    command: ["python", "-m", "techflip.cli", "loop"]
+    volumes:
+      - data:/data
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy:/data
+    restart: unless-stopped
+
+volumes:
+  data:
+  caddy:

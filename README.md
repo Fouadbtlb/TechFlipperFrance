@@ -1,85 +1,103 @@
-# TechFlip — Self-Hosted Tech-Flip Scanner
+# TechFlip
 
-TechFlip polls Leboncoin for used tech (consoles, PCs, laptops, GPUs, CPUs, RAM,
-storage, PSUs, monitors), values each listing by **decomposing it into its
-parts**, prices those parts from a local tracker it learns from the market
-itself, and alerts you on Telegram when the net profit clears a bar that gets
-stricter the farther the item is from Lille.
+Finds profitable used-tech deals on Leboncoin and 2ememain, values each listing
+**part by part** against real market prices, and shows every subscriber the
+deals that are profitable **from their own home**, after the drive or the
+shipping. Ships as a paid iOS/Android app, with Telegram alerts for the owner.
 
-It is built for **flipping near Lille**: a cheap machine hiding a good GPU is a
-deal even if the rest is junk, and a far listing has to be worth the shipping.
-
-## How it values a machine
-
-1. Recognize the components in the title/description against `config/pricebook.yaml`.
-2. Price each one from the tracker: the median of real single-item listings it
-   has scraped, or a seed price until it has enough (`MIN_COMPARABLES`).
-3. `true_value = sum(parts) * REALIZATION_FACTOR`, discounted per condition.
-4. `net_profit = true_value - asking_price - logistics` (drive round-trip or
-   shipping, whichever is cheaper).
-5. Alert if net_profit clears the zone bar with enough confidence.
-
-| Zone   | Distance to Lille | Net bar | Analysis |
-|--------|-------------------|---------|----------|
-| EASY   | < 60 km           | 30 EUR  | thin evidence OK, cheap to inspect |
-| MEDIUM | 60-150 km         | 80 EUR  | full decomposition + confidence |
-| HARD   | > 150 km / ship   | 120 EUR | decomposition + LLM/photo + risk vetting |
-
-Everything above is configurable in `.env`. Full design: [docs/DESIGN.md](docs/DESIGN.md).
-
-## Install
-
-```bash
-pip install -e .
-cp .env.example .env      # fill in the Telegram token
+```
+ Leboncoin / 2ememain
+        │  scanner (techflip.cli loop)
+        ▼
+ recognize parts ─► price each part (learned median) ─► appraisal (stored once)
+        │                                                  │
+        │                       per viewer: distance, logistics, personal bar
+        ▼                                                  ▼
+ Telegram (owner)                       API (techflip.cli serve) ─► mobile app
+                                         ▲ attestation + RevenueCat entitlement
 ```
 
-`pgeocode` (a dependency) downloads the French postal database on first use so
-distances to Lille are exact; without it, TechFlip falls back to a small
-built-in table and treats unknown locations as far.
+## Repository
 
-## Configure
+| Path | What |
+|------|------|
+| `techflip/` | Scanner + valuation engine (Python) |
+| `techflip/viewer.py` | Per-viewer decision: same listing, different profit per home |
+| `techflip/api/` | Paid-app backend: auth, attestation, entitlements, deals, push |
+| `mobile/` | Expo / React Native app (iOS + Android) |
+| `deploy/` | Docker Compose + Caddy for a single VPS |
+| `docs/SECURITY.md` | Why a cracked app gets nothing |
+| `docs/DEPLOY.md` | Step-by-step to the stores |
+| `docs/DESIGN.md` | Valuation design |
 
-Edit `config/searches.yaml`. Two kinds of search:
+## How a listing is valued
 
-- `hunt`: valued and can alert (near Lille = low bar, far = high bar).
-- `feeder`: only teaches the price tracker, never alerts.
+1. Recognize the components in the title/description against `config/pricebook.yaml`.
+2. Price each one from the tracker: the median of real single-item listings
+   (excluding the listing being valued), or a seed price until it has
+   `MIN_COMPARABLES`.
+3. `value = sum(parts × condition) × per-category quick-resale haircut`.
+4. Far, uncertain, or easily faked items (single console/GPU/laptop/phone) get a
+   local vision-LLM pass on the photos. The verdict is cached per price.
+5. Seller trust (account age, reviews) is fetched once for candidates.
 
-Distance is handled by the zone logic, so hunt searches can stay nationwide.
+Then, **for each viewer**: `net = value − price − min(round-trip drive, shipping)`,
+held to a bar that rises with distance (EASY < 60 km, MEDIUM < 150 km, HARD
+beyond) plus that viewer's own minimum profit, radius and categories.
 
-## Run
+## The app
+
+- **Affaires**: deals sorted by profit, distance or freshness, with category filters.
+- **Carte**: profit pins around you, colored by distance zone, with a swipeable card carousel.
+- **Fiche**: the full math (resale − price − trip), value part by part, confidence,
+  photo check, seller trust, price drops, and one tap to the listing.
+- **Alertes**: push notifications for new deals that match *your* criteria.
+- **Paywall**: shows real, non-actionable proof ("12 affaires autour de Lille
+  cette semaine, jusqu'à +210 €") before asking for money.
+
+## Run it
+
+```bash
+pip install -e ".[dev]"
+cp .env.example .env
+python -m pytest                          # 87 tests
+```
+
+Scanner:
 
 ```bash
 python -m techflip.cli check              # validate config + ping Telegram
 python -m techflip.cli bootstrap          # warm up the price tracker
-python -m techflip.cli once               # one test cycle
-python -m techflip.cli loop               # run continuously
-python -m techflip.cli price rtx 4070     # what the tracker thinks a part is worth
-python -m techflip.cli try "pc gamer"     # value live listings for a query (no alert)
+python -m techflip.cli loop               # run continuously (APP_BACKEND=1 to push to app users)
 python -m techflip.cli top [n]            # best stored deals
-python -m techflip.cli stats              # DB counters
+python -m techflip.cli price rtx 4070     # what the tracker thinks a part is worth
 ```
 
-## The first few days
+API (local dev, see `docs/DEPLOY.md` for production):
 
-The tracker refuses to trust a learned price without `MIN_COMPARABLES` real
-single-item listings; until then it uses the seed prices in `pricebook.yaml`.
-`bootstrap` and `feeder` searches fill it in faster.
+```bash
+JWT_SECRET=$(python -c 'import secrets;print(secrets.token_urlsafe(48))') \
+ATTEST_MODE=off DEV_UNLOCK_ALL=1 python -m techflip.cli serve
+```
 
-## Local AI (optional)
+App:
 
-For far or uncertain deals, a local vision model reads the description and photos
-to confirm condition, count bundle extras, and flag tech scams (iCloud-locked,
-ex-mining GPU, box-only, bent pins). For near-Lille listings the catalog cannot
-decompose (laptops, phones, prebuilts), it also estimates a whole-item resale
-value so they can still surface. It is never blocking: if the AI server is
-offline, decomposable deals still alert. Backend swappable via `AI_URL`.
+```bash
+cd mobile && npm install
+EXPO_PUBLIC_API_URL=http://<lan-ip>:8000 EXPO_PUBLIC_INSECURE_DEV_AUTH=1 npx expo run:ios
+npm run typecheck && npm run lint
+```
 
-## Anti-blocking
+## Before you sell this
 
-Mobile TLS fingerprint matching the app user-agent, jittered intervals, night
-pause, and a hard abort on the first DataDome block.
+Scraping Leboncoin breaks its terms of service, and in France reselling data
+extracted from a marketplace can also infringe the database producer's
+*sui generis* right (Code de la propriété intellectuelle, L342-1). Leboncoin has
+gone to court over this before. Running it for yourself is one level of risk;
+charging subscribers for it is another. Get a French IP lawyer's opinion, and
+consider pointing the app at sources that allow it. Apple and Google may also
+ask during review where the listings come from.
 
 ## License
 
-Proprietary. See [LICENSE](LICENSE).
+Proprietary.

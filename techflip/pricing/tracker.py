@@ -27,10 +27,10 @@ class PriceTracker:
         self.min_comparables = min_comparables
         self.window_days = window_days
 
-    def price(self, key: str) -> PriceQuote:
+    def price(self, key: str, exclude_uid: str | None = None) -> PriceQuote:
         seed = self.catalog.seed(key)
         since = (datetime.now(timezone.utc) - timedelta(days=self.window_days)).isoformat()
-        prices = [p for p in self.store.component_prices(key, since) if p is not None]
+        prices = [p for p in self._prices(key, since, exclude_uid) if p is not None]
         if seed:
             prices = [p for p in prices if 0.5 * seed <= p <= 2 * seed]
         n = len(prices)
@@ -41,3 +41,8 @@ class PriceTracker:
             return PriceQuote(key, round(med, 2), "learned", n)
         w = n / self.min_comparables
         return PriceQuote(key, round(w * med + (1 - w) * seed, 2), "blend", n)
+
+    def _prices(self, key, since, exclude_uid):
+        if exclude_uid is None:
+            return self.store.component_prices(key, since)
+        return self.store.component_prices(key, since, exclude_uid=exclude_uid)

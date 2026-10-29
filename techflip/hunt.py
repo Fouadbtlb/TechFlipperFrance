@@ -186,9 +186,7 @@ def evaluate(
 
     distance = locator.distance(l.zipcode, l.lat, l.lng)
     ship_class = "bulky" if build else catalog.by_key[comps[0].key].ship_class
-    # A shop sells at its counter.
-    trip = logistics_cost(distance, ship_class, l.owner_type != "pro" and is_shippable(l.description),
-                          cost_per_km)
+    trip = logistics_cost(distance, ship_class, is_shippable(l.description), cost_per_km)
     savings = round(value - l.price - (trip or 0), 2)
     age = _age_days(last_seen, now)
 

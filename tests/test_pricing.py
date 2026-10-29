@@ -272,3 +272,31 @@ def test_shop_shorthand_for_damaged_is_understood():
         assert listing_condition(None, text) == "broken", text
     for text in ["Console NINTENDO Switch En etat", "PS5 tres bon etat"]:
         assert listing_condition(None, text) == "working", text
+
+
+class _Asking:
+    def __init__(self, by_key):
+        self.by_key = by_key
+
+    def component_prices(self, key, since_iso, exclude_uid=None, stale_days=None):
+        return self.by_key.get(key, [])
+
+    def sold_prices(self, key, since_iso, exclude_uid=None):
+        return []
+
+    def days_to_sell(self, key, since_iso):
+        return []
+
+    def feedback_factor(self, key, since_iso):
+        return 1.0
+
+
+def test_a_component_without_a_seed_waits_for_enough_ads():
+    """No seed and a single sealed 1 To at 1829 must not price every 1 To."""
+    catalog = load_catalog("config/pricebook.yaml")
+    key = "tablet:galaxy-tab-s11-ultra-1tb"
+    assert catalog.seed(key) is None
+    thin = PriceTracker(_Asking({key: [1829, 1300]}), catalog, min_comparables=5).price(key)
+    assert thin.unit_value is None and thin.source == "unknown"
+    enough = PriceTracker(_Asking({key: [1200, 1250, 1300, 1350, 1829]}), catalog, min_comparables=5).price(key)
+    assert enough.unit_value == 1300 and enough.source == "learned"

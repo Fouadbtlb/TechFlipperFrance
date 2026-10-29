@@ -27,6 +27,8 @@ export interface DealCard {
   lng: number | null;
   source: string;
   shop: boolean;
+  carrier_locked?: boolean;
+  photo_unverified?: boolean;
   reliable: boolean;
   reposts: number;
   days_to_sell: number | null;

@@ -307,13 +307,14 @@ def test_a_desktop_chip_is_not_mistaken_for_a_mobile_one(ctx):
         assert "laptop" not in f.flags, title
 
 
-def test_a_shop_item_is_collected_in_store(ctx):
-    """A shop sells at its counter: the trip is the drive, never shipping."""
+def test_a_shop_item_ships_like_any_other(ctx):
+    """Same rule as the app (decision.py): a chain like Cash Converters ships its
+    stock, so the trip is the cheaper of the drive and the parcel."""
     store, tracker, locator = ctx
     f = evaluate(_listing("Xbox Series S", 110, source="cashconverters", owner_type="pro",
-                          lat=50.4569, lng=4.8722, city="Jambes", description="envoi possible"),
+                          lat=50.4569, lng=4.8722, city="Jambes"),
                  CATALOG, tracker, locator)
-    assert f.trip == pytest.approx(2 * f.distance * 0.25, abs=0.1)
+    assert f.trip == 25.0                         # a console ships "bulky", cheaper than 2 x 120 km
 
 
 def test_white_markers_and_sales_copy():

@@ -296,7 +296,7 @@ components:
   - {key: tablet:ipad-pro-m-13, label: iPad Pro 12.9/13 (M1+), category: tablet, ship_class: parcel, seed: 950, aliases: []}
   - {key: tablet:ipad-pro-m-11, label: iPad Pro 11 (M1+), category: tablet, ship_class: parcel, seed: 750, aliases: []}
   - {key: tablet:ipad-pro-old, label: iPad Pro (2020 et avant), category: tablet, ship_class: parcel, seed: 330, aliases: []}
-  - {key: tablet:ipad-pro-2017, label: iPad Pro 9.7/10.5 (2015-2017), category: tablet, ship_class: parcel, seed: 110, aliases: []}
+  - {key: tablet:ipad-pro-2017, label: iPad Pro (2015-2017), category: tablet, ship_class: parcel, seed: 110, aliases: []}   # 9.7, 10.5, 12.9 1re-2e gen, ou generation non precisee
   - {key: tablet:ipad-air-m, label: iPad Air (M1+), category: tablet, ship_class: parcel, seed: 550, aliases: []}
   - {key: tablet:ipad-air-4, label: iPad Air 4, category: tablet, ship_class: parcel, seed: 255, aliases: []}
   - {key: tablet:ipad-air-old, label: iPad Air (2019 et avant), category: tablet, ship_class: parcel, seed: 160, aliases: []}
@@ -311,7 +311,11 @@ components:
   - {key: tablet:surface-pro-7, label: Surface Pro 7/8, category: tablet, ship_class: parcel, seed: 300, aliases: [surface pro 7, surface pro 8]}   # prive n=9 med 300
   - {key: tablet:surface-pro-old, label: Surface Pro 4-6, category: tablet, ship_class: parcel, seed: 200, aliases: [surface pro 4, surface pro 5, surface pro 6]}   # prive n=5 med 200
   - {key: tablet:surface-pro, label: Surface Pro, category: tablet, ship_class: parcel, seed: 300, aliases: [surface pro]}            # prive n=26   # generation inconnue: on suppose ancien, par prudence
-  - {key: tablet:galaxy-tab-s11-ultra, label: Galaxy Tab S11 Ultra, category: tablet, ship_class: parcel, seed: 1100, aliases: [galaxy tab s11 ultra, tab s11 ultra]}   # prive n=10, 790-1829 selon stockage
+  - {key: tablet:galaxy-tab-s11-ultra, label: Galaxy Tab S11 Ultra 256 Go, category: tablet, ship_class: parcel, seed: 1100, aliases: [galaxy tab s11 ultra, tab s11 ultra]}   # 256 Go ou taille non precisee. Seed = ancienne mediane toutes tailles (prive n=10, 790-1829): A RECALER sur les seuls 256 Go
+  # 512 Go et 1 To, separes par _VARIANTS (extract.py). Sans seed: pas de prix tant
+  # qu'il n'y a pas MIN_COMPARABLES annonces de cette taille.
+  - {key: tablet:galaxy-tab-s11-ultra-512, label: Galaxy Tab S11 Ultra 512 Go, category: tablet, ship_class: parcel, aliases: []}
+  - {key: tablet:galaxy-tab-s11-ultra-1tb, label: Galaxy Tab S11 Ultra 1 To, category: tablet, ship_class: parcel, aliases: []}
   - {key: tablet:galaxy-tab-s11, label: Galaxy Tab S11, category: tablet, ship_class: parcel, seed: 650, aliases: [galaxy tab s11, tab s11]}   # prive n=4 hors Ultra: 650 650 650 800
   - {key: tablet:galaxy-tab-s10, label: Galaxy Tab S10, category: tablet, ship_class: parcel, seed: 300, aliases: [galaxy tab s10, tab s10]}   # prive n=56
   - {key: tablet:galaxy-tab-s9, label: Galaxy Tab S9, category: tablet, ship_class: parcel, seed: 375, aliases: [galaxy tab s9, tab s9]}       # prive n=9

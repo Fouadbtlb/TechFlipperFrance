@@ -288,6 +288,8 @@ _ORD = r"(?:e|de|ste|eme|ieme|th|nd|rd)\b"
 _CHIP = r"\bm[1-9]\b"
 _SIZE13 = r"(?:\b13\b|12[.,]9)"
 _NEW_PRO = r"(?:" + _CHIP + r"|\b202[1-9]\b|\b[5-9]\s*" + _ORD + r")"
+# "2e gen", "1ere generation", "3rd gen": an ordinal, then the word.
+_GEN = r"\s*(?:e|de|ste|eme|ieme|th|nd|rd|ere|re|er|st)?\s*gen"
 
 
 _VARIANTS: dict[str, tuple[tuple[re.Pattern, str], ...]] = {
@@ -339,15 +341,34 @@ _VARIANTS: dict[str, tuple[tuple[re.Pattern, str], ...]] = {
     "phone:xiaomi-15": (
         (re.compile(r"\b15\s*t\s*pro\b"), "phone:xiaomi-15t-pro"),
     ),
+    # Storage moves this tablet by hundreds of euros (790 to 1829 privately), so
+    # one median over every size priced a 256 Go about 270 too high. Read from
+    # the cheapest size up: a "256 Go + microSD 1 To" ad is a 256 Go, and an ad
+    # that names no size stays on the base key.
+    "tablet:galaxy-tab-s11-ultra": (
+        (re.compile(r"\b256\s*(?:go|gb|g)\b"), "tablet:galaxy-tab-s11-ultra"),
+        (re.compile(r"\b512\s*(?:go|gb|g)\b"), "tablet:galaxy-tab-s11-ultra-512"),
+        (re.compile(r"(?<!jusqu'a )(?<!jusqua )(?<!sd )\b(?:1\s*(?:to|tb)|1000\s*(?:go|gb))\b"),
+         "tablet:galaxy-tab-s11-ultra-1tb"),
+    ),
     "tablet:ipad-pro": (
         # 9.7 and 10.5 inch, 2015-2017: about 100 EUR, a third of a 2018-2020 Pro.
-        (re.compile(r"\b9[.,][17]\b|\b10[.,]5\b|\b201[5-7]\b"), "tablet:ipad-pro-2017"),
+        # So are the 1st and 2nd generation 12.9, and anything with Touch ID or
+        # Lightning: a 2018+ Pro is USB-C only, even its cable.
+        (re.compile(r"\b9[.,][17]\b|\b10[.,]5\b|\b201[5-7]\b|touch\s*id|lightning"
+                    r"|\b[12]" + _GEN), "tablet:ipad-pro-2017"),
         (re.compile(r"\b20(?:1\d|20)\b"), "tablet:ipad-pro-old"),
         (re.compile(_SIZE13 + r".*" + _NEW_PRO + r"|" + _NEW_PRO + r".*" + _SIZE13), "tablet:ipad-pro-m-13"),
         # The 13-inch Pro only exists since 2024 (M4).
         (re.compile(r"\b13\s*-?\s*(?:\"|”|''|pouces?|inch|po)"), "tablet:ipad-pro-m-13"),
         (re.compile(_CHIP + r"|\b20(?:2[1-9])\b|\b11\b.*\b[34]\s*" + _ORD), "tablet:ipad-pro-m-11"),
-        (re.compile(r"."), "tablet:ipad-pro-old"),
+        # What only a 2018-2020 Pro has: the 11-inch size, Face ID, USB-C, the
+        # 2nd Pencil, the A12X/A12Z chip, "3e/4e generation" (12.9).
+        (re.compile(r"\b11\s*-?\s*(?:\"|”|''|pouces?|inch|po\b)|\bpro\s*11\b|face\s*id|usb\s*-?\s*c\b"
+                    r"|pencil\s*2|\ba12[xz]\b|\b[34]" + _GEN), "tablet:ipad-pro-old"),
+        # No sign of the generation: the cheapest one, so an old 9.7 Pro listed
+        # as just "iPad Pro" never shows a margin it does not have.
+        (re.compile(r"."), "tablet:ipad-pro-2017"),
     ),
     "tablet:ipad-air": (
         (re.compile(_CHIP + r"|\b202[2-9]\b|\bair\s*(?:[5-9]|11|13)\b|\b[5-9]\s*" + _ORD), "tablet:ipad-air-m"),

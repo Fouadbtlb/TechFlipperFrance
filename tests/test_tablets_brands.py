@@ -6,6 +6,8 @@ guess, so the shop asks 220 for a Surface Pro that private sellers list at 475.
 Seeds below are private medians measured on 2026-09-29, sample size on each
 line.
 """
+import pytest
+
 from techflip.pricing.catalog import load_catalog
 from techflip.pricing.extract import recognize
 
@@ -47,3 +49,16 @@ def test_the_tab_s11_ultra_is_not_the_tab_s11():
     from techflip.pricing.extract import recognize as _rec
     assert [c.key for c in _rec("Samsung Galaxy Tab S11 Ultra 256 Go", "", CATALOG)] == ["tablet:galaxy-tab-s11-ultra"]
     assert [c.key for c in _rec("TABLETTES Samsung tab S11 128GB", "", CATALOG)] == ["tablet:galaxy-tab-s11"]
+
+
+@pytest.mark.parametrize("title, desc, key", [
+    ("Samsung Galaxy Tab S11 Ultra 256 Go", "", "tablet:galaxy-tab-s11-ultra"),
+    ("Galaxy Tab S11 Ultra 12/512GB", "", "tablet:galaxy-tab-s11-ultra-512"),
+    ("Galaxy Tab S11 Ultra 1 To 5G", "", "tablet:galaxy-tab-s11-ultra-1tb"),
+    ("Galaxy Tab S11 Ultra 256 Go + microSD 1 To", "", "tablet:galaxy-tab-s11-ultra"),
+    ("Galaxy Tab S11 Ultra", "512 Go, extensible jusqu'à 1 To", "tablet:galaxy-tab-s11-ultra-512"),
+    ("Galaxy Tab S11 Ultra", "comme neuve", "tablet:galaxy-tab-s11-ultra"),
+])
+def test_the_tab_s11_ultra_is_priced_per_storage_size(title, desc, key):
+    """One median over 256 Go to 1 To priced a 256 Go about 270 EUR too high."""
+    assert [c.key for c in recognize(title, desc, CATALOG)] == [key]

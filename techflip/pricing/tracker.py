@@ -7,7 +7,8 @@ Evidence, best first:
    prices subscribers reported. The closest thing to real sales we can see.
 3. "learned": median of single-item asking prices in the recency window.
 4. "blend": asking median mixed with the seed while data is thin.
-5. "seed": the catalog price, until anything better exists.
+5. "seed": the catalog price, until anything better exists. A component with
+   no seed gets no price until it has MIN_COMPARABLES ads.
 
 Only private sellers count: you resell as a private seller, and a shop's shelf
 price (a Switch at 170 in a Cash Converters, 128 between individuals) would
@@ -96,10 +97,14 @@ class PriceTracker:
 
         if len(sold) >= self.min_comparables:
             base, source, n, pool = median(sold), "sold", len(sold), sold
-        elif not asking:
-            return PriceQuote(key, seed, "seed" if seed is not None else "unknown", 0, days_to_sell=dts)
-        elif len(asking) >= self.min_comparables or seed is None:
+        elif len(asking) >= self.min_comparables:
             base, source, n, pool = median(asking), "learned", len(asking), asking
+        elif seed is None:
+            # No seed and too few ads: no opinion. One ad's price (a sealed 1 To
+            # at 1829) would otherwise set the value of every unit.
+            return PriceQuote(key, None, "unknown", len(asking), days_to_sell=dts)
+        elif not asking:
+            return PriceQuote(key, seed, "seed", 0, days_to_sell=dts)
         else:
             w = len(asking) / self.min_comparables
             base, source, n, pool = w * median(asking) + (1 - w) * seed, "blend", len(asking), None

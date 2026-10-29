@@ -44,10 +44,13 @@ function DealCardBase({ deal, compact = false }: { deal: Deal; compact?: boolean
           {euros(deal.price)} · {where}
           {!compact && deal.city ? ` · ${deal.city}` : ''}
         </T>
-        {!compact && (fresh || drop > 0 || deal.reposts > 0 || deal.risk !== 'low' || deal.gone || deal.shop) ? (
+        {!compact &&
+        (fresh || drop > 0 || deal.reposts > 0 || deal.risk !== 'low' || deal.gone || deal.shop || deal.carrier_locked || deal.photo_unverified) ? (
           <View style={s.pills}>
             {fresh ? <Pill tone="brass" label="Nouveau" /> : null}
             {deal.shop ? <Pill tone="info" label="Magasin" /> : null}
+            {deal.carrier_locked ? <Pill tone="warn" label="Bloqué opérateur" /> : null}
+            {deal.photo_unverified ? <Pill tone="warn" label="Photo à contrôler" /> : null}
             {drop > 0 ? <Pill tone="profit" label={`Baisse de ${euros(drop)}`} /> : null}
             {deal.reposts > 0 ? <Pill tone="info" label="Remise en ligne" /> : null}
             {deal.risk === 'high' ? <Pill tone="risk" label="Prudence" /> : null}

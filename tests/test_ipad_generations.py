@@ -2,7 +2,7 @@
 
 One "iPad Pro" key priced a 2018 Pro like a 2022 one (850 EUR over 106 ads of
 every generation), so iPads filled the top of the app's reliable feed. When the
-title does not name the generation, the cheapest bucket wins.
+ad shows no sign of the generation, the cheapest bucket wins.
 """
 import pytest
 
@@ -20,7 +20,19 @@ CATALOG = load_catalog("config/pricebook.yaml")
     ("Ipad Pro M5 11” 256gb", "ipad-pro-m-11"),
     ("iPad Pro 11\" 2020 – 128 Go", "ipad-pro-old"),
     ("Apple Ipad Pro 12,9 inch (4e generatie) 512GB", "ipad-pro-old"),
-    ("iPad Pro", "ipad-pro-old"),
+    # No sign of the generation: the cheapest bucket, the 2015-2017 Pros.
+    ("iPad Pro", "ipad-pro-2017"),
+    ("iPad Pro 12,9 256Go", "ipad-pro-2017"),
+    ("iPad Pro 1ère génération 12,9", "ipad-pro-2017"),
+    ("iPad Pro 12.9 Touch ID", "ipad-pro-2017"),
+    ("iPad Pro 12,9 avec câble USB-C vers Lightning", "ipad-pro-2017"),
+    # Only a 2018-2020 Pro has these.
+    ("iPad Pro 11 pouces 128 Go", "ipad-pro-old"),
+    ("iPad Pro 12.9 3e génération 64Go", "ipad-pro-old"),
+    ("Apple iPad Pro 11\" Face ID 256Go", "ipad-pro-old"),
+    ("iPad Pro 12,9 USB-C 256 Go", "ipad-pro-old"),
+    ("iPad Pro avec Apple Pencil 2", "ipad-pro-old"),
+    ("iPad Pro A12X 64Go", "ipad-pro-old"),
     ("APPLE IPAD AIR 2026 11 INCH M4 NIEUWSTAAT", "ipad-air-m"),
     ("Apple Ipad Air a2588 5th gen 64gb", "ipad-air-m"),
     ("iPad Air 4 (2020) 256GB", "ipad-air-4"),

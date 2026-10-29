@@ -136,6 +136,9 @@ def card(row, j: Judgement) -> dict:
         "lng": row["lng"],
         "source": row["source"],
         "shop": row["owner_type"] == "pro",
+        # Why a deal sits in "À vérifier", shown on the card itself.
+        "carrier_locked": bool(appr.get("carrier_locked")),
+        "photo_unverified": bool(appr.get("photo_unverified")),
         "reliable": is_reliable(row),
         "reposts": row["reposts"] or 0,
         "days_to_sell": appr.get("days_to_sell"),

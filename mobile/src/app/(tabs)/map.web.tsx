@@ -5,16 +5,17 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DealCard } from '@/components/DealCard';
-import { EmptyState, T } from '@/components/ui';
+import { EmptyState, Rule, T } from '@/components/ui';
 import { usePins } from '@/lib/queries';
-import { space } from '@/lib/theme';
+import { space, usePalette } from '@/lib/theme';
 
 export default function MapScreen() {
+  const p = usePalette();
   const q = usePins();
   const pins = q.data?.items ?? [];
 
   return (
-    <SafeAreaView edges={['top']} style={s.root}>
+    <SafeAreaView edges={['top']} style={[s.root, { backgroundColor: p.bg }]}>
       <View style={s.head}>
         <T v="label">{q.isLoading ? '…' : `${pins.length} affaire${pins.length > 1 ? 's' : ''}`}</T>
         <T v="body" color="muted">La carte s’affiche sur l’app iPhone et Android.</T>
@@ -26,7 +27,8 @@ export default function MapScreen() {
           data={pins}
           keyExtractor={(item) => item.uid}
           contentContainerStyle={s.list}
-          renderItem={({ item }) => <DealCard deal={item.card} compact />}
+          renderItem={({ item }) => <DealCard deal={item.card} />}
+          ItemSeparatorComponent={Rule}
         />
       )}
     </SafeAreaView>
@@ -35,6 +37,6 @@ export default function MapScreen() {
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  head: { paddingHorizontal: space.md, paddingVertical: space.sm, gap: 4 },
-  list: { padding: space.md, gap: space.sm },
+  head: { paddingHorizontal: space.xl, paddingTop: space.xl, paddingBottom: space.sm, gap: 4 },
+  list: { paddingHorizontal: space.xl, paddingBottom: space.xxl },
 });

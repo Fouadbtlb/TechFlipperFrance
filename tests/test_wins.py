@@ -222,3 +222,15 @@ def test_a_carrier_locked_phone_is_never_reliable():
            "appraisal": '{"risk": null}'}
     assert is_reliable(row)
     assert not is_reliable({**row, "appraisal": '{"risk": null, "carrier_locked": true}'})
+
+
+def test_the_card_says_why_a_deal_needs_checking():
+    from techflip.api.deals import card
+    v = Viewer(home=LILLE, policy=default_policy())
+    row = {"uid": "cashconverters:1", "title": "Samsung S25 FE", "price": 200, "last_price": None,
+           "true_value": 340, "lat": LILLE[0], "lng": LILLE[1], "confidence": 0.9, "category": "phone",
+           "reposts": 0, "owner_type": "pro", "source": "cashconverters", "city": "Mouscron",
+           "published_at": None, "first_seen": None, "raw_json": "{}",
+           "appraisal": '{"risk": null, "carrier_locked": true}'}
+    c = card(row, judge(row, v))
+    assert c["shop"] and c["carrier_locked"] and not c["photo_unverified"]

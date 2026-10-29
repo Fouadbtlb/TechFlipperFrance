@@ -1,0 +1,550 @@
+# Les 30 magasins Cash Converters Belgique, deux rayons chacun.
+#
+# Fichier separe: 60 recherches dans la boucle continue seraient absurdes, mais
+# le stock d'une chaine bouge lentement et merite un balayage complet
+# periodique. Tri par prix decroissant parce que le rayon consoles compte 13000
+# lignes dont la plupart sont des jeux a 0,49 EUR: tout ce qui vaut le
+# deplacement tient dans les premieres pages.
+#
+#   SEARCHES_FILE=config/searches-cashconverters.yaml python -m techflip.cli once
+searches:
+- name: CC Antwerpen - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-ANTWERPEN&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Antwerpen - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-ANTWERPEN&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Arlon - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-ARLON&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Arlon - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-ARLON&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Ath - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-ATH&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Ath - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-ATH&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Aywaille - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-AYWAILLE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Aywaille - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-AYWAILLE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Binche - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-BINCHE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Binche - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-BINCHE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Bruxelles - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-BRUXELLES&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Bruxelles - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-BRUXELLES&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Couillet - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-COUILLET&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Couillet - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-COUILLET&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Drogenbos - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-DROGENBOS&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Drogenbos - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-DROGENBOS&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Etterbeek - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-ETTERBEEK&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Etterbeek - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-ETTERBEEK&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Evere - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-EVERE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Evere - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-EVERE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Fleron - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-FLERON&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Fleron - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-FLERON&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Froyennes - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-FROYENNES&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Froyennes - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-FROYENNES&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Gosselies - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-GOSSELIES&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Gosselies - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-GOSSELIES&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Grivegnee - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-GRIVEGNEE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Grivegnee - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-GRIVEGNEE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Herstal - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-HERSTAL&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Herstal - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-HERSTAL&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Huy - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-HUY&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Huy - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-HUY&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Ixelles - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-IXELLES&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Ixelles - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-IXELLES&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Jambes - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-JAMBES&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Jambes - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-JAMBES&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Jette - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-JETTE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Jette - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-JETTE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC La Louviere - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC La Louviere - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Liege Centre - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-LIEGE+CENTRE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Liege Centre - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-LIEGE+CENTRE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Marche - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-MARCHE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Marche - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-MARCHE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Mons - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-MONS&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Mons - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-MONS&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Mouscron - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-MOUSCRON&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Mouscron - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-MOUSCRON&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Quaregnon - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-QUAREGNON&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Quaregnon - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-QUAREGNON&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Sambreville - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-SAMBREVILLE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Sambreville - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-SAMBREVILLE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Seraing - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-SERAING&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Seraing - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-SERAING&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Tubize - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-TUBIZE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Tubize - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-TUBIZE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Verviers - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-VERVIERS&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Verviers - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-VERVIERS&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Wavre - jeux
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-WAVRE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 900
+- name: CC Wavre - informatique
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-WAVRE&order=product.price.desc
+  kind: hunt
+  min_price: 40
+  max_price: 2500
+- name: CC Antwerpen - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-ANTWERPEN&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Arlon - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-ARLON&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Ath - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-ATH&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Aywaille - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-AYWAILLE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Binche - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-BINCHE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Bruxelles - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-BRUXELLES&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Couillet - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-COUILLET&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Drogenbos - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-DROGENBOS&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Etterbeek - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-ETTERBEEK&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Evere - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-EVERE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Fleron - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-FLERON&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Froyennes - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-FROYENNES&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Gosselies - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-GOSSELIES&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Grivegnee - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-GRIVEGNEE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Herstal - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-HERSTAL&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Huy - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-HUY&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Ixelles - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-IXELLES&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Jambes - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-JAMBES&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Jette - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-JETTE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC La Louviere - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-LA+LOUVIERE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Liege Centre - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-LIEGE+CENTRE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Marche - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-MARCHE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Mons - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-MONS&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Mouscron - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-MOUSCRON&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Quaregnon - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-QUAREGNON&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Sambreville - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-SAMBREVILLE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Seraing - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-SERAING&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Tubize - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-TUBIZE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Verviers - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-VERVIERS&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: CC Wavre - gsm
+  source: cashconverters
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-WAVRE&order=product.price.desc
+  kind: hunt
+  min_price: 60
+  max_price: 2500

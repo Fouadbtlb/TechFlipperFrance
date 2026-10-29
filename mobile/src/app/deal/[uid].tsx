@@ -17,12 +17,20 @@ import { radius, space, usePalette } from '@/lib/theme';
 import type { DealDetail, Part } from '@/lib/types';
 
 const SOURCE_LABEL: Record<Part['source'], string> = {
+  owner: 'prix de vente réel',
   sold: 'prix des annonces parties',
   learned: 'prix du marché',
   blend: 'marché et estimation',
   seed: 'estimation',
   ai: 'estimation par l’IA',
   unknown: 'non chiffré',
+};
+
+const SITE_NAME: Record<string, string> = {
+  leboncoin: 'Leboncoin',
+  '2ememain': '2ememain',
+  cashconverters: 'Cash Converters',
+  cashexpress: 'Cash Express',
 };
 
 const ZONE_LABEL = { EASY: 'à proximité', MEDIUM: 'à distance moyenne', HARD: 'éloignée' } as const;
@@ -92,7 +100,7 @@ export default function DealScreen() {
             <Ionicons name={d.saved ? 'heart' : 'heart-outline'} size={21} color={d.saved ? p.risk : p.text} />
           </Pressable>
           <Button
-            label={`Voir l’annonce sur ${d.source === '2ememain' ? '2ememain' : 'Leboncoin'}`}
+            label={`Voir l’annonce sur ${SITE_NAME[d.source] ?? d.source}`}
             onPress={async () => {
               await WebBrowser.openBrowserAsync(d.url);
               noteListingOpened(d.uid).catch(() => undefined);
@@ -237,7 +245,11 @@ function Detail({ d, bottomPad }: { d: DealDetail; bottomPad: number }) {
           value={`${confidence} %`}
           tone={confidence >= 60 ? 'profit' : confidence >= 30 ? 'warn' : 'risk'}
         />
-        <LedgerRow label="Photos vérifiées par l’IA" value={d.photo_checked ? 'Oui' : 'Non'} tone={d.photo_checked ? 'profit' : 'muted'} />
+        <LedgerRow
+          label="Photos vérifiées par l’IA"
+          value={d.photo_checked ? 'Oui' : d.photo_unverified ? 'À contrôler sur place' : 'Non'}
+          tone={d.photo_checked ? 'profit' : d.photo_unverified ? 'warn' : 'muted'}
+        />
         {d.scam_score != null ? (
           <LedgerRow
             label="Risque d’arnaque"

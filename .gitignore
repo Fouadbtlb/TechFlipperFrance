@@ -16,3 +16,10 @@ venv/
 
 # App backend secrets (service-account keys, etc.)
 secrets/
+
+# DB snapshots taken before destructive maintenance
+*.db.bak-*
+
+# SQLite write-ahead log (the store runs in WAL mode)
+*.db-shm
+*.db-wal

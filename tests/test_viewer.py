@@ -76,15 +76,16 @@ class _Notifier:
     enabled = False
 
     def send_deal(self, *a):
-        pass
+        return False
 
     def send_text(self, *a):
-        pass
+        return False
 
 
 def test_llm_verdict_is_cached_across_resweeps_and_fanout_gets_deals(tmp_path, monkeypatch):
     settings = Settings(
         telegram_token="", telegram_chat_id="", db_path=Path(tmp_path / "t.db"), ai_url="http://x",
+        ai_min_margin=0, sold_path="none.yaml",
         searches=(SearchConfig(name="PS5", url="u", kind="hunt", min_price=100, max_price=900),),
     )
     ad = Listing(source="leboncoin", source_id="9", url="u", title="PS5 edition disque",

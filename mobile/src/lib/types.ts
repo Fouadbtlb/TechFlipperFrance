@@ -26,6 +26,7 @@ export interface DealCard {
   lat: number | null;
   lng: number | null;
   source: string;
+  shop: boolean;
   reliable: boolean;
   reposts: number;
   days_to_sell: number | null;
@@ -36,7 +37,7 @@ export interface Part {
   label: string;
   qty: number;
   value: number | null;
-  source: 'sold' | 'learned' | 'blend' | 'seed' | 'ai' | 'unknown';
+  source: 'owner' | 'sold' | 'learned' | 'blend' | 'seed' | 'ai' | 'unknown';
   n: number;
   condition: string;
 }
@@ -62,6 +63,7 @@ export interface DealDetail extends DealCard {
   method: 'parts' | 'parts+ai' | 'ai' | null;
   parts: Part[];
   photo_checked: boolean;
+  photo_unverified: boolean;
   shippable: boolean;
   scam_score: number | null;
   seller: Seller | null;

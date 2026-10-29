@@ -9,8 +9,14 @@ result (distance, logistics, personal bar) is decided later, per viewer, in
 viewer.judge().
 
 Effort goes where it matters: every listing gets the cheap text appraisal;
-only borderline, far, or easily faked candidates pay for the vision model,
-and its verdict is cached per price.
+only borderline, far, or easily faked candidates worth AI_MIN_MARGIN pay for
+the vision model, and its verdict is cached per price.
+
+A single console, GPU, laptop or phone must have its photos checked against
+its title. When that check cannot run (no model configured, model down, or
+the item not recognized on the photos), the listing stays only near home,
+flagged "photo non vérifiée" so you look in person, and never when the bare
+title hides a cheaper model (a "Switch" is often a Lite).
 """
 from __future__ import annotations
 
@@ -22,11 +28,11 @@ from dataclasses import dataclass, field
 from .config import Settings
 from .decision import ZonePolicy
 from .domain import Listing
-from .filters import price_prefilter, text_prefilter
+from .filters import not_an_offer, price_prefilter, text_prefilter
 from .geo import Locator, distance_km, logistics_cost, zone_for_distance
 from .pricing.appraise import Appraisal, appraise, build_items, items_from_classification
 from .pricing.catalog import Catalog
-from .pricing.extract import is_bundle, primary_key
+from .pricing.extract import is_ambiguous_identity, is_bundle, primary_key
 from .pricing.tracker import PriceTracker
 from .scoring.seller import seller_summary
 from .storage import Store
@@ -39,7 +45,7 @@ APP_CATEGORY = {
     "phone": "phone", "monitor": "monitor",
     "ram": "parts", "storage": "parts", "psu": "parts", "motherboard": "parts",
     "cooler": "parts", "case": "parts",
-    "controller": "accessory", "game": "accessory",
+    "controller": "accessory", "game": "accessory", "tablet": "phone",
 }
 _LLM_TYPE_CATEGORY = {"pc": "pc", "laptop": "laptop", "phone": "phone"}
 # Single, liquid, easily faked items: the photos must confirm the title.
@@ -101,7 +107,7 @@ class Valuer:
     # ---------------------------------------------------------------- flow
 
     def value(self, l: Listing, comps) -> Valuation | Rejection:
-        rejected = self._prefilter(l)
+        rejected = self._prefilter(l, comps)
         if rejected:
             return rejected
         ctx = self._context(l, comps)
@@ -109,7 +115,7 @@ class Valuer:
             return Rejection("ni retrait ni envoi possible")
 
         text = f"{l.title} {l.description}"
-        appr = self._appraise(build_items(comps, None, self.catalog, text), l)
+        appr = self._appraise(build_items(comps, None, self.catalog, text, l.title), l)
         net = appr.true_value - l.price - ctx.logistics
         category = self._category(l, comps)
 
@@ -129,7 +135,10 @@ class Valuer:
 
     # ---------------------------------------------------------------- steps
 
-    def _prefilter(self, l: Listing) -> Rejection | None:
+    def _prefilter(self, l: Listing, comps) -> Rejection | None:
+        why = not_an_offer(l, comps)
+        if why:
+            return Rejection(why, discard=True)
         search = self.searches.get(l.search_name)
         min_price = search.min_price if search else 20
         max_price = search.max_price if search else None
@@ -157,20 +166,29 @@ class Valuer:
                     category: str) -> Valuation | Rejection:
         needs_photo = self._needs_photo(comps)
         wants_ai = needs_photo or ctx.zone != "EASY" or net < 1.5 * ctx.bar or appr.confidence < 0.5
-        if not (self.classify and wants_ai):
-            return self._result(appr, ctx, category, method="parts", verdict=None, risk=None)
-        verdict = self.verdict(l)
+        verdict = None
+        if self.classify and wants_ai and net >= self.settings.ai_min_margin:
+            verdict = self.verdict(l)
         if verdict and verdict.get("is_trade") is True:
             return Rejection("échange, pas une vente", discard=True)
+        unverified = False
         if needs_photo:
-            rejected = self._photo_matches_title(comps, verdict)
-            if rejected:
-                return rejected
+            check = self._photo_matches_title(comps, verdict)
+            if isinstance(check, Rejection):
+                return check
+            if check == "unverified":
+                if ctx.zone != "EASY":
+                    return Rejection("photo non vérifiée, trop loin pour aller voir")
+                if is_ambiguous_identity(comps, l.title):
+                    return Rejection("modèle ambigu sans vérification photo")
+                unverified = True
         if verdict is None:
-            return self._result(appr, ctx, category, method="parts", verdict=None, risk=None)
-        items = items_from_classification(verdict, self.catalog) or build_items(comps, None, self.catalog, text)
+            return self._result(appr, ctx, category, method="parts", verdict=None, risk=None,
+                                photo_unverified=unverified)
+        items = (items_from_classification(verdict, self.catalog)
+                 or build_items(comps, None, self.catalog, text, l.title))
         return self._result(self._appraise(items, l), ctx, category, method="parts+ai", verdict=verdict,
-                            risk=_num(verdict.get("risque_arnaque")))
+                            risk=_num(verdict.get("risque_arnaque")), photo_unverified=unverified)
 
     def _whole_item(self, l, ctx: _Context, appr: Appraisal, category: str) -> Valuation | Rejection:
         verdict = self.verdict(l)
@@ -189,6 +207,7 @@ class Valuer:
         value = round(est * self.settings.realization_factor, 2)
         appraisal = self._appraisal_dict(
             method="ai", ctx=ctx, risk=risk, verdict=verdict, floor=None, days=None, n_priced=0,
+            photo_unverified=False,
             lines=(f"Estimation IA a verifier: {est:.0f}€ revente occasion",),
             breakdown=[{"key": "ai:whole", "label": "Estimation IA (objet entier)", "qty": 1,
                         "value": value, "source": "ai", "n": 0}])
@@ -212,19 +231,22 @@ class Valuer:
         return appraise(items, self.tracker, self.settings.realization_factor, l.uid)
 
     def _result(self, appr: Appraisal, ctx: _Context, category: str, *, method: str, verdict, risk,
-                alertable: bool = True) -> Valuation:
+                alertable: bool = True, photo_unverified: bool = False) -> Valuation:
         appraisal = self._appraisal_dict(method=method, ctx=ctx, risk=risk, verdict=verdict,
                                          floor=appr.floor_value, days=appr.days_to_sell,
-                                         n_priced=appr.n_priced, lines=appr.lines, breakdown=list(appr.breakdown))
+                                         n_priced=appr.n_priced, lines=appr.lines, breakdown=list(appr.breakdown),
+                                         photo_unverified=photo_unverified)
         return Valuation(appr.true_value, appr.confidence, category, appraisal, appr.lines, appr.n_priced,
                          risk, verdict, alertable)
 
     @staticmethod
-    def _appraisal_dict(*, method, ctx: _Context, risk, verdict, floor, days, n_priced, lines, breakdown) -> dict:
+    def _appraisal_dict(*, method, ctx: _Context, risk, verdict, floor, days, n_priced, lines, breakdown,
+                        photo_unverified) -> dict:
         return {
             "method": method, "breakdown": breakdown, "lines": list(lines), "risk": risk,
             "shippable": ctx.shippable, "ship_class": ctx.ship_class, "n_priced": n_priced,
-            "photo_checked": verdict is not None, "floor": floor, "days_to_sell": days,
+            "photo_checked": verdict is not None, "photo_unverified": photo_unverified,
+            "floor": floor, "days_to_sell": days,
         }
 
     def verdict(self, l: Listing) -> dict | None:
@@ -241,20 +263,24 @@ class Valuer:
             self.store.cache_verdict(l.uid, l.price, v)
         return v
 
-    def _photo_matches_title(self, comps, verdict) -> Rejection | None:
-        """Fail closed: drop when the photos cannot be read, and discard for good
-        when they show a different (usually cheaper) item than the title."""
+    def _photo_matches_title(self, comps, verdict) -> Rejection | str:
+        """"ok" when the photos show what the title claims (or there is nothing
+        to check), "unverified" when no verdict could confirm it, and a
+        Rejection, discarded for good, when they show a different (usually
+        cheaper) item: "PS5" on a photo of a PS4."""
         claimed = primary_key(comps)
         if not claimed:
-            return None
-        items = items_from_classification(verdict, self.catalog) if verdict else []
+            return "ok"
+        if not verdict:
+            return "unverified"
+        items = items_from_classification(verdict, self.catalog)
         category = self.catalog.by_key[claimed].category
         seen = next((i.key for i in items if i.category == category), None)
         if seen is None:
-            return Rejection("photos illisibles pour confirmer le titre")
+            return "unverified"
         if seen != claimed:
             return Rejection(f"photo: {seen} au lieu de {claimed}", discard=True)
-        return None
+        return "ok"
 
     def _needs_photo(self, comps) -> bool:
         key = primary_key(comps)

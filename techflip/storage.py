@@ -10,6 +10,7 @@ Tables:
 - alerts        : listings already sent to the owner's Telegram (never twice)
 - price_feedback: subscribers' verdicts on our estimates and their real
                   resale prices, one row per user and listing
+- picks         : the owner's shortlist on the local shopping board
 
 A listing that leaves the site ("partie") is the closest thing to a sale we can
 observe: its last price feeds the tracker ahead of asking prices, and how long
@@ -18,15 +19,14 @@ it stayed up gives the time to sell.
 from __future__ import annotations
 
 import json
-import re
 import sqlite3
-import unicodedata
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from . import tuning
 from .db import connect, open_db
 from .domain import Listing
+from .text import words
 
 __all__ = ["Store", "connect", "title_key"]
 
@@ -111,6 +111,15 @@ CREATE TABLE IF NOT EXISTS price_feedback (
 );
 CREATE INDEX IF NOT EXISTS idx_feedback_uid ON price_feedback(uid);
 
+-- The owner's verdict on a listing, from the shopping board. Separate from
+-- `alerts` (the bot's own bookkeeping): neither may silence the other.
+CREATE TABLE IF NOT EXISTS picks (
+    uid        TEXT PRIMARY KEY,
+    state      TEXT NOT NULL,     -- interested | hidden
+    note       TEXT,
+    updated_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS meta (
     key        TEXT PRIMARY KEY,
     value      TEXT NOT NULL,
@@ -122,9 +131,23 @@ MIGRATIONS = (("store/001_schema", _SCHEMA),)
 
 
 def title_key(title: str | None) -> str:
-    t = unicodedata.normalize("NFKD", title or "")
-    t = "".join(c for c in t if not unicodedata.combining(c)).lower()
-    return " ".join(re.findall(r"[a-z0-9]+", t))
+    return " ".join(words(title))
+
+
+# What `import_from` copies from another database: facts, never old valuations.
+_IMPORTED = {
+    "listings": ("uid", "source", "source_id", "search_name", "url", "title", "price", "last_price",
+                 "brand", "model", "condition", "city", "zipcode", "department", "country", "lat", "lng",
+                 "owner_type", "has_phone", "seller_id", "published_at", "fetched_at", "raw_json",
+                 "first_seen", "last_seen", "status", "disappeared_at", "days_on_market"),
+    "price_history": ("uid", "price", "seen_at"),
+    "alerts": ("uid", "alerted_at", "true_value", "net_profit", "tier"),
+    "picks": ("uid", "state", "note", "updated_at"),
+}
+
+# Shops price at their shelf, not at what an individual can resell for.
+_PRIVATE = "(owner_type IS NULL OR owner_type != 'pro')"
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -193,12 +216,15 @@ class Store:
             )
         else:
             changed = l.price is not None and old_price is not None and l.price != old_price
+            # A known publication date is never overwritten: for a shop, which
+            # has stock rather than postings, it stays the day we first saw it.
             self.conn.execute(
                 """UPDATE listings SET price=?, url=?, title=?, fetched_at=?, raw_json=?,
-                       last_seen=?, status='active',
+                       last_seen=?, status='active', disappeared_at=NULL, days_on_market=NULL,
+                       published_at = COALESCE(published_at, ?),
                        last_price = CASE WHEN ? THEN ? ELSE last_price END
                    WHERE uid=?""",
-                (l.price, l.url, l.title, l.fetched_at, raw, l.fetched_at,
+                (l.price, l.url, l.title, l.fetched_at, raw, l.fetched_at, l.published_at,
                  int(changed), old_price, l.uid),
             )
         if is_new:
@@ -297,7 +323,8 @@ class Store:
         self.conn.commit()
 
     def mark_gone(self, uid: str, at: str | None = None):
-        """The listing left the site (or two subscribers reported it sold)."""
+        """The listing left the site (or two subscribers reported it sold).
+        first_seen to disappeared_at is how long it took to sell."""
         at = at or _now()
         row = self.conn.execute("SELECT first_seen, status FROM listings WHERE uid=?", (uid,)).fetchone()
         if row is None or row["status"] == "gone":
@@ -309,22 +336,32 @@ class Store:
         self.conn.commit()
 
     def mark_checked(self, uid: str):
+        """Checked, no clear answer: not due again until its next turn."""
         self.conn.execute("UPDATE listings SET last_checked=? WHERE uid=?", (_now(), uid))
+        self.conn.commit()
+
+    def mark_alive(self, uid: str):
+        """Confirmed still online, which also undoes an earlier wrong 'gone'."""
+        now = _now()
+        self.conn.execute(
+            "UPDATE listings SET status='active', disappeared_at=NULL, days_on_market=NULL, "
+            "last_checked=?, last_seen=? WHERE uid=?", (now, now, uid))
         self.conn.commit()
 
     def due_for_check(self, limit: int, source: str) -> list[sqlite3.Row]:
         """Which active listings to re-check, most useful first: deals people
-        can see (every 3 h, so dead deals leave the feed), then single items
-        that teach the tracker (every 2 days)."""
+        can see (every 3 h, so dead deals leave the feed), then single private
+        items that teach the tracker (every 2 days)."""
         now = datetime.now(timezone.utc)
         deals_before = (now - tuning.RECHECK_DEALS_EVERY).isoformat()
         comps_before = (now - tuning.RECHECK_COMPONENTS_EVERY).isoformat()
         horizon = (now - tuning.RECHECK_HORIZON).isoformat()
         return self.conn.execute(
-            """SELECT uid, source_id, url FROM listings
+            f"""SELECT uid, source, source_id, title, price, lat, lng, url FROM listings
                WHERE status='active' AND source=? AND first_seen>=?
                  AND ((margin > 0 AND appraisal IS NOT NULL AND IFNULL(last_checked, first_seen) < ?)
-                      OR (primary_component IS NOT NULL AND IFNULL(last_checked, first_seen) < ?))
+                      OR (primary_component IS NOT NULL AND {_PRIVATE}
+                          AND IFNULL(last_checked, first_seen) < ?))
                ORDER BY (margin > 0) DESC, IFNULL(last_checked, first_seen)
                LIMIT ?""",
             (source, horizon, deals_before, comps_before, limit)).fetchall()
@@ -333,9 +370,9 @@ class Store:
         """Closest thing to sale prices: last price of single items that left
         the site, plus resale prices subscribers reported for that item."""
         rows = self.conn.execute(
-            """SELECT price AS p FROM listings
+            f"""SELECT price AS p FROM listings
                WHERE primary_component=? AND status='gone' AND price IS NOT NULL
-                 AND disappeared_at>=? AND uid IS NOT ?
+                 AND disappeared_at>=? AND uid IS NOT ? AND {_PRIVATE}
                UNION ALL
                SELECT f.resale_price AS p FROM price_feedback f JOIN listings l ON l.uid=f.uid
                WHERE l.primary_component=? AND f.resale_price IS NOT NULL AND f.created_at>=?""",
@@ -388,17 +425,20 @@ class Store:
                 out["mine"], out["my_resale"] = me["verdict"], me["resale_price"]
         return out
 
-    def component_prices(self, key: str, since_iso: str,
-                         exclude_uid: str | None = None) -> list[float]:
-        """Prices of single-item listings for one component, in the recency
-        window. This is what the price tracker learns from. The listing being
-        appraised is excluded, or it would vouch for its own price."""
-        rows = self.conn.execute(
-            "SELECT price FROM listings WHERE primary_component=? AND price IS NOT NULL "
-            "AND fetched_at >= ? AND uid IS NOT ?",
-            (key, since_iso, exclude_uid),
-        ).fetchall()
-        return [r["price"] for r in rows]
+    def component_prices(self, key: str, since_iso: str, exclude_uid: str | None = None,
+                         stale_days: float | None = None) -> list[float]:
+        """Asking prices of single private listings for one component, in the
+        recency window: what the price tracker learns from. The listing being
+        appraised is excluded, or it would vouch for its own price.
+        `stale_days` drops ads still online that long after first sighting."""
+        sql = (f"SELECT price FROM listings WHERE primary_component=? AND price IS NOT NULL "
+               f"AND fetched_at >= ? AND uid IS NOT ? AND {_PRIVATE}")
+        params: list = [key, since_iso, exclude_uid]
+        if stale_days is not None:
+            sql += (" AND (first_seen IS NULL OR last_seen IS NULL"
+                    " OR julianday(last_seen) - julianday(first_seen) < ?)")
+            params.append(stale_days)
+        return [r["price"] for r in self.conn.execute(sql, params)]
 
     # ---------- deals (read side) ----------
 
@@ -423,6 +463,92 @@ class Store:
         return self.conn.execute(
             "SELECT price, seen_at FROM price_history WHERE uid=? ORDER BY id", (uid,)
         ).fetchall()
+
+    # ---------- shopping board (the whole pool, read in bulk) ----------
+
+    def active_listings(self) -> list[sqlite3.Row]:
+        """Every listing still believed online, newest sighting first."""
+        return self.conn.execute(
+            "SELECT uid, raw_json, last_seen, owner_type, primary_component FROM listings WHERE status='active' "
+            "AND price IS NOT NULL AND raw_json IS NOT NULL ORDER BY last_seen DESC").fetchall()
+
+    def market_ages(self) -> dict[str, float]:
+        """uid -> days between first and last sighting, for the whole pool."""
+        return {r["uid"]: round(r["d"], 2) for r in self.conn.execute(
+            "SELECT uid, julianday(last_seen) - julianday(first_seen) d FROM listings "
+            "WHERE status='active'") if r["d"] is not None}
+
+    def price_cuts(self) -> dict[str, dict]:
+        """uid -> {first, current, cut, pct, changes} for every seller who cut
+        the price. Only cuts count: a raise is a seller testing the market."""
+        seq: dict[str, list[float]] = {}
+        for r in self.conn.execute(
+                "SELECT uid, price FROM price_history WHERE price IS NOT NULL ORDER BY id"):
+            seq.setdefault(r["uid"], []).append(r["price"])
+        return {uid: {"first": p[0], "current": p[-1], "cut": round(p[0] - p[-1], 2),
+                      "pct": round((p[0] - p[-1]) / p[0], 3), "changes": len(p) - 1}
+                for uid, p in seq.items() if len(p) >= 2 and p[0] > p[-1]}
+
+    def set_pick(self, uid: str, state: str, note: str | None = None):
+        """state 'interested' or 'hidden'; anything else clears the pick."""
+        if state not in ("interested", "hidden"):
+            self.conn.execute("DELETE FROM picks WHERE uid=?", (uid,))
+        else:
+            self.conn.execute(
+                "INSERT INTO picks (uid, state, note, updated_at) VALUES (?,?,?,?) "
+                "ON CONFLICT(uid) DO UPDATE SET state=excluded.state, "
+                "note=COALESCE(excluded.note, picks.note), updated_at=excluded.updated_at",
+                (uid, state, note, _now()))
+        self.conn.commit()
+
+    def picks(self) -> dict[str, sqlite3.Row]:
+        return {r["uid"]: r for r in self.conn.execute("SELECT * FROM picks")}
+
+    def retrack(self, teaching_key) -> dict:
+        """Re-apply the current teaching rule to every stored listing, so ads
+        stored before a rule existed stop poisoning the medians.
+        `teaching_key(listing) -> key | None`."""
+        stats = {"scanned": 0, "changed": 0}
+        for r in self.conn.execute(
+                "SELECT uid, raw_json, primary_component FROM listings WHERE raw_json IS NOT NULL").fetchall():
+            key = teaching_key(Listing.from_dict(json.loads(r["raw_json"])))
+            stats["scanned"] += 1
+            if key != r["primary_component"]:
+                self.conn.execute("UPDATE listings SET primary_component=?, is_single=? WHERE uid=?",
+                                  (key, int(bool(key)), r["uid"]))
+                stats["changed"] += 1
+        self.conn.commit()
+        return stats
+
+    def import_from(self, other: str | Path) -> dict:
+        """Copy listings, price history, alerts and picks from another TechFlip
+        database, an older version included: the price memory is the slowest
+        thing to rebuild. Facts only (what was listed, when, at what price);
+        valuations are redone by the current rules. Rows already here win.
+        Run `retrack` afterwards."""
+        self.conn.commit()
+        self.conn.execute("ATTACH DATABASE ? AS old", (str(other),))
+        try:
+            out = {}
+            for table, wanted in _IMPORTED.items():
+                theirs = {r["name"] for r in self.conn.execute(f"PRAGMA old.table_info({table})")}
+                cols = ", ".join(c for c in wanted if c in theirs)
+                if not cols:
+                    continue
+                only_new = (" WHERE uid NOT IN (SELECT uid FROM main.price_history)"
+                            if table == "price_history" else "")
+                out[table] = self.conn.execute(
+                    f"INSERT OR IGNORE INTO main.{table} ({cols}) SELECT {cols} FROM old.{table}{only_new}"
+                ).rowcount
+            for r in self.conn.execute(
+                    "SELECT uid, title, raw_json FROM listings WHERE title_key IS NULL").fetchall():
+                raw = json.loads(r["raw_json"] or "{}")
+                self.conn.execute("UPDATE listings SET title_key=?, lat=IFNULL(lat, ?), lng=IFNULL(lng, ?) "
+                                  "WHERE uid=?", (title_key(r["title"]), raw.get("lat"), raw.get("lng"), r["uid"]))
+            self.conn.commit()
+        finally:
+            self.conn.execute("DETACH DATABASE old")
+        return out
 
     # ---------- owner alerts ----------
 

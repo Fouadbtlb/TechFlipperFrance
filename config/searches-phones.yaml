@@ -1,0 +1,213 @@
+# Telephones entre particuliers. Le trou le plus cher du carnet de prix.
+#
+# 2 469 annonces GSM non evaluees, soit 697 000 EUR de stock, parce que le
+# marche prive des telephones n'etait jamais interroge: toutes les recherches
+# configurees visaient le PC et la console. Resultat, les seules donnees
+# telephone du pool venaient des chaines, et une chaine est le plafond de
+# vente, pas le prix qu'on en tire (Switch: 170 en magasin, 128 entre
+# particuliers). Sans ces lignes, evaluer un telephone de magasin revenait a
+# le comparer a son propre prix d'etiquette.
+#
+# postcode=7700 = Mouscron, a 16 km de Lille et sur la frontiere: le rayon
+# attrape les deux marches d'un coup.
+#
+#   SEARCHES_FILE=config/searches-phones.yaml python -m techflip.cli once
+searches:
+- name: GSM 40km (BE)
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?l1CategoryId=136&postcode=7700&distanceMeters=40000&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 60
+  max_price: 1600
+- name: GSM 80km (BE)
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?l1CategoryId=136&postcode=7700&distanceMeters=80000&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 80
+  max_price: 1600
+- name: GSM s26 ultra
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=s26+ultra&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM galaxy s26
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=galaxy+s26&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM s25 ultra
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=s25+ultra&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM s25 edge
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=s25+edge&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM galaxy s25
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=galaxy+s25&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM s24 ultra
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=s24+ultra&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM galaxy s24
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=galaxy+s24&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM s23 ultra
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=s23+ultra&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM galaxy s23
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=galaxy+s23&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM s22 ultra
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=s22+ultra&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM galaxy s21
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=galaxy+s21&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM z fold 7
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=z+fold+7&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM z fold 6
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=z+fold+6&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM z flip 7
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=z+flip+7&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM z flip 6
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=z+flip+6&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM iphone 17 pro
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=iphone+17+pro&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM iphone 16 pro
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=iphone+16+pro&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM iphone 16
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=iphone+16&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM iphone 15 pro
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=iphone+15+pro&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM iphone 15
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=iphone+15&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM iphone 14 pro
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=iphone+14+pro&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM iphone 14
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=iphone+14&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM iphone 13
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=iphone+13&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM iphone se
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=iphone+se&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM redmi note 14
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=redmi+note+14&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM redmi note 13
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=redmi+note+13&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM xiaomi 15
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=xiaomi+15&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM xiaomi 14t
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=xiaomi+14t&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM pixel 9
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=pixel+9&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM pixel 8
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=pixel+8&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600
+- name: GSM oneplus nord
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=oneplus+nord&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 60
+  max_price: 1600

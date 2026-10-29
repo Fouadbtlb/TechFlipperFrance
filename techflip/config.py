@@ -2,7 +2,9 @@
 
 Two layers:
 - .env                 -> secrets & runtime knobs (tokens, thresholds, API keys)
-- config/searches.yaml -> the searches to monitor (paste Leboncoin URLs)
+- config/searches.yaml -> the searches to monitor (paste Leboncoin URLs), and
+                          optionally a `proxy:` for the scrapers
+- config/sold.yaml     -> what you actually sold things for
 
 The API's settings live in their own dataclass (ApiSettings) so the scanner can
 run on a box that has none of the app secrets.
@@ -39,17 +41,26 @@ class Settings:
     telegram_token: str
     telegram_chat_id: str
     db_path: Path
+    # Proxy for every scraper ("http://user:pass@host:port"), None = direct.
+    proxy: str | None = None
     poll_seconds_min: int = 90
     poll_seconds_max: int = 240
     night_pause: bool = True
-    impersonate: str = "safari_ios"
+    # Leboncoin TLS fingerprint. Which mobile stack DataDome lets through
+    # changes over time (safari_ios in July 2026, chrome_android in August):
+    # re-test rather than trust this default.
+    impersonate: str = "chrome_android"
     ai_url: str = "http://localhost:11434/v1"
     ai_model: str = "qwen2.5vl:7b"
     # qwen2.5vl:7b ships a 4096-token context; one full-res photo plus the prompt
     # already fills most of it, so keep this at 1 unless the model has more ctx.
     ai_max_images: int = 1
+    # The vision model only runs on candidates worth at least this much (EUR):
+    # CPU inference on photos is slow and heats the machine.
+    ai_min_margin: float = 70
     # pricing
     pricebook_path: str = "config/pricebook.yaml"
+    sold_path: str = "config/sold.yaml"
     min_comparables: int = 5
     window_days: int = 90
     realization_factor: float = 0.85
@@ -69,6 +80,9 @@ class Settings:
     min_conf_hard: float = 0.6
     # listings re-checked per cycle to learn what left the site (sold or withdrawn)
     departure_checks: int = 12
+    # shopping board: asking prices of ads still online after this many days
+    # are left out of its medians (they did not sell at that price)
+    stale_days: float = 10
     searches: tuple[SearchConfig, ...] = field(default_factory=tuple)
 
 
@@ -87,9 +101,11 @@ def _bool(name: str, default: bool) -> bool:
     return default if not v else v not in ("0", "false", "no")
 
 
-def load_settings(searches_file: str | Path = "config/searches.yaml") -> Settings:
+def load_settings(searches_file: str | Path | None = None) -> Settings:
+    """`searches_file` defaults to $SEARCHES_FILE, then config/searches.yaml."""
+    path = Path(searches_file or os.environ.get("SEARCHES_FILE") or "config/searches.yaml")
     searches: list[SearchConfig] = []
-    path = Path(searches_file)
+    raw: dict = {}
     if path.exists():
         raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         default_exclude = tuple(raw.get("default_exclude", []))
@@ -115,14 +131,17 @@ def load_settings(searches_file: str | Path = "config/searches.yaml") -> Setting
         telegram_token=os.environ.get("TELEGRAM_BOT_TOKEN", ""),
         telegram_chat_id=os.environ.get("TELEGRAM_CHAT_ID", ""),
         db_path=Path(os.environ.get("TECHFLIP_DB", "techflip.db")),
+        proxy=os.environ.get("PROXY_URL") or raw.get("proxy") or None,
         poll_seconds_min=_int("POLL_SECONDS_MIN", 90),
         poll_seconds_max=_int("POLL_SECONDS_MAX", 240),
         night_pause=_bool("NIGHT_PAUSE", True),
-        impersonate=os.environ.get("LBC_IMPERSONATE", "safari_ios"),
+        impersonate=os.environ.get("LBC_IMPERSONATE", "chrome_android"),
         ai_url=os.environ.get("AI_URL", "http://localhost:11434/v1"),
         ai_model=os.environ.get("AI_MODEL", "qwen2.5vl:7b"),
         ai_max_images=_int("AI_MAX_IMAGES", 1),
+        ai_min_margin=_float("AI_MIN_MARGIN", 70),
         pricebook_path=os.environ.get("PRICEBOOK", "config/pricebook.yaml"),
+        sold_path=os.environ.get("SOLD_PRICES", "config/sold.yaml"),
         min_comparables=_int("MIN_COMPARABLES", 5),
         window_days=_int("WINDOW_DAYS", 90),
         realization_factor=_float("REALIZATION_FACTOR", 0.85),
@@ -138,6 +157,7 @@ def load_settings(searches_file: str | Path = "config/searches.yaml") -> Setting
         min_conf_medium=_float("MIN_CONF_MEDIUM", 0.4),
         min_conf_hard=_float("MIN_CONF_HARD", 0.6),
         departure_checks=_int("DEPARTURE_CHECKS", 12),
+        stale_days=_float("STALE_DAYS", 10),
         searches=tuple(searches),
     )
 

@@ -1,0 +1,232 @@
+"""Cash Converters Belgium - a pro second-hand chain, priced like a shop.
+
+Worth its own source because it does not behave like a marketplace. A private
+seller prices by hope and negotiates; a chain prices to clear stock on a
+schedule and does not haggle, so its mistakes are systematic and repeatable
+rather than one-off. The owner found a Steam Deck LCD at 230 and an OLED 2To at
+500 there, which is well under the private asks this tool already tracks.
+
+The site is PrestaShop 1.7, so `&ajax=1` on any category or search URL returns
+clean JSON (`products[]` with id, name, price_amount, url, cover) instead of
+HTML to parse.
+
+Location is the useful part. Every item sits in one physical shop, and the
+category facet filters by it (`q=Magasin-JAMBES`), so an entire page of results
+shares a known town, no per-product request needed to find out where it is.
+JAMBES is Namur; SAMBREVILLE, HUY and WAVRE ring it. Store names are geocoded
+through pgeocode's Belgian dataset rather than a table of coordinates typed out
+by hand.
+"""
+from __future__ import annotations
+
+import datetime as dt
+import logging
+import re
+import urllib.parse
+
+from curl_cffi import requests
+
+from ..config import SearchConfig
+from ..domain import Listing
+from ..liveness import page_online
+
+log = logging.getLogger(__name__)
+
+_BASE = "https://www.cashconverters.be"
+_PER_PAGE = 48
+_TAGS = re.compile(r"<[^>]+>")
+
+
+class CashConvertersSource:
+    name = "cashconverters"
+
+    def __init__(self, impersonate: str = "chrome131", timeout: float = 30.0, proxy: str | None = None):
+        self.session = requests.Session(impersonate=impersonate)
+        if proxy:
+            self.session.proxies = {"http": proxy, "https": proxy}
+        self.timeout = timeout
+        self._geo: dict[str, tuple[float, float] | None] = {}
+
+    def fetch(self, search: SearchConfig, page: int = 1) -> list[Listing]:
+        url = _with_ajax(search.url, page)
+        r = self.session.get(url, timeout=self.timeout,
+                             headers={"Accept": "application/json",
+                                      "X-Requested-With": "XMLHttpRequest"})
+        if "json" not in r.headers.get("content-type", ""):
+            log.warning("cashconverters: non-JSON (HTTP %s) - blocked?", r.status_code)
+            return []
+        store = _store_of(search.url)
+        latlng = self._latlng(store)
+        out: list[Listing] = []
+        for item in (r.json() or {}).get("products") or []:
+            # `add_to_cart_url` is null exactly when the shop has sold the
+            # item; `active` still reads 1, so it is no help. The 700 EUR
+            # RTX 3080 at Ixelles was recommended as the buy of the weekend
+            # while its own page said "Rupture de stock".
+            if not item.get("add_to_cart_url"):
+                continue
+            try:
+                out.append(self._normalize(item, search.name, store, latlng))
+            except Exception:
+                log.exception("cashconverters: normalization failed")
+        return out
+
+    def is_online(self, row) -> bool | None:
+        """The product page decides: the feed keeps sold items for hours."""
+        return page_online(self.session.get(row["url"], timeout=self.timeout))
+
+    def _normalize(self, it: dict, search_name: str, store, latlng) -> Listing:
+        price = it.get("price_amount")
+        return Listing(
+            source=self.name,
+            source_id=str(it.get("id_product")),
+            url=it.get("url") or it.get("canonical_url") or _BASE,
+            title=_title(it),
+            price=float(price) if price is not None else None,
+            # A shop has stock, not a posting date. Recording the day we first
+            # saw it is the closest true statement, and it is what lets the
+            # resweep reconsider the item later instead of judging it once.
+            published_at=dt.datetime.now(tz=dt.timezone.utc).date().isoformat(),
+            description=_TAGS.sub(" ", it.get("description_short") or "").strip(),
+            city=_pretty(store),
+            country="BE",
+            owner_type="pro",
+            lat=latlng[0] if latlng else None,
+            lng=latlng[1] if latlng else None,
+            image_urls=tuple(_images(it)),
+            source_category=_category_of(it.get("url") or ""),
+            search_name=search_name,
+        )
+
+    def _latlng(self, store: str | None):
+        if not store:
+            return None
+        if store not in self._geo:
+            self._geo[store] = _geocode(store)
+        return self._geo[store]
+
+
+def _with_ajax(url: str, page: int) -> str:
+    parts = urllib.parse.urlsplit(url)
+    q = dict(urllib.parse.parse_qsl(parts.query, keep_blank_values=True))
+    q.update({"ajax": "1", "resultsPerPage": str(_PER_PAGE), "page": str(page)})
+    return urllib.parse.urlunsplit(parts._replace(query=urllib.parse.urlencode(q)))
+
+
+def _store_of(url: str) -> str | None:
+    """The shop a filtered category page is pinned to, from `q=Magasin-XXX`."""
+    q = dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(url).query))
+    m = re.match(r"Magasin-(.+)$", q.get("q", ""))
+    return m.group(1).strip() if m else None
+
+
+def _pretty(store: str | None) -> str | None:
+    return store.title() if store else None
+
+
+# Postcode of the commune each shop sits in. pgeocode's NAME search is not safe
+# for these: it put HUY in Lathuy, MARCHE in Marchienne-au-Pont (Charleroi)
+# rather than Marche-en-Famenne, and found nothing for LIEGE or LA LOUVIERE.
+# A postcode lookup is exact.
+_STORE_POSTCODE = {
+    "ANTWERPEN": "2000", "ARLON": "6700", "ATH": "7800", "AYWAILLE": "4920",
+    "BINCHE": "7130", "BRUXELLES": "1000", "COUILLET": "6010",
+    "DROGENBOS": "1620", "ETTERBEEK": "1040", "EVERE": "1140",
+    "FLERON": "4620", "FROYENNES": "7503", "GOSSELIES": "6041",
+    "GRIVEGNEE": "4030", "HERSTAL": "4040", "HUY": "4500", "IXELLES": "1050",
+    "JAMBES": "5100", "JETTE": "1090", "LA LOUVIERE": "7100", "LA": "7100",
+    "LIEGE": "4000", "MARCHE": "6900", "MONS": "7000", "MOUSCRON": "7700",
+    "QUAREGNON": "7390", "SAMBREVILLE": "5060", "SERAING": "4100",
+    "TUBIZE": "1480", "VERVIERS": "4800", "WAVRE": "1300",
+}
+
+
+def _geocode(store: str):
+    try:
+        import pgeocode
+    except Exception:
+        return None
+    pc = _STORE_POSTCODE.get((store or "").upper().strip())
+    if pc:
+        try:
+            r = pgeocode.Nominatim("be").query_postal_code(pc)
+            lat, lng = float(r["latitude"]), float(r["longitude"])
+            if lat == lat and lng == lng:
+                return (lat, lng)
+        except Exception:
+            log.warning("cashconverters: postcode lookup failed for %r", store, exc_info=True)
+    try:
+        df = pgeocode.Nominatim("be").query_location(store.title(), top_k=1)
+        if len(df):
+            row = df.iloc[0]
+            lat, lng = float(row["latitude"]), float(row["longitude"])
+            if lat == lat and lng == lng:          # NaN when unknown
+                return (lat, lng)
+    except Exception:
+        log.warning("cashconverters: geocoding failed for %r", store, exc_info=True)
+    return None
+
+
+def _category_of(url: str) -> str | None:
+    """The aisle segment of a product URL: /fr/<aisle>/<id>-<slug>.html."""
+    m = re.search(r"/fr/([a-z0-9-]+)/\d+-", url or "")
+    return m.group(1) if m else None
+
+
+def _images(it: dict) -> list[str]:
+    sizes = ((it.get("cover") or {}).get("bySize") or {})
+    urls = [v.get("url") for v in sizes.values() if isinstance(v, dict) and v.get("url")]
+    return urls[-1:] or urls
+
+
+def _slug_words(url: str) -> str:
+    """The product slug, as words: /fr/<aisle>/<id>-<slug>.html -> "<slug>".
+
+    A clerk retypes the title and drops things the slug kept. "Smartphone
+    Samsung z flip 7 black 8gb/128gb" is filed at .../z-flip-7-FE-black-...,
+    and the FE is 200 EUR cheaper between private sellers than the Flip 7 the
+    title claims.
+    """
+    m = re.search(r"/fr/[a-z0-9-]+/\d+-([a-z0-9-]+)\.html", url or "")
+    return m.group(1).replace("-", " ") if m else ""
+
+
+# Variant markers only. The slug is NOT a safe copy of the title: Cash
+# Converters reuses product pages, so /1211064-pc-gaming-ryzen-5-4th-rtx-4060-...
+# now holds an ad titled "carte graphique Gigabyte RTX 4060". Appending that
+# slug wholesale turned a bare graphics card into a whole tower worth 638 EUR.
+#
+# What the slug is reliably good for is the one word a clerk drops when
+# retyping: "Smartphone Samsung z flip 7 black 8gb/128gb" is filed under
+# .../z-flip-7-FE-black-..., and the FE asks 450 between private sellers where
+# the Flip 7 asks 650. So take variant words, and only when the slug is
+# demonstrably describing the same product as the title.
+_VARIANT_WORDS = {"fe", "pro", "max", "ultra", "lite", "mini", "plus", "slim",
+                  "digital", "oled", "xl", "se"}
+
+
+def _title(it: dict) -> str:
+    name = (it.get("name") or "").strip()
+    slug = _slug_words(it.get("url") or it.get("canonical_url") or "")
+    extra = _variant_hint(name, slug)
+    return f"{name} {extra}".strip() if extra else name
+
+
+def _variant_hint(name: str, slug: str) -> str:
+    if not name or not slug:
+        return ""
+    have = {w for w in re.split(r"[^0-9a-z]+", name.lower()) if w}
+    words = [w for w in slug.split() if w]
+    if not have or not words:
+        return ""
+    # Same product? Most of the title has to reappear in the slug. A reused
+    # page fails this and contributes nothing.
+    shared = len(have & set(words)) / len(have)
+    if shared < 0.6:
+        return ""
+    if not any(w in _VARIANT_WORDS and w not in have for w in words):
+        return ""
+    # The whole slug, not the bare variant word: "fe" tacked onto the end of
+    # the title is not adjacent to "flip 7" and matches no alias. Safe to take
+    # in full precisely because the overlap test above proved same product.
+    return slug

@@ -37,14 +37,16 @@ def since_iso(max_age_days: int) -> str:
     return (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
 
 
-# Below this, or with a serious risk signal, a deal goes to "À vérifier"
-# instead of mixing with the solid ones.
+# Below this, with a serious risk signal, or with photos nobody could check,
+# a deal goes to "À vérifier" instead of mixing with the solid ones.
 RELIABLE_CONFIDENCE = tuning.RELIABLE_CONFIDENCE
 BUCKETS = ("reliable", "check")
 
 
 def is_reliable(row) -> bool:
-    return (row["confidence"] or 0) >= RELIABLE_CONFIDENCE and risk_level(_appraisal(row)) != "high"
+    appr = _appraisal(row)
+    return ((row["confidence"] or 0) >= RELIABLE_CONFIDENCE and risk_level(appr) != "high"
+            and not appr.get("photo_unverified"))
 
 
 def deals_for(store: Store, viewer: Viewer, max_age_days: int, hidden: set[str] = frozenset(),
@@ -133,6 +135,7 @@ def card(row, j: Judgement) -> dict:
         "lat": row["lat"],
         "lng": row["lng"],
         "source": row["source"],
+        "shop": row["owner_type"] == "pro",
         "reliable": is_reliable(row),
         "reposts": row["reposts"] or 0,
         "days_to_sell": appr.get("days_to_sell"),
@@ -152,8 +155,8 @@ def negotiation(row, j: Judgement, viewer: Viewer) -> dict | None:
     """The most this viewer should pay to keep their own margin, an opening
     offer, and a polite message to the seller (who is addressed as "vous")."""
     value, price, logistics = row["true_value"], row["price"], j.logistics
-    if value is None or price is None or logistics is None:
-        return None
+    if value is None or price is None or logistics is None or row["owner_type"] == "pro":
+        return None    # a shop does not haggle
     bar = viewer.policy.bars[j.decision.zone]
     max_price = _round5(value - logistics - bar)
     if max_price <= 0:
@@ -199,6 +202,7 @@ def detail(store: Store, row, j: Judgement, saved: bool, viewer: Viewer | None =
         "negotiation": negotiation(row, j, viewer) if viewer else None,
         "feedback": store.feedback_summary(row["uid"], user_id),
         "photo_checked": bool(appr.get("photo_checked")),
+        "photo_unverified": bool(appr.get("photo_unverified")),
         "shippable": bool(appr.get("shippable", True)),
         "scam_score": appr.get("risk"),
         "seller": appr.get("seller"),

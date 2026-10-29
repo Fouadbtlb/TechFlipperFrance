@@ -7,6 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 from lbc.exceptions import DatadomeError
 
+from techflip import liveness
 from techflip import pipeline as pipe
 from techflip.api.accounts import Accounts
 from techflip.api.app import create_app
@@ -92,11 +93,11 @@ class _CheckingSource:
     def fetch(self, search, page=1):
         return []
 
-    def is_online(self, ad_id):
+    def is_online(self, row):
         self.calls += 1
         if self.block_after is not None and self.calls > self.block_after:
             raise DatadomeError("blocked")
-        return ad_id not in self.gone_ids
+        return row["source_id"] not in self.gone_ids
 
 
 def _pipe(tmp_path, monkeypatch, src):
@@ -104,6 +105,7 @@ def _pipe(tmp_path, monkeypatch, src):
                         searches=(SearchConfig(name="x", url="u"),), departure_checks=10)
     monkeypatch.setattr(pipe, "_make_source", lambda n, s: src)
     monkeypatch.setattr(pipe.time, "sleep", lambda *a: None)
+    monkeypatch.setattr(liveness.time, "sleep", lambda *a: None)
     return pipe.Pipeline(settings)
 
 
@@ -150,7 +152,7 @@ def test_reposts_are_linked_and_shown_once(tmp_path):
 def test_negotiation_never_offers_more_than_the_max():
     v = Viewer(home=LILLE, policy=default_policy())
     row = {"true_value": 300, "price": 260, "lat": LILLE[0], "lng": LILLE[1], "confidence": 0.9,
-           "category": "console", "reposts": 0, "title": "PS5",
+           "category": "console", "reposts": 0, "title": "PS5", "owner_type": None,
            "appraisal": '{"shippable": false, "ship_class": "bulky", "risk": 1}'}
     n = negotiation(row, judge(row, v), v)
     assert n["max_price"] == 270 and n["opening"] <= n["max_price"] and n["opening"] < 260
@@ -199,3 +201,15 @@ def test_daily_digest_once_in_the_evening(tmp_path):
 
 
 assert SECRET  # shared fixtures imported above
+
+
+def test_unchecked_photos_never_count_as_reliable_and_shops_do_not_haggle():
+    from techflip.api.deals import is_reliable
+    v = Viewer(home=LILLE, policy=default_policy())
+    row = {"true_value": 300, "price": 200, "lat": LILLE[0], "lng": LILLE[1], "confidence": 0.9,
+           "category": "console", "reposts": 0, "title": "Xbox Series X", "owner_type": None,
+           "appraisal": '{"shippable": false, "ship_class": "bulky", "risk": 1}'}
+    assert is_reliable(row)
+    assert not is_reliable({**row, "appraisal": '{"risk": 1, "photo_unverified": true}'})
+    assert negotiation(row, judge(row, v), v) is not None
+    assert negotiation({**row, "owner_type": "pro"}, judge(row, v), v) is None

@@ -1,0 +1,269 @@
+# Cash Express: 23 magasins a portee, une recherche par rayon et par pays.
+#
+# Pourquoi si peu de lignes pour 150 000 articles: Algolia fait un OU a
+# l'interieur d'un tableau de facettes, donc tous les magasins proches tiennent
+# dans une seule requete. Cash Converters coute 60 appels pour 30 magasins;
+# ici c'est 42 pour 23 magasins et un catalogue cinq fois plus gros.
+#
+# Les magasins retenus sont a moins de 200 km de Lille ou 130 km de Namur.
+# LILLE CENTRE est a 1 km, LIEVIN a 29, HORNU a 59 (a cote de Quaregnon) et
+# ANDENNE sur la route du week-end.
+#
+# Le rayon (`shelf` = categories_faceting.label) est la facette utile, pas
+# `universe`: "Consoles & Jeux video" contient "jeux", ce qui ferait barrer
+# toutes les consoles par le garde-fou des rayons.
+#
+#   SEARCHES_FILE=config/searches-cashexpress.yaml python -m techflip.cli once
+searches:
+- name: CE FR - PC gamer
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=PC+gamer&min=150
+  kind: hunt
+  min_price: 150
+  max_price: 2500
+- name: CE FR - PC Gamer Fixe
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=PC+Gamer+Fixe&min=150
+  kind: hunt
+  min_price: 150
+  max_price: 2500
+- name: CE FR - PC Gamer portable
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=PC+Gamer+portable&min=200
+  kind: hunt
+  min_price: 200
+  max_price: 2000
+- name: CE FR - Ordinateur de bureau
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Ordinateur+de+bureau&min=120
+  kind: hunt
+  min_price: 120
+  max_price: 1500
+- name: CE FR - PC portables
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=PC+portables&min=120
+  kind: hunt
+  min_price: 120
+  max_price: 1500
+- name: CE FR - Consoles
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Consoles&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900
+- name: CE FR - Consoles portables
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Consoles+portables&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900
+- name: CE FR - Console PC Portable
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Console+PC+Portable&min=150
+  kind: hunt
+  min_price: 150
+  max_price: 900
+- name: CE FR - Consoles Retro
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Consoles+Retro&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900
+- name: CE FR - Écrans PC & Moniteurs
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=%C3%89crans+PC+%26+Moniteurs&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900
+- name: CE FR - Écrans gamer et incurvés
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=%C3%89crans+gamer+et+incurv%C3%A9s&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900
+- name: CE FR - Smartphones Android
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Smartphones+Android&min=80
+  kind: hunt
+  min_price: 80
+  max_price: 1200
+- name: CE FR - Samsung Galaxy
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Samsung+Galaxy&min=80
+  kind: hunt
+  min_price: 80
+  max_price: 1200
+- name: CE FR - Galaxy S
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Galaxy+S&min=80
+  kind: hunt
+  min_price: 80
+  max_price: 1200
+- name: CE FR - Galaxy A
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Galaxy+A&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 600
+- name: CE FR - iPhone
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=iPhone&min=80
+  kind: hunt
+  min_price: 80
+  max_price: 1200
+- name: CE FR - iPhone 11 à 15
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=iPhone+11+%C3%A0+15&min=100
+  kind: hunt
+  min_price: 100
+  max_price: 1200
+- name: CE FR - Smartphones pas cher
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Smartphones+pas+cher&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 600
+- name: CE FR - Tablettes
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Tablettes&min=80
+  kind: hunt
+  min_price: 80
+  max_price: 900
+- name: CE FR - Stockage
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Stockage&min=40
+  kind: hunt
+  min_price: 40
+  max_price: 500
+- name: CE FR - Accessoires informatiques
+  source: cashexpress
+  url: https://www.cashexpress.fr/produits-occasions.html?shop=CHARLEVILLE%7CLIEVIN%7CLILLE+CENTRE%7CLONGWY%7CPARIS+19%7CPIERRY%7CREIMS%7CREIMS+CORMONTREUIL%7CROUEN+REPUBLIQUE%7CROUEN+SAINT+SEVER&shelf=Accessoires+informatiques&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900
+- name: CE BE - PC gamer
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=PC+gamer&min=150
+  kind: hunt
+  min_price: 150
+  max_price: 2500
+- name: CE BE - PC Gamer Fixe
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=PC+Gamer+Fixe&min=150
+  kind: hunt
+  min_price: 150
+  max_price: 2500
+- name: CE BE - PC Gamer portable
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=PC+Gamer+portable&min=200
+  kind: hunt
+  min_price: 200
+  max_price: 2000
+- name: CE BE - Ordinateur de bureau
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Ordinateur+de+bureau&min=120
+  kind: hunt
+  min_price: 120
+  max_price: 1500
+- name: CE BE - PC portables
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=PC+portables&min=120
+  kind: hunt
+  min_price: 120
+  max_price: 1500
+- name: CE BE - Consoles
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Consoles&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900
+- name: CE BE - Consoles portables
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Consoles+portables&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900
+- name: CE BE - Console PC Portable
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Console+PC+Portable&min=150
+  kind: hunt
+  min_price: 150
+  max_price: 900
+- name: CE BE - Consoles Retro
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Consoles+Retro&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900
+- name: CE BE - Écrans PC & Moniteurs
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=%C3%89crans+PC+%26+Moniteurs&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900
+- name: CE BE - Écrans gamer et incurvés
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=%C3%89crans+gamer+et+incurv%C3%A9s&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900
+- name: CE BE - Smartphones Android
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Smartphones+Android&min=80
+  kind: hunt
+  min_price: 80
+  max_price: 1200
+- name: CE BE - Samsung Galaxy
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Samsung+Galaxy&min=80
+  kind: hunt
+  min_price: 80
+  max_price: 1200
+- name: CE BE - Galaxy S
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Galaxy+S&min=80
+  kind: hunt
+  min_price: 80
+  max_price: 1200
+- name: CE BE - Galaxy A
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Galaxy+A&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 600
+- name: CE BE - iPhone
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=iPhone&min=80
+  kind: hunt
+  min_price: 80
+  max_price: 1200
+- name: CE BE - iPhone 11 à 15
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=iPhone+11+%C3%A0+15&min=100
+  kind: hunt
+  min_price: 100
+  max_price: 1200
+- name: CE BE - Smartphones pas cher
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Smartphones+pas+cher&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 600
+- name: CE BE - Tablettes
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Tablettes&min=80
+  kind: hunt
+  min_price: 80
+  max_price: 900
+- name: CE BE - Stockage
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Stockage&min=40
+  kind: hunt
+  min_price: 40
+  max_price: 500
+- name: CE BE - Accessoires informatiques
+  source: cashexpress
+  url: https://www.cashexpress.be/produits-occasions.html?shop=ANDENNE%7CBONCELLES%7CCHARLEROI%7CCOURT+SAINT+ETIENNE%7CDINANT%7CGRIVEGNEE%7CHERSTAL%7CHORNU%7CLA+LOUVIERE%7CLIEGE%7CROCOURT%7CSERAING%7CVERVIERS&shelf=Accessoires+informatiques&min=60
+  kind: hunt
+  min_price: 60
+  max_price: 900

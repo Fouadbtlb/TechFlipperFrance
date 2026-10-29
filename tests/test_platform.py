@@ -141,3 +141,63 @@ def test_valuation_exits_are_explicit(tmp_path, monkeypatch):
 def test_seeded_deal_helper_still_valid(tmp_path):
     uid = _seed_deal(tmp_path / "t.db", "z")
     assert Store(tmp_path / "t.db").get(uid)["margin"] > 0
+
+
+_OLD_SCHEMA = """
+CREATE TABLE listings (uid TEXT PRIMARY KEY, source TEXT NOT NULL, source_id TEXT NOT NULL,
+    search_name TEXT, url TEXT, title TEXT, price REAL, city TEXT, zipcode TEXT, owner_type TEXT,
+    published_at TEXT, fetched_at TEXT, raw_json TEXT, first_seen TEXT, last_seen TEXT,
+    status TEXT DEFAULT 'active', primary_component TEXT, true_value REAL, net_profit REAL);
+CREATE TABLE price_history (id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL, price REAL, seen_at TEXT);
+CREATE TABLE alerts (uid TEXT PRIMARY KEY, alerted_at TEXT, true_value REAL, net_profit REAL, tier TEXT);
+CREATE TABLE picks (uid TEXT PRIMARY KEY, state TEXT NOT NULL, note TEXT, updated_at TEXT);
+"""
+
+
+def test_an_older_database_is_imported_facts_only(tmp_path):
+    """Months of scraped prices are the slowest thing to rebuild, so they come
+    over; the old valuations do not (the current rules redo them)."""
+    import json
+    import sqlite3
+
+    from techflip.pricing.catalog import load_catalog
+    from techflip.pricing.identify import teaching_key
+
+    old = sqlite3.connect(tmp_path / "old.db")
+    old.executescript(_OLD_SCHEMA)
+    ad = Listing(source="2ememain", source_id="7", url="u", title="Nintendo Switch OLED", price=180,
+                 published_at="2026-09-01", lat=50.8, lng=3.2, fetched_at=NOW.isoformat())
+    old.execute("INSERT INTO listings (uid, source, source_id, title, price, raw_json, first_seen, last_seen, "
+                "fetched_at, primary_component, true_value, net_profit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                (ad.uid, "2ememain", "7", ad.title, 180, json.dumps(ad.to_dict()), NOW.isoformat(),
+                 NOW.isoformat(), NOW.isoformat(), "console:switch", 999, 500))
+    old.execute("INSERT INTO price_history (uid, price, seen_at) VALUES (?, 200, 'x'), (?, 180, 'y')",
+                (ad.uid, ad.uid))
+    old.execute("INSERT INTO alerts (uid, tier) VALUES (?, 'confirmed')", (ad.uid,))
+    old.execute("INSERT INTO picks (uid, state, updated_at) VALUES (?, 'interested', 'z')", (ad.uid,))
+    old.commit()
+    old.close()
+
+    store = Store(tmp_path / "new.db")
+    got = store.import_from(tmp_path / "old.db")
+    assert got == {"listings": 1, "price_history": 2, "alerts": 1, "picks": 1}
+    row = store.get(ad.uid)
+    assert row["true_value"] is None and row["net_profit"] is None       # no stale valuation
+    assert row["lat"] == 50.8 and row["title_key"] == "nintendo switch oled"
+    assert store.import_from(tmp_path / "old.db")["price_history"] == 0  # twice is harmless
+    catalog = load_catalog("config/pricebook.yaml")
+    assert store.retrack(lambda l: teaching_key(l, catalog))["scanned"] == 1
+    assert store.get(ad.uid)["primary_component"] == "console:switch-oled"
+
+
+def test_shop_items_are_not_rechecked_as_price_references(tmp_path):
+    """A shop's item leaving says nothing about private resale prices, so it
+    is not worth a request every two days."""
+    s = Store(tmp_path / "t.db")
+    for i, owner in (("p", None), ("s", "pro")):
+        l = Listing(source="leboncoin", source_id=i, url="u", title="RTX 4070", price=450,
+                    published_at="x", owner_type=owner,
+                    fetched_at=(NOW - timedelta(days=5)).isoformat())
+        s.upsert_listing(l)
+        s.set_primary_component(l.uid, "gpu:rtx-4070", True)
+    assert [r["uid"] for r in s.due_for_check(10, "leboncoin")] == ["leboncoin:p"]

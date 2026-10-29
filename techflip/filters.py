@@ -1,10 +1,11 @@
-"""Cheap prefilters, before any valuation work: price band + hard scam reject."""
+"""Cheap prefilters, before any valuation work: price band, hard scam reject,
+and ads that are not an offer of the thing they name."""
 from __future__ import annotations
 
 import re
-import unicodedata
 
 from .domain import Listing
+from .text import plain
 
 
 def text_prefilter(l: Listing, require: tuple[str, ...],
@@ -52,13 +53,51 @@ _SCAM_MARKERS = (
 
 
 def scam_marker(l: Listing) -> str | None:
-    blob = _norm(f"{l.title} {l.description or ''}")
+    blob = plain(f"{l.title} {l.description or ''}")
     for m in _SCAM_MARKERS:
         if m in blob:
             return m
     return None
 
 
-def _norm(s: str) -> str:
-    s = unicodedata.normalize("NFKD", s or "")
-    return "".join(c for c in s if not unicodedata.combining(c)).lower()
+# Someone looking to BUY. Title only, anchored to the front: deeper in a title
+# the same verb is sales copy ("PS5 recherchee par tous").
+_WANTED = re.compile(
+    r"^\W*(?:(?:je|ik|on|nous)\s+(?:ben\s+)?)?"
+    r"(?:recherch\w*|cherch\w*|achet\w*|achat|"
+    r"gezocht|zoek\w*|op zoek|gevraagd|wanted|looking for)\b")
+# A repair shop advertising its service: "Reparation ecran Samsung Galaxy S24
+# Ultra pas cher Garantie" (260 EUR) was priced as a 487 EUR phone.
+_SERVICE = re.compile(
+    r"^\W*(?:reparation|reparatie|herstelling|remplacement|vervanging|depannage)\b")
+# "Moet weg of ruilen tegen iPhone 16": the model named is the one the seller
+# WANTS; what they offer is not named at all.
+_SWAP = re.compile(r"\bruil\w*\s+tegen\b|\bechang\w*\s+(?:contre|tegen)\b"
+                   r"|\bswap\s+(?:for|against)\b")
+_COUNTERFEIT = re.compile(r"\b(?:replique|replica|copie|clone|fake|namaak|imitation)\b")
+# In a description "copie" alone is usually the invoice ("copie de la
+# facture"). Only the admission counts: "c'est une copie".
+_ADMITTED_COPY = re.compile(
+    r"\b(?:c\W?est|est|is|it\W?s|dit\s+is)\s+(?:une|een|a|an)\s+"
+    r"(?:copie|kopie|replica|replique|copy|fake|namaak|imitation|clone)\b")
+# No genuine flagship ships from these: "S24 Ultra 512 Go" at 250 EUR said
+# "achete sur le site chinois aliexpress".
+_CLONE_SHOP = re.compile(r"\b(?:aliexpress|temu|wish\.com|dhgate)\b")
+
+
+def not_an_offer(l: Listing, comps=()) -> str | None:
+    """Why this ad is not an offer of the item it names, or None.
+
+    `comps`: the recognized parts, needed for the clone-shop rule (phones)."""
+    title, desc = plain(l.title), plain(l.description)
+    if _WANTED.match(title):
+        return "annonce de recherche, pas une vente"
+    if _SERVICE.match(title):
+        return "service de réparation, pas un objet"
+    if _SWAP.search(title):
+        return "échange, pas une vente"
+    if _COUNTERFEIT.search(title) or _ADMITTED_COPY.search(desc):
+        return "copie ou contrefaçon"
+    if any(c.category == "phone" for c in comps) and _CLONE_SHOP.search(f"{title} {desc}"):
+        return "téléphone acheté sur un site de clones"
+    return None

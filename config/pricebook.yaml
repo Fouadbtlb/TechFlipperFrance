@@ -10,6 +10,16 @@
 # Levels reflect the mid-2026 regime: the AI/memory supply shock pulled used
 # RAM/SSD/GPU/console prices UP versus 2025, not down. Reprice periodically.
 
+# Verifie sur le marche reel le 2026-09 (le proprietaire a demande de croiser):
+#   RTX 5070 12Go   neuf 679-929 EUR -> seed occasion releve de 480 a 570
+#   Ryzen 7 5700X   occasion 128-181 EUR -> seed 150 confirme
+#   DDR4 32Go kit   45-70 EUR -> seed baisse de 85 a 60 (l'envolee 2026 a frappe
+#                   la DDR5, pas la DDR4)
+#   SSD NVMe 2To    neuf 100-140 EUR Gen4 -> seed 120
+# Le NAND et la DRAM ont double en 2026 (penurie liee a l'IA), donc ces lignes
+# vieillissent vite: recroiser avant de se fier a une grosse marge sur du
+# stockage ou de la memoire.
+
 components:
   # ---------- consoles ----------
   - {key: console:ps5, label: PS5, category: console, ship_class: bulky, seed: 420, aliases: [playstation 5, ps5 standard, ps5 slim, ps5 edition disque]}
@@ -27,6 +37,9 @@ components:
   - {key: console:switch, label: Nintendo Switch, category: console, ship_class: parcel, seed: 160, aliases: [switch]}
 
   # ---------- handhelds ----------
+  # The 1To OLED is its own SKU: pooled with the 512Go it dragged that model's
+  # learned price up by ~80 EUR and invented margin on 512Go ads.
+  - {key: console:steam-deck-oled-1tb, label: Steam Deck OLED 1To, category: console, ship_class: parcel, seed: 680, aliases: [steam deck oled 1tb, steam deck oled 1 to, steam deck oled 1to]}
   - {key: console:steam-deck-oled, label: Steam Deck OLED, category: console, ship_class: parcel, seed: 560, aliases: [steam deck oled]}
   - {key: console:steam-deck, label: Steam Deck, category: console, ship_class: parcel, seed: 320, aliases: [steamdeck]}
   - {key: console:rog-ally, label: ROG Ally, category: console, ship_class: parcel, seed: 440, aliases: [asus rog ally, rog ally z1, rog ally x]}
@@ -46,25 +59,48 @@ components:
   - {key: gpu:gtx-1660, label: GTX 1660, category: gpu, ship_class: parcel, seed: 100, aliases: [gtx1660]}
   - {key: gpu:rtx-2060, label: RTX 2060, category: gpu, ship_class: parcel, seed: 140, aliases: [rtx2060]}
   - {key: gpu:rtx-3050, label: RTX 3050, category: gpu, ship_class: parcel, seed: 160}
-  - {key: gpu:rtx-3060-ti, label: RTX 3060 Ti, category: gpu, ship_class: parcel, seed: 260, aliases: [rtx 3060ti, 3060 ti]}
+  - {key: gpu:rtx-3060-ti, label: RTX 3060 Ti, category: gpu, ship_class: parcel, seed: 245, aliases: [rtx 3060ti, 3060 ti]}
   - {key: gpu:rtx-3060, label: RTX 3060, category: gpu, ship_class: parcel, seed: 260, aliases: [rtx3060]}
-  - {key: gpu:rtx-3070-ti, label: RTX 3070 Ti, category: gpu, ship_class: parcel, seed: 380, aliases: [rtx 3070ti, 3070 ti]}
+  - {key: gpu:rtx-3070-ti, label: RTX 3070 Ti, category: gpu, ship_class: parcel, seed: 310, aliases: [rtx 3070ti, 3070 ti]}
   - {key: gpu:rtx-3070, label: RTX 3070, category: gpu, ship_class: parcel, seed: 320, aliases: [rtx3070]}
-  - {key: gpu:rtx-3080, label: RTX 3080, category: gpu, ship_class: parcel, seed: 430, aliases: [rtx3080]}
+  - {key: gpu:rtx-3080, label: RTX 3080, category: gpu, ship_class: parcel, seed: 400, aliases: [rtx3080]}
   - {key: gpu:rtx-4060-ti, label: RTX 4060 Ti, category: gpu, ship_class: parcel, seed: 370, aliases: [rtx 4060ti, 4060 ti]}
   - {key: gpu:rtx-4060, label: RTX 4060, category: gpu, ship_class: parcel, seed: 280, aliases: [rtx4060]}
   - {key: gpu:rtx-4070-ti-super, label: RTX 4070 Ti Super, category: gpu, ship_class: parcel, seed: 780, aliases: [4070 ti super]}
   - {key: gpu:rtx-4070-ti, label: RTX 4070 Ti, category: gpu, ship_class: parcel, seed: 670, aliases: [rtx 4070ti, 4070 ti]}
   - {key: gpu:rtx-4070-super, label: RTX 4070 Super, category: gpu, ship_class: parcel, seed: 580, aliases: [4070 super]}
   - {key: gpu:rtx-4070, label: RTX 4070, category: gpu, ship_class: parcel, seed: 480, aliases: [rtx4070]}
-  - {key: gpu:rtx-4080, label: RTX 4080, category: gpu, ship_class: parcel, seed: 880, aliases: [rtx4080, 4080 super]}
+  - {key: gpu:rtx-4080, label: RTX 4080, category: gpu, ship_class: parcel, seed: 980, aliases: [rtx4080, 4080 super]}
   - {key: gpu:rtx-4090, label: RTX 4090, category: gpu, ship_class: parcel, seed: 1500, aliases: [rtx4090]}
-  - {key: gpu:rx-6600, label: RX 6600, category: gpu, ship_class: parcel, seed: 170, aliases: [radeon rx 6600]}
+  - {key: gpu:rx-6600, label: RX 6600, category: gpu, ship_class: parcel, seed: 190, aliases: [radeon rx 6600]}
   - {key: gpu:rx-6700-xt, label: RX 6700 XT, category: gpu, ship_class: parcel, seed: 280, aliases: [6700 xt]}
   - {key: gpu:rx-6800-xt, label: RX 6800 XT, category: gpu, ship_class: parcel, seed: 380, aliases: [6800 xt]}
   - {key: gpu:rx-7600, label: RX 7600, category: gpu, ship_class: parcel, seed: 220, aliases: [radeon rx 7600]}
   - {key: gpu:rx-7700-xt, label: RX 7700 XT, category: gpu, ship_class: parcel, seed: 370, aliases: [7700 xt]}
   - {key: gpu:rx-7800-xt, label: RX 7800 XT, category: gpu, ship_class: parcel, seed: 460, aliases: [7800 xt]}
+  # Seeds below are provisional used-market estimates; the tracker overwrites
+  # them once it has learned a real median. Kept deliberately on the low side so
+  # a wrong seed misses a deal rather than inventing one.
+  - {key: gpu:rtx-2070-super, label: RTX 2070 Super, category: gpu, ship_class: parcel, seed: 175, aliases: [rtx 2070 super, 2070 super]}
+  - {key: gpu:rtx-2070, label: RTX 2070, category: gpu, ship_class: parcel, seed: 150, aliases: [rtx2070]}
+  - {key: gpu:rtx-2080-ti, label: RTX 2080 Ti, category: gpu, ship_class: parcel, seed: 280, aliases: [rtx 2080ti, 2080 ti]}
+  - {key: gpu:rtx-2080-super, label: RTX 2080 Super, category: gpu, ship_class: parcel, seed: 210, aliases: [rtx 2080 super, 2080 super]}
+  - {key: gpu:rtx-2080, label: RTX 2080, category: gpu, ship_class: parcel, seed: 190, aliases: [rtx2080]}
+  - {key: gpu:rtx-3080-ti, label: RTX 3080 Ti, category: gpu, ship_class: parcel, seed: 470, aliases: [rtx 3080ti, 3080 ti]}
+  - {key: gpu:rtx-3090, label: RTX 3090, category: gpu, ship_class: parcel, seed: 580, aliases: [rtx3090]}
+  - {key: gpu:rtx-5070-ti, label: RTX 5070 Ti, category: gpu, ship_class: parcel, seed: 620, aliases: [rtx 5070ti, 5070 ti]}
+  - {key: gpu:rtx-5070, label: RTX 5070, category: gpu, ship_class: parcel, seed: 570, aliases: [rtx5070]}  # neuf 679-929 (materiel.net, alternate.fr, 2026-09)
+  - {key: gpu:rtx-5080, label: RTX 5080, category: gpu, ship_class: parcel, seed: 880, aliases: [rtx5080]}
+  - {key: gpu:rtx-5090, label: RTX 5090, category: gpu, ship_class: parcel, seed: 1800, aliases: [rtx5090]}
+  - {key: gpu:gtx-1060, label: GTX 1060, category: gpu, ship_class: parcel, seed: 60, aliases: [gtx1060]}
+  - {key: gpu:gtx-1070-ti, label: GTX 1070 Ti, category: gpu, ship_class: parcel, seed: 110, aliases: [gtx 1070ti, 1070 ti]}
+  - {key: gpu:gtx-1070, label: GTX 1070, category: gpu, ship_class: parcel, seed: 95, aliases: [gtx1070]}
+  - {key: gpu:gtx-1080-ti, label: GTX 1080 Ti, category: gpu, ship_class: parcel, seed: 180, aliases: [gtx 1080ti, 1080 ti]}
+  - {key: gpu:gtx-1080, label: GTX 1080, category: gpu, ship_class: parcel, seed: 125, aliases: [gtx1080]}
+  - {key: gpu:rx-6750-xt, label: RX 6750 XT, category: gpu, ship_class: parcel, seed: 310, aliases: [6750 xt]}
+  - {key: gpu:rx-6650-xt, label: RX 6650 XT, category: gpu, ship_class: parcel, seed: 185, aliases: [6650 xt]}
+  - {key: gpu:arc-a770, label: Intel Arc A770, category: gpu, ship_class: parcel, seed: 165, aliases: [arc a770]}
+  - {key: gpu:arc-a750, label: Intel Arc A750, category: gpu, ship_class: parcel, seed: 115, aliases: [arc a750]}
 
   # ---------- CPUs ----------
   - {key: cpu:i5-10400f, label: i5-10400F, category: cpu, ship_class: small, seed: 60, aliases: [i5 10400f, 10400f]}
@@ -83,18 +119,207 @@ components:
   - {key: cpu:ryzen-7-5800x3d, label: Ryzen 7 5800X3D, category: cpu, ship_class: small, seed: 290, aliases: [r7 5800x3d, 5800x3d]}
   - {key: cpu:ryzen-7-5800x, label: Ryzen 7 5800X, category: cpu, ship_class: small, seed: 165, aliases: [r7 5800x, 5800x]}
   - {key: cpu:ryzen-7-7800x3d, label: Ryzen 7 7800X3D, category: cpu, ship_class: small, seed: 380, aliases: [r7 7800x3d, 7800x3d]}
+  # Provisional used seeds (see GPU note); tracker refines them from real ads.
+  - {key: cpu:i5-11400f, label: i5-11400F, category: cpu, ship_class: small, seed: 70, aliases: [i5 11400f, 11400f]}
+  - {key: cpu:i5-11600k, label: i5-11600K, category: cpu, ship_class: small, seed: 100, aliases: [i5 11600k, 11600k]}
+  - {key: cpu:i7-11700, label: i7-11700, category: cpu, ship_class: small, seed: 125, aliases: [i7 11700, 11700k, 11700f, 11700]}
+  - {key: cpu:i7-9700k, label: i7-9700K, category: cpu, ship_class: small, seed: 100, aliases: [i7 9700k, 9700k, i7 9700, 9700f]}
+  - {key: cpu:i5-9400f, label: i5-9400F, category: cpu, ship_class: small, seed: 55, aliases: [i5 9400f, 9400f]}
+  - {key: cpu:i7-8700k, label: i7-8700K, category: cpu, ship_class: small, seed: 85, aliases: [i7 8700k, 8700k, i7 8700]}
+  - {key: cpu:i5-14600k, label: i5-14600K, category: cpu, ship_class: small, seed: 220, aliases: [i5 14600k, 14600k]}
+  - {key: cpu:i7-14700k, label: i7-14700K, category: cpu, ship_class: small, seed: 320, aliases: [i7 14700k, 14700k]}
+  - {key: cpu:ryzen-5-3600, label: Ryzen 5 3600, category: cpu, ship_class: small, seed: 65, aliases: [r5 3600, ryzen 3600, 3600x]}
+  - {key: cpu:ryzen-7-3700x, label: Ryzen 7 3700X, category: cpu, ship_class: small, seed: 100, aliases: [r7 3700x, 3700x]}
+  - {key: cpu:ryzen-7-7700x, label: Ryzen 7 7700X, category: cpu, ship_class: small, seed: 250, aliases: [r7 7700x, 7700x, ryzen 7 7700]}
+  - {key: cpu:ryzen-9-5900x, label: Ryzen 9 5900X, category: cpu, ship_class: small, seed: 215, aliases: [r9 5900x, 5900x]}
+  - {key: cpu:ryzen-9-5950x, label: Ryzen 9 5950X, category: cpu, ship_class: small, seed: 285, aliases: [r9 5950x, 5950x]}
+  - {key: cpu:ryzen-9-7900x, label: Ryzen 9 7900X, category: cpu, ship_class: small, seed: 320, aliases: [r9 7900x, 7900x]}
+
+  # ---------- blind spots found by `cli gaps` (2026-08-13) ----------
+  # Every entry below appeared in real stored ads that the recognizer could not
+  # read, so the machine containing it was valued on its remaining parts alone:
+  # a "Game PC GTX 1070 / i5-6600K / 16GB" asking 350 came back worth 209,
+  # because two of its three parts did not exist as far as the catalog was
+  # concerned. The used pool around Lille is mostly 6th-10th gen Intel and
+  # GTX 10-series, which is exactly the range the pricebook had skipped, and
+  # that is why no PC ever looked worth buying.
+  #
+  # Desktop parts only. Mobile chips (11800H, 13900HX, 12500H...) are left out
+  # deliberately: they appear in laptop ads, and pricing a laptop's mobile GPU
+  # at its desktop namesake's value is how a 400 EUR laptop becomes a fake deal.
+  - {key: cpu:i5-4590, label: i5-4590, category: cpu, ship_class: small, seed: 22, aliases: [i5 4590, 4590]}
+  - {key: cpu:i7-4790, label: i7-4790, category: cpu, ship_class: small, seed: 45, aliases: [i7 4790, 4790k, i7-4790k, i7 4790k]}
+  - {key: cpu:i5-6500, label: i5-6500, category: cpu, ship_class: small, seed: 28, aliases: [i5 6500]}
+  - {key: cpu:i5-6600k, label: i5-6600K, category: cpu, ship_class: small, seed: 38, aliases: [i5 6600k, 6600k]}
+  - {key: cpu:i7-6700, label: i7-6700, category: cpu, ship_class: small, seed: 55, aliases: [i7 6700, 6700k, i7-6700k, i7 6700k]}
+  - {key: cpu:i5-7500, label: i5-7500, category: cpu, ship_class: small, seed: 32, aliases: [i5 7500]}
+  - {key: cpu:i7-7700, label: i7-7700, category: cpu, ship_class: small, seed: 60, aliases: [i7 7700, 7700k, i7-7700k, i7 7700k]}
+  - {key: cpu:i5-8400, label: i5-8400, category: cpu, ship_class: small, seed: 45, aliases: [i5 8400]}
+  - {key: cpu:i5-8500, label: i5-8500, category: cpu, ship_class: small, seed: 45, aliases: [i5 8500]}
+  - {key: cpu:i5-11400, label: i5-11400, category: cpu, ship_class: small, seed: 65, aliases: [i5 11400]}
+  - {key: cpu:i5-12500, label: i5-12500, category: cpu, ship_class: small, seed: 100, aliases: [i5 12500]}
+  - {key: cpu:i9-11900k, label: i9-11900K, category: cpu, ship_class: small, seed: 145, aliases: [i9 11900k, 11900k, 11900kf]}
+  - {key: cpu:i7-14700, label: i7-14700, category: cpu, ship_class: small, seed: 265, aliases: [i7 14700, 14700f, i7-14700f]}
+  - {key: cpu:i9-13900k, label: i9-13900K, category: cpu, ship_class: small, seed: 340, aliases: [i9 13900k, 13900k, 13900kf, i9-13900kf]}
+  - {key: cpu:i9-14900k, label: i9-14900K, category: cpu, ship_class: small, seed: 410, aliases: [i9 14900k, 14900k, 14900kf, i9-14900kf]}
+  - {key: cpu:ryzen-5-2600, label: Ryzen 5 2600, category: cpu, ship_class: small, seed: 38, aliases: [r5 2600, 2600x, ryzen 5 2600x]}
+  - {key: cpu:ryzen-5-4500, label: Ryzen 5 4500, category: cpu, ship_class: small, seed: 52, aliases: [r5 4500]}
+  - {key: cpu:ryzen-5-7500f, label: Ryzen 5 7500F, category: cpu, ship_class: small, seed: 125, aliases: [r5 7500f, 7500f]}
+  - {key: cpu:ryzen-5-9600x, label: Ryzen 5 9600X, category: cpu, ship_class: small, seed: 215, aliases: [r5 9600x, 9600x]}
+  - {key: cpu:ryzen-7-3800x, label: Ryzen 7 3800X, category: cpu, ship_class: small, seed: 88, aliases: [r7 3800x, 3800x]}
+  - {key: cpu:ryzen-7-7700, label: Ryzen 7 7700, category: cpu, ship_class: small, seed: 235, aliases: [r7 7700]}
+  - {key: cpu:ryzen-7-8700f, label: Ryzen 7 8700F, category: cpu, ship_class: small, seed: 185, aliases: [r7 8700f, 8700f, 8700g]}
+  - {key: cpu:ryzen-9-3900x, label: Ryzen 9 3900X, category: cpu, ship_class: small, seed: 125, aliases: [r9 3900x, 3900x]}
+  - {key: cpu:ryzen-9-7950x, label: Ryzen 9 7950X, category: cpu, ship_class: small, seed: 375, aliases: [r9 7950x, 7950x]}
+  - {key: gpu:gtx-970, label: GTX 970, category: gpu, ship_class: parcel, seed: 42, aliases: [gtx970]}
+  - {key: gpu:gtx-1050-ti, label: GTX 1050 Ti, category: gpu, ship_class: parcel, seed: 45, aliases: [gtx 1050ti, 1050 ti]}
+  - {key: gpu:gtx-1650-super, label: GTX 1650 Super, category: gpu, ship_class: parcel, seed: 95, aliases: [gtx 1650 super, 1650 super]}
+  - {key: gpu:gtx-1660-ti, label: GTX 1660 Ti, category: gpu, ship_class: parcel, seed: 110, aliases: [gtx 1660ti, 1660 ti]}
+  - {key: gpu:rx-570, label: RX 570, category: gpu, ship_class: parcel, seed: 48, aliases: [rx570, radeon rx 570]}
+  - {key: gpu:rx-580, label: RX 580, category: gpu, ship_class: parcel, seed: 62, aliases: [rx580, radeon rx 580]}
+  - {key: gpu:rx-590, label: RX 590, category: gpu, ship_class: parcel, seed: 72, aliases: [rx590, radeon rx 590]}
+  - {key: gpu:rx-5500-xt, label: RX 5500 XT, category: gpu, ship_class: parcel, seed: 72, aliases: [5500 xt]}
+  - {key: gpu:rx-5600-xt, label: RX 5600 XT, category: gpu, ship_class: parcel, seed: 100, aliases: [5600 xt]}
+  - {key: gpu:rx-5700-xt, label: RX 5700 XT, category: gpu, ship_class: parcel, seed: 130, aliases: [5700 xt]}
+  - {key: gpu:rx-5700, label: RX 5700, category: gpu, ship_class: parcel, seed: 110, aliases: [rx5700]}
+  - {key: gpu:rx-6600-xt, label: RX 6600 XT, category: gpu, ship_class: parcel, seed: 170, aliases: [6600 xt]}
+  - {key: gpu:rx-6700, label: RX 6700, category: gpu, ship_class: parcel, seed: 235, aliases: [rx6700]}
+  - {key: gpu:rx-6800, label: RX 6800, category: gpu, ship_class: parcel, seed: 320, aliases: [rx6800]}
+  - {key: gpu:rx-6900-xt, label: RX 6900 XT, category: gpu, ship_class: parcel, seed: 410, aliases: [6900 xt]}
+  - {key: gpu:rx-7900-xtx, label: RX 7900 XTX, category: gpu, ship_class: parcel, seed: 690, aliases: [7900 xtx]}
+  - {key: gpu:rx-7900-xt, label: RX 7900 XT, category: gpu, ship_class: parcel, seed: 550, aliases: [7900 xt]}
+  - {key: gpu:rtx-5060-ti, label: RTX 5060 Ti, category: gpu, ship_class: parcel, seed: 370, aliases: [rtx 5060ti, 5060 ti]}
+  - {key: gpu:rtx-5060, label: RTX 5060, category: gpu, ship_class: parcel, seed: 270, aliases: [rtx5060]}
+  - {key: gpu:rx-9070-xt, label: RX 9070 XT, category: gpu, ship_class: parcel, seed: 600, aliases: [9070 xt]}
+  - {key: gpu:rx-9070, label: RX 9070, category: gpu, ship_class: parcel, seed: 500, aliases: [rx9070]}
+  - {key: gpu:rx-9060-xt, label: RX 9060 XT, category: gpu, ship_class: parcel, seed: 290, aliases: [9060 xt]}
+
+  # ---------- telephones ----------
+  # Le rayon GSM de Cash Converters compte des centaines d'appareils en stock et
+  # l'outil etait totalement aveugle: aucune categorie phone n'existait, donc un
+  # iPhone a 1199 EUR ne valait rien du tout a ses yeux.
+  #
+  # Les seeds ci-dessous sont volontairement APPROXIMATIFS et bas. Ils n'ont pas
+  # besoin d'etre justes: avec des milliers d'annonces GSM en base, le tracker
+  # apprend la vraie mediane des qu'il a 5 comparables et remplace le seed. Un
+  # seed trop haut inventerait des marges, un seed trop bas fait juste rater une
+  # affaire -- on choisit de rater.
+  - {key: phone:iphone-17-pro-max, label: iPhone 17 Pro Max, category: phone, ship_class: small, seed: 1050, aliases: [iphone 17 pro max]}
+  - {key: phone:iphone-17-pro, label: iPhone 17 Pro, category: phone, ship_class: small, seed: 900, aliases: [iphone 17 pro]}
+  - {key: phone:iphone-17, label: iPhone 17, category: phone, ship_class: small, seed: 700, aliases: [iphone 17]}
+  - {key: phone:iphone-16-pro-max, label: iPhone 16 Pro Max, category: phone, ship_class: small, seed: 800, aliases: [iphone 16 pro max]}
+  - {key: phone:iphone-16-pro, label: iPhone 16 Pro, category: phone, ship_class: small, seed: 680, aliases: [iphone 16 pro]}
+  - {key: phone:iphone-16, label: iPhone 16, category: phone, ship_class: small, seed: 520, aliases: [iphone 16]}
+  - {key: phone:iphone-15-pro-max, label: iPhone 15 Pro Max, category: phone, ship_class: small, seed: 620, aliases: [iphone 15 pro max]}
+  - {key: phone:iphone-15-pro, label: iPhone 15 Pro, category: phone, ship_class: small, seed: 520, aliases: [iphone 15 pro]}
+  - {key: phone:iphone-15, label: iPhone 15, category: phone, ship_class: small, seed: 400, aliases: [iphone 15]}
+  - {key: phone:iphone-14-pro-max, label: iPhone 14 Pro Max, category: phone, ship_class: small, seed: 480, aliases: [iphone 14 pro max]}
+  - {key: phone:iphone-14-pro, label: iPhone 14 Pro, category: phone, ship_class: small, seed: 410, aliases: [iphone 14 pro]}
+  - {key: phone:iphone-14, label: iPhone 14, category: phone, ship_class: small, seed: 310, aliases: [iphone 14]}
+  - {key: phone:iphone-13-pro-max, label: iPhone 13 Pro Max, category: phone, ship_class: small, seed: 380, aliases: [iphone 13 pro max]}
+  - {key: phone:iphone-13-pro, label: iPhone 13 Pro, category: phone, ship_class: small, seed: 330, aliases: [iphone 13 pro]}
+  - {key: phone:iphone-13, label: iPhone 13, category: phone, ship_class: small, seed: 250, aliases: [iphone 13]}
+  - {key: phone:iphone-12, label: iPhone 12, category: phone, ship_class: small, seed: 180, aliases: [iphone 12]}
+  - {key: phone:iphone-11, label: iPhone 11, category: phone, ship_class: small, seed: 130, aliases: [iphone 11]}
+  - {key: phone:s25-ultra, label: Galaxy S25 Ultra, category: phone, ship_class: small, seed: 700, aliases: [galaxy s25 ultra, s25 ultra, samsung s25 ultra]}
+  - {key: phone:s24-ultra, label: Galaxy S24 Ultra, category: phone, ship_class: small, seed: 520, aliases: [galaxy s24 ultra, s24 ultra, samsung s24 ultra]}
+  - {key: phone:s23-ultra, label: Galaxy S23 Ultra, category: phone, ship_class: small, seed: 390, aliases: [galaxy s23 ultra, s23 ultra, samsung s23 ultra]}
+  - {key: phone:s25, label: Galaxy S25, category: phone, ship_class: small, seed: 475, aliases: [galaxy s25, samsung s25]}        # prive n=28, releve 2026-09-08
+  - {key: phone:s24, label: Galaxy S24, category: phone, ship_class: small, seed: 330, aliases: [galaxy s24, samsung s24]}
+  - {key: phone:s23, label: Galaxy S23, category: phone, ship_class: small, seed: 260, aliases: [galaxy s23, samsung s23]}
+  - {key: phone:s22, label: Galaxy S22, category: phone, ship_class: small, seed: 180, aliases: [galaxy s22, samsung s22]}
+  - {key: phone:z-fold-6, label: Galaxy Z Fold 6, category: phone, ship_class: small, seed: 700, aliases: [galaxy z fold 6, z fold 6, samsung z fold 6]}
+  - {key: phone:z-flip-6, label: Galaxy Z Flip 6, category: phone, ship_class: small, seed: 420, aliases: [galaxy z flip 6, z flip 6, samsung z flip 6]}
+  - {key: phone:pixel-9-pro, label: Pixel 9 Pro, category: phone, ship_class: small, seed: 480, aliases: [google pixel 9 pro, pixel 9 pro]}
+  - {key: phone:pixel-9, label: Pixel 9, category: phone, ship_class: small, seed: 380, aliases: [google pixel 9, pixel 9]}
+  - {key: phone:pixel-8, label: Pixel 8, category: phone, ship_class: small, seed: 260, aliases: [google pixel 8, pixel 8]}
+
+  # Ajouts 2026-09: les modeles que le carnet ne connaissait pas alors que le
+  # rayon GSM en etait plein. 2 469 annonces telephone, 697 000 EUR de stock,
+  # etaient non evaluables faute de ces lignes.
+  #
+  # Les `seed` marques (prive) sont la MEDIANE DES DEMANDES ENTRE PARTICULIERS
+  # relevee sur 2ememain le 2026-09-08, echantillon indique. Les autres sont la
+  # mediane des chaines, faute de donnees privees: c'est le choix prudent, car
+  # sur les telephones le prive demande environ 1,12x le prix magasin (mediane
+  # de 20 modeles), donc partir du magasin sous-estime plutot que l'inverse.
+  # C'est l'inverse des consoles, ou la chaine est AU-DESSUS du prive.
+  - {key: phone:s26-ultra, label: Galaxy S26 Ultra, category: phone, ship_class: small, seed: 950, aliases: [s26 ultra, galaxy s26 ultra, samsung s26 ultra]}          # prive n=82
+  - {key: phone:s26, label: Galaxy S26, category: phone, ship_class: small, seed: 650, aliases: [galaxy s26, samsung s26]}                                        # prive n=74
+  - {key: phone:s25-edge, label: Galaxy S25 Edge, category: phone, ship_class: small, seed: 500, aliases: [s25 edge, galaxy s25 edge, samsung s25 edge]}               # prive n=25
+  - {key: phone:s25-fe, label: Galaxy S25 FE, category: phone, ship_class: small, seed: 425, aliases: [s25 fe, galaxy s25 fe, samsung s25 fe]}                       # prive n=7
+  - {key: phone:s24-fe, label: Galaxy S24 FE, category: phone, ship_class: small, seed: 300, aliases: [s24 fe, galaxy s24 fe, samsung s24 fe]}                       # prive n=15
+  - {key: phone:s22-ultra, label: Galaxy S22 Ultra, category: phone, ship_class: small, seed: 325, aliases: [s22 ultra, galaxy s22 ultra, samsung s22 ultra]}           # prive n=19
+  - {key: phone:s21, label: Galaxy S21, category: phone, ship_class: small, seed: 200, aliases: [galaxy s21, samsung s21]}                                        # prive n=22
+  - {key: phone:z-fold-7, label: Galaxy Z Fold 7, category: phone, ship_class: small, seed: 950, aliases: [z fold 7, fold 7, galaxy fold 7, samsung fold 7]}         # prive n=27
+  - {key: phone:z-fold-8, label: Galaxy Z Fold 8, category: phone, ship_class: small, seed: 1300, aliases: [z fold 8, fold 8, galaxy fold 8, samsung fold 8]}   # prive n=4 med 1325, magasin n=7 med 1300
+  - {key: phone:z-flip-8, label: Galaxy Z Flip 8, category: phone, ship_class: small, seed: 645, aliases: [z flip 8, flip 8, galaxy flip 8, samsung flip 8]}      # prive n=4 med 645, magasin n=111 med 650
+  - {key: phone:z-flip-7-fe, label: Galaxy Z Flip 7 FE, category: phone, ship_class: small, seed: 450, aliases: [z flip 7 fe, flip 7 fe]}        # prive n=9
+  - {key: phone:z-flip-7, label: Galaxy Z Flip 7, category: phone, ship_class: small, seed: 650, aliases: [z flip 7, flip 7, galaxy flip 7, samsung flip 7]}         # prive n=51 hors FE
+  - {key: phone:z-flip-5, label: Galaxy Z Flip 5, category: phone, ship_class: small, seed: 300, aliases: [z flip 5, flip 5]}                        # magasin n=22
+  - {key: phone:xcover-5, label: Galaxy XCover 5, category: phone, ship_class: small, seed: 80, aliases: [xcover 5, galaxy xcover 5, samsung xcover 5]}                # magasin n=23
+  - {key: phone:iphone-se, label: iPhone SE, category: phone, ship_class: small, seed: 100, aliases: [iphone se]}                                    # prive n=12
+  - {key: phone:iphone-16e, label: iPhone 16e, category: phone, ship_class: small, seed: 400, aliases: [iphone 16e, iphone 16 e]}                    # magasin n=24
+  - {key: phone:iphone-air, label: iPhone Air, category: phone, ship_class: small, seed: 680, aliases: [iphone air]}                                 # magasin n=17
+  - {key: phone:iphone-xs, label: iPhone XS, category: phone, ship_class: small, seed: 170, aliases: [iphone xs, iphone xs max]}                     # magasin n=15
+  - {key: phone:iphone-xr, label: iPhone XR, category: phone, ship_class: small, seed: 130, aliases: [iphone xr]}                                    # magasin n=11
+  - {key: phone:pixel-10, label: Pixel 10, category: phone, ship_class: small, seed: 500, aliases: [pixel 10, google pixel 10]}                      # magasin n=13
+  - {key: phone:xiaomi-17t-pro, label: Xiaomi 17T Pro, category: phone, ship_class: small, seed: 490, aliases: [xiaomi 17t pro, 17t pro]}            # magasin n=30
+  - {key: phone:xiaomi-17, label: Xiaomi 17, category: phone, ship_class: small, seed: 500, aliases: [xiaomi 17]}                                    # magasin n=47
+  - {key: phone:xiaomi-15t-pro, label: Xiaomi 15T Pro, category: phone, ship_class: small, seed: 365, aliases: [xiaomi 15t pro, 15t pro]}            # magasin n=26
+  - {key: phone:xiaomi-15, label: Xiaomi 15, category: phone, ship_class: small, seed: 500, aliases: [xiaomi 15]}                                    # prive n=9
+  - {key: phone:xiaomi-14t-pro, label: Xiaomi 14T Pro, category: phone, ship_class: small, seed: 250, aliases: [xiaomi 14t pro, 14t pro]}            # magasin n=14
+  - {key: phone:redmi-note-15, label: Redmi Note 15, category: phone, ship_class: small, seed: 220, aliases: [redmi note 15]}                        # magasin n=22
+  - {key: phone:redmi-note-14, label: Redmi Note 14, category: phone, ship_class: small, seed: 175, aliases: [redmi note 14]}                        # prive n=11
+  - {key: phone:redmi-note-13, label: Redmi Note 13, category: phone, ship_class: small, seed: 250, aliases: [redmi note 13]}                        # prive n=15
+  - {key: phone:motorola-edge-50, label: Motorola Edge 50, category: phone, ship_class: small, seed: 190, aliases: [edge 50, motorola edge 50]}      # magasin n=15
+  - {key: phone:oneplus-nord, label: OnePlus Nord, category: phone, ship_class: small, seed: 178, aliases: [oneplus nord, one plus nord]}            # prive n=10
+
+  # ---------- tablettes ----------
+  # Angle mort mesure le 2026-09-29: 127 000 EUR de stock, 100% non reconnu,
+  # parce qu'aucune categorie tablette n'existait. `seed` = mediane des
+  # demandes ENTRE PARTICULIERS relevee ce jour-la, echantillon en commentaire.
+  #
+  # C'est le rayon ou les chaines se trompent le plus: un vendeur grade un
+  # iPhone de tete et une Surface Pro au jugé, d'ou 220 en magasin contre 475
+  # entre particuliers. Les variantes viennent AVANT l'iPad generique, sinon
+  # un iPad Pro se fait chiffrer au prix d'un iPad d'entree de gamme.
+  - {key: tablet:ipad-pro, label: iPad Pro, category: tablet, ship_class: parcel, seed: 750, aliases: [ipad pro]}                     # prive n=52
+  - {key: tablet:ipad-air, label: iPad Air, category: tablet, ship_class: parcel, seed: 550, aliases: [ipad air]}                     # prive n=48
+  - {key: tablet:ipad-mini, label: iPad mini, category: tablet, ship_class: parcel, seed: 282, aliases: [ipad mini]}                  # prive n=46
+  - {key: tablet:ipad, label: iPad, category: tablet, ship_class: parcel, seed: 378, aliases: [ipad]}                                 # prive n=226
+  - {key: tablet:surface-pro-new, label: Surface Pro 9+, category: tablet, ship_class: parcel, seed: 690, aliases: [surface pro 9, surface pro 10, surface pro 11, surface pro x]}   # prive n=4
+  - {key: tablet:surface-pro-7, label: Surface Pro 7/8, category: tablet, ship_class: parcel, seed: 300, aliases: [surface pro 7, surface pro 8]}   # prive n=9 med 300
+  - {key: tablet:surface-pro-old, label: Surface Pro 4-6, category: tablet, ship_class: parcel, seed: 200, aliases: [surface pro 4, surface pro 5, surface pro 6]}   # prive n=5 med 200
+  - {key: tablet:surface-pro, label: Surface Pro, category: tablet, ship_class: parcel, seed: 300, aliases: [surface pro]}            # prive n=26   # generation inconnue: on suppose ancien, par prudence
+  - {key: tablet:galaxy-tab-s11-ultra, label: Galaxy Tab S11 Ultra, category: tablet, ship_class: parcel, seed: 1100, aliases: [galaxy tab s11 ultra, tab s11 ultra]}   # prive n=10, 790-1829 selon stockage
+  - {key: tablet:galaxy-tab-s11, label: Galaxy Tab S11, category: tablet, ship_class: parcel, seed: 650, aliases: [galaxy tab s11, tab s11]}   # prive n=4 hors Ultra: 650 650 650 800
+  - {key: tablet:galaxy-tab-s10, label: Galaxy Tab S10, category: tablet, ship_class: parcel, seed: 300, aliases: [galaxy tab s10, tab s10]}   # prive n=56
+  - {key: tablet:galaxy-tab-s9, label: Galaxy Tab S9, category: tablet, ship_class: parcel, seed: 375, aliases: [galaxy tab s9, tab s9]}       # prive n=9
+  - {key: tablet:galaxy-tab-a, label: Galaxy Tab A, category: tablet, ship_class: parcel, seed: 175, aliases: [galaxy tab a, tab a9, tab a11, tab a8]}  # prive n=29
+  - {key: tablet:redmi-pad, label: Redmi Pad, category: tablet, ship_class: parcel, seed: 138, aliases: [redmi pad]}                  # prive n=8
+
+  # ---------- telephones, autres marques ----------
+  # Meme cause, meme effet: Honor se vend 710 entre particuliers et 430 en
+  # magasin, l'ecart le plus large de tout le rayon telephone.
+  - {key: phone:honor-magic-lite, label: Honor Magic Lite, category: phone, ship_class: small, seed: 210, aliases: [honor magic lite, magic 7 lite, magic 8 lite, magic 6 lite, magic7 lite, magic8 lite]}   # prive n=2 (169, 250); la Lite est un milieu de gamme, pas la Magic
+  - {key: phone:honor-magic, label: Honor Magic, category: phone, ship_class: small, seed: 710, aliases: [honor magic]}               # prive n=12
+  - {key: phone:oneplus-13, label: OnePlus 13, category: phone, ship_class: small, seed: 525, aliases: [oneplus 13, one plus 13]}     # prive n=8
+  - {key: phone:oneplus-12, label: OnePlus 12, category: phone, ship_class: small, seed: 400, aliases: [oneplus 12, one plus 12]}     # prive n=5, mince
+  - {key: phone:nothing-phone, label: Nothing Phone, category: phone, ship_class: small, seed: 222, aliases: [nothing phone]}         # prive n=8
+  - {key: phone:oppo-reno, label: Oppo Reno, category: phone, ship_class: small, seed: 200, aliases: [oppo reno]}                     # prive n=9
 
   # ---------- RAM ----------
   - {key: ram:ddr4-8gb, label: RAM DDR4 8Go, category: ram, ship_class: small, seed: 15, aliases: [8go ddr4, ddr4 8gb, 8 go ddr4]}
   - {key: ram:ddr4-16gb, label: RAM DDR4 16Go, category: ram, ship_class: small, seed: 40, aliases: [16go ddr4, ddr4 16gb, 16 go ddr4]}
-  - {key: ram:ddr4-32gb, label: RAM DDR4 32Go, category: ram, ship_class: small, seed: 85, aliases: [32go ddr4, ddr4 32gb, 32 go ddr4]}
+  - {key: ram:ddr4-32gb, label: RAM DDR4 32Go, category: ram, ship_class: small, seed: 60, aliases: [32go ddr4, ddr4 32gb, 32 go ddr4]}
   - {key: ram:ddr5-16gb, label: RAM DDR5 16Go, category: ram, ship_class: small, seed: 85, aliases: [16go ddr5, ddr5 16gb]}
   - {key: ram:ddr5-32gb, label: RAM DDR5 32Go, category: ram, ship_class: small, seed: 190, aliases: [32go ddr5, ddr5 32gb]}
 
   # ---------- storage ----------
   - {key: storage:nvme-500gb, label: SSD NVMe 500Go, category: storage, ship_class: small, seed: 25, aliases: [nvme 500go, ssd nvme 500]}
   - {key: storage:nvme-1tb, label: SSD NVMe 1To, category: storage, ship_class: small, seed: 70, aliases: [nvme 1to, ssd nvme 1to, nvme 1tb]}
-  - {key: storage:nvme-2tb, label: SSD NVMe 2To, category: storage, ship_class: small, seed: 140, aliases: [nvme 2to, ssd nvme 2to, nvme 2tb]}
+  - {key: storage:nvme-2tb, label: SSD NVMe 2To, category: storage, ship_class: small, seed: 120, aliases: [nvme 2to, ssd nvme 2to, nvme 2tb]}
   - {key: storage:ssd-1tb, label: SSD 1To, category: storage, ship_class: small, seed: 40, aliases: [ssd 1to, ssd sata 1to]}
   - {key: storage:hdd-2tb, label: HDD 2To, category: storage, ship_class: small, seed: 28, aliases: [disque dur 2to, hdd 2to]}
 

@@ -10,12 +10,20 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 import urllib.parse
 import urllib.request
 
 from ..domain import Listing, ScoreResult
 
 log = logging.getLogger(__name__)
+
+# api.telegram.org resets a connection now and then: one dropped socket must
+# not cost a deal, so a send is retried briefly before it counts as failed.
+_ATTEMPTS = 3
+_BACKOFF_S = 2.0
+_SOURCE_NAME = {"leboncoin": "Leboncoin", "2ememain": "2ememain",
+                "cashconverters": "Cash Converters", "cashexpress": "Cash Express"}
 
 
 class TelegramNotifier:
@@ -29,11 +37,13 @@ class TelegramNotifier:
 
     def send_deal(
         self, l: Listing, s: ScoreResult, extra_lines: list[str] | tuple = ()
-    ) -> None:
-        self._send(self._format(l, s, extra_lines))
+    ) -> bool:
+        """True only if Telegram accepted the message: the caller writes the
+        deal off on this answer."""
+        return self._send(self._format(l, s, extra_lines))
 
-    def send_text(self, text: str) -> None:
-        self._send(text)
+    def send_text(self, text: str) -> bool:
+        return self._send(text)
 
     # ----------
 
@@ -57,14 +67,13 @@ class TelegramNotifier:
                 continue
             lines.append(_esc(x if len(x) <= 78 else x[:77] + "…"))
 
-        link = f'<a href="{l.url}">🔗 Lier Leboncoin</a>'
-        lines.append(link)
+        lines.append(f'<a href="{l.url}">🔗 Voir l’annonce ({_SOURCE_NAME.get(l.source, l.source)})</a>')
         return "\n".join(lines)
 
-    def _send(self, text: str) -> None:
+    def _send(self, text: str) -> bool:
         if not self.enabled:
-            log.warning("Telegram not configured; message:\n%s", text)
-            return
+            log.info("Telegram not configured; message:\n%s", text)
+            return False
         url = f"https://api.telegram.org/bot{self.token}/sendMessage"
         payload = json.dumps({
             "chat_id": self.chat_id,
@@ -75,12 +84,19 @@ class TelegramNotifier:
         req = urllib.request.Request(
             url, data=payload, headers={"Content-Type": "application/json"}
         )
-        try:
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                if resp.status != 200:
+        for attempt in range(1, _ATTEMPTS + 1):
+            try:
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    if resp.status == 200:
+                        return True
                     log.error("Telegram HTTP %s", resp.status)
-        except Exception:
-            log.exception("Telegram send failed")
+                    return False
+            except Exception:
+                last = attempt == _ATTEMPTS
+                log.warning("Telegram send failed (try %d/%d)", attempt, _ATTEMPTS, exc_info=last)
+                if not last:
+                    time.sleep(_BACKOFF_S * attempt)
+        return False
 
 
 def _esc(s: str) -> str:

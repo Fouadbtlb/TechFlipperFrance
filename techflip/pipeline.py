@@ -1,9 +1,13 @@
 """Pipeline: fetch -> ingest -> value -> alert the owner -> fan out to the app.
 
 One cycle runs every configured search once. Feeder searches only teach the
-price tracker; hunt searches are valued (valuation.py). Each cycle also
-re-checks a few listings to learn what left the site, records a heartbeat for
+price tracker; hunt searches are valued (valuation.py). A DataDome block stops
+that one site for the cycle, the others carry on. Each cycle also re-checks a
+few listings to learn what left the site (liveness.py), records a heartbeat for
 /v1/health, and once a day prunes data nobody needs any more.
+
+An owner alert is written off only once Telegram accepted it: a deal marked
+"sent" after a failed send would never be seen.
 """
 from __future__ import annotations
 
@@ -16,13 +20,15 @@ from collections.abc import Callable, Iterable
 
 from lbc.exceptions import DatadomeError
 
+from . import liveness
 from .config import Settings
 from .decision import policy_from_settings
 from .domain import Listing, ScoreResult
 from .geo import Locator
 from .notify.telegram import TelegramNotifier
 from .pricing.catalog import load_catalog
-from .pricing.extract import is_bundle, primary_key, recognize
+from .pricing.identify import components_of, teaching_key
+from .pricing.sold import load_sold
 from .pricing.tracker import PriceTracker
 from .scoring.ai import AIVetter
 from .sources.leboncoin import LeboncoinSource
@@ -41,10 +47,16 @@ Fanout = Callable[[list[str]], None]
 
 def _make_source(name: str, settings: Settings):
     if name == "leboncoin":
-        return LeboncoinSource(impersonate=settings.impersonate)
+        return LeboncoinSource(proxy=settings.proxy, impersonate=settings.impersonate)
     if name == "2ememain":
         from .sources.deuxememain import DeuxiemeMainSource
-        return DeuxiemeMainSource()
+        return DeuxiemeMainSource(proxy=settings.proxy)
+    if name == "cashconverters":
+        from .sources.cashconverters import CashConvertersSource
+        return CashConvertersSource(proxy=settings.proxy)
+    if name == "cashexpress":
+        from .sources.cashexpress import CashExpressSource
+        return CashExpressSource(proxy=settings.proxy)
     raise ValueError(f"source inconnue: {name!r}")
 
 
@@ -54,7 +66,8 @@ class Pipeline:
         self.settings = settings
         self.store = Store(settings.db_path)
         self.catalog = load_catalog(settings.pricebook_path)
-        self.tracker = PriceTracker(self.store, self.catalog, settings.min_comparables, settings.window_days)
+        self.tracker = PriceTracker(self.store, self.catalog, settings.min_comparables, settings.window_days,
+                                    owner_sales=load_sold(settings.sold_path))
         self.locator = Locator(origin=settings.home)
         self.policy = policy_from_settings(settings)
         self.owner = Viewer(home=settings.home, policy=self.policy, easy_km=settings.easy_km,
@@ -81,15 +94,19 @@ class Pipeline:
     def run_once(self) -> dict:
         stats = {"fetched": 0, "new": 0, "alerts": 0, "errors": 0}
         self._fresh = []
+        blocked: set[str] = set()
         for search in self.settings.searches:
+            if search.source in blocked:
+                continue
             try:
                 listings = self.sources[search.source].fetch(search)
                 self._consecutive_errors = 0
             except DatadomeError:
-                log.warning("DataDome block on %s, aborting cycle", search.name)
+                log.warning("DataDome block on %s, skipping %s for this cycle", search.name, search.source)
                 stats["errors"] += 1
                 self._consecutive_errors += 1
-                break
+                blocked.add(search.source)
+                continue
             except Exception:
                 log.exception("fetch failed for %s", search.name)
                 stats["errors"] += 1
@@ -124,10 +141,9 @@ class Pipeline:
             pos = self.locator.position(l.zipcode)
             if pos:
                 self.store.set_position(l.uid, *pos)
-        comps = recognize(l.title, l.description, self.catalog)
-        pk = None if is_bundle(l.title) else primary_key(comps)
+        pk = teaching_key(l, self.catalog)
         self.store.set_primary_component(l.uid, pk, bool(pk))
-        return is_new, comps
+        return is_new, components_of(l, self.catalog)
 
     def _resweep(self, days: int = 7) -> int:
         """Re-value recent listings as the tracker matures (cheap: the vision
@@ -139,7 +155,7 @@ class Pipeline:
             if search is None or search.kind != "hunt":
                 continue
             l = Listing.from_dict(json.loads(row["raw_json"]))
-            if self._evaluate(l, recognize(l.title, l.description, self.catalog)):
+            if self._evaluate(l, components_of(l, self.catalog)):
                 n += 1
         if n:
             log.info("resweep: %d annonce(s) devenue(s) bonne(s) affaire(s)", n)
@@ -178,7 +194,11 @@ class Pipeline:
         extra = [f"{_ZONE_MARK.get(j.decision.zone, '')} {j.decision.zone} · {where} · "
                  f"logistique {j.logistics:.0f}€ ({mode})",
                  f"Confiance {v.confidence:.0%} · {v.n_priced} pièce(s) valorisée(s)", *v.lines]
-        self.notifier.send_deal(l, result, extra)
+        if v.appraisal.get("photo_unverified"):
+            extra.insert(0, "⚠️ photo non vérifiée, à contrôler sur place")
+        if not self.notifier.send_deal(l, result, extra):
+            log.warning("alert NOT delivered for %s, retried next cycle", l.uid)
+            return False
         self.store.mark_alerted(l.uid, v.true_value, j.net, tier="confirmed")
         log.info("ALERT %s [%s] +%.0f€", l.uid, j.decision.zone, j.net)
         return True
@@ -190,31 +210,17 @@ class Pipeline:
     # ---------------------------------------------------------------- upkeep
 
     def _watch_departures(self) -> int:
-        """Re-check a few listings per cycle. One that left the site gives the
-        tracker a near-sale price and a time to sell, and stops being shown as
-        a deal. Small budget, jittered, stops at the first block."""
+        """Re-check a few listings per cycle (see liveness.py). One that left
+        the site gives the tracker a near-sale price and a time to sell, and
+        stops being shown as a deal."""
         budget = self.settings.departure_checks
         gone = 0
         for name, source in self.sources.items():
-            check = getattr(source, "is_online", None)
-            if not check or budget <= 0:
-                continue
-            for row in self.store.due_for_check(budget, name):
-                budget -= 1
-                try:
-                    online = check(row["source_id"])
-                except DatadomeError:
-                    log.warning("DataDome on departure checks, stopping for this cycle")
-                    return gone
-                except Exception:
-                    log.debug("departure check failed for %s", row["uid"], exc_info=True)
-                    continue
-                if online is False:
-                    self.store.mark_gone(row["uid"])
-                    gone += 1
-                elif online is True:
-                    self.store.mark_checked(row["uid"])
-                time.sleep(random.uniform(2.0, 5.0))
+            if budget <= 0:
+                break
+            rows = self.store.due_for_check(budget, name)
+            budget -= len(rows)
+            gone += liveness.check(self.store, source, rows)["gone"]
         if gone:
             log.info("departures: %d annonce(s) partie(s)", gone)
         return gone
@@ -233,11 +239,18 @@ class Pipeline:
 
     def bootstrap(self, pages: int = 3) -> int:
         total = 0
+        blocked: set[str] = set()
         for search in self.settings.searches:
+            if search.source in blocked:
+                continue
             source = self.sources[search.source]
             for page in range(1, pages + 1):
                 try:
                     listings = source.fetch(search, page=page)
+                except DatadomeError:
+                    log.warning("bootstrap: DataDome on %s, skipping %s", search.name, search.source)
+                    blocked.add(search.source)
+                    break
                 except Exception:
                     log.exception("bootstrap: fetch failed (%s p%d)", search.name, page)
                     break

@@ -30,6 +30,18 @@ RECHECK_COMPONENTS_EVERY = timedelta(days=2)
 RECHECK_HORIZON = timedelta(days=60)
 # Same seller + same title within this window = the item was put back online.
 REPOST_WINDOW = timedelta(days=60)
+# Leboncoin re-check: a search on the title words, this price band around the
+# listing's price (sellers cut, sometimes raise) and this radius around it.
+RECHECK_PRICE_BAND = (0.6, 1.1)
+RECHECK_RADIUS_M = 10_000
+
+# ---- shopping board ----------------------------------------------------------
+
+BOARD_BAIT_RATIO = 0.45          # under this share of market value: bait, ranked last
+BOARD_STALE_DAYS = 10            # not seen for this long: probably gone
+BOARD_SITTING_DAYS = 10          # still online this long after first seen: did not sell
+TOWER_REALIZATION = 0.85         # what a whole tower fetches against the towers' median ask
+TOWER_MAX_SPREAD = 0.4           # comparable towers spread wider than this: no opinion
 
 # ---- negotiation -------------------------------------------------------------
 

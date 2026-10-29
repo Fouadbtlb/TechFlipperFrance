@@ -1,0 +1,160 @@
+# Les angles morts mesures le 2026-09-29: tablettes (127 000 EUR de stock non
+# evaluable, 100% non reconnu), marques de telephone hors Samsung/Apple/Xiaomi,
+# et cartes graphiques nues.
+#
+# Meme methode que pour les telephones: on interroge d'abord le marche entre
+# particuliers, puis on seed le carnet sur les medianes relevees. Sans ca, un
+# iPad de magasin ne pourrait etre compare qu'au prix d'etiquette d'un magasin.
+#
+#   python -m techflip.cli ingest config/searches-blindspots.yaml 4
+searches:
+- name: BS ipad pro
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=ipad+pro&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS ipad air
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=ipad+air&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS ipad mini
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=ipad+mini&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS ipad 10
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=ipad+10&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS ipad 11
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=ipad+11&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS galaxy tab s9
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=galaxy+tab+s9&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS galaxy tab s10
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=galaxy+tab+s10&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS galaxy tab s11
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=galaxy+tab+s11&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS galaxy tab a9
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=galaxy+tab+a9&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS surface pro
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=surface+pro&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS redmi pad
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=redmi+pad&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS lenovo tab
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=lenovo+tab&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS tablette samsung
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=tablette+samsung&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS honor magic
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=honor+magic&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS oppo reno
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=oppo+reno&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS oneplus 12
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=oneplus+12&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS oneplus 13
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=oneplus+13&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS nothing phone
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=nothing+phone&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS xperia 1
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=xperia+1&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS asus rog phone
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=asus+rog+phone&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS carte graphique rtx
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=carte+graphique+rtx&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS rtx 4070
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=rtx+4070&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS rtx 5070
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=rtx+5070&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS rx 7800 xt
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=rx+7800+xt&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500
+- name: BS rtx 3080
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?query=rtx+3080&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: feeder
+  min_price: 80
+  max_price: 2500

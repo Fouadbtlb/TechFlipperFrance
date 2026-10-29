@@ -1,0 +1,102 @@
+# Les deux magasins Cash Converters les plus proches de Lille, tout le stock
+# des rayons qui comptent, trie par prix decroissant, sans plancher au fetch.
+# Froyennes est a 21 km, Mouscron a 16 km.
+#
+#   python -m techflip.cli ingest config/searches-cc-local.yaml 15
+searches:
+- name: CC FROYENNES - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC FROYENNES - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC FROYENNES - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC FROYENNES - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC FROYENNES - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC FROYENNES - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC FROYENNES - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC FROYENNES - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-FROYENNES&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MOUSCRON - informatique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/134-informatique?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MOUSCRON - gsm-gps-telephonie
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/136-gsm-gps-telephonie?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MOUSCRON - jeux-consoles-video
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/138-jeux-consoles-video?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MOUSCRON - tablettes-tactiles
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/140-tablettes-tactiles?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MOUSCRON - photo-video-optique
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/143-photo-video-optique?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MOUSCRON - hifi
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/141-hifi?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MOUSCRON - tv-home-cinema-lecteurs-graveurs
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/147-tv-home-cinema-lecteurs-graveurs?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 30
+  max_price: 5000
+- name: CC MOUSCRON - montres
+  source: cashconverters
+  kind: hunt
+  url: https://www.cashconverters.be/fr/131-montres?q=Magasin-MOUSCRON&order=product.price.desc
+  min_price: 30
+  max_price: 5000

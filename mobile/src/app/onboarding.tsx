@@ -10,7 +10,7 @@ const POINTS = [
   {
     n: 'I',
     title: 'Seulement ce qui rapporte',
-    body: 'Leboncoin et 2ememain sont lus en continu. Tu ne vois que les annonces qui laissent une marge.',
+    body: 'Leboncoin, 2ememain et les magasins d’occasion sont lus en continu. Tu ne vois que les annonces qui laissent une marge.',
   },
   {
     n: 'II',

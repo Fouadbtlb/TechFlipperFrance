@@ -1,0 +1,61 @@
+# Jeu de recherches REDUIT, pour le service qui tourne en continu.
+#
+# Pourquoi: la version complete lance 30 recherches par cycle, dont 22 par
+# mots-cles a l'echelle nationale dont la page 1 part a Marseille. Ici, que des
+# balayages par rayon autour de Lille: c'est la seule chose qui sert a etre
+# premier sur une annonce proche, et ca divise le nombre de requetes par ~4.
+#
+# Le service tourne aussi avec AI_URL vide: l'inference vision en CPU est ce qui
+# chauffe la machine, pas le scan. Sans modele, la verification photo repond
+# "non verifiee" et la garde se ferme d'elle-meme (voir pipeline._evaluate):
+# une annonce ambigue proche n'alerte plus, une annonce claire alerte avec un
+# avertissement "a controler sur place".
+default_exclude:
+- recherche
+- achète
+- je cherche
+searches:
+- name: Informatique 50km Lille
+  url: https://www.leboncoin.fr/recherche?category=15&locations=Lille__50.6292_3.0573_10000_50000
+  kind: hunt
+  min_price: 40
+  max_price: 1500
+- name: Consoles 50km Lille
+  url: https://www.leboncoin.fr/recherche?category=43&locations=Lille__50.6292_3.0573_10000_50000
+  kind: hunt
+  min_price: 40
+  max_price: 700
+- name: Informatique 100km Lille
+  url: https://www.leboncoin.fr/recherche?category=15&locations=Lille__50.6292_3.0573_10000_100000
+  kind: hunt
+  min_price: 60
+  max_price: 1500
+- name: Consoles 100km Lille
+  url: https://www.leboncoin.fr/recherche?category=43&locations=Lille__50.6292_3.0573_10000_100000
+  kind: hunt
+  min_price: 60
+  max_price: 700
+- name: Informatique 40km (BE)
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?l1CategoryId=322&postcode=7700&distanceMeters=40000&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 40
+  max_price: 1500
+- name: Consoles 40km (BE)
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?l1CategoryId=356&postcode=7700&distanceMeters=40000&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 40
+  max_price: 700
+- name: Informatique 80km (BE)
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?l1CategoryId=322&postcode=7700&distanceMeters=80000&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 60
+  max_price: 1500
+- name: Consoles 80km (BE)
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?l1CategoryId=356&postcode=7700&distanceMeters=80000&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 60
+  max_price: 700

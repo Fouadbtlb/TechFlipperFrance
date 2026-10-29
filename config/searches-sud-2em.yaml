@@ -1,0 +1,29 @@
+# Particuliers autour de Charleroi (6000) et Namur (5000), informatique et
+# consoles, rayon 30 km.
+#
+#   python -m techflip.cli ingest config/searches-sud-2em.yaml 6
+searches:
+- name: Informatique 30km Charleroi
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?l1CategoryId=322&postcode=6000&distanceMeters=30000&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: Consoles 30km Charleroi
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?l1CategoryId=356&postcode=6000&distanceMeters=30000&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 50
+  max_price: 2500
+- name: Informatique 30km Namur
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?l1CategoryId=322&postcode=5000&distanceMeters=30000&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 60
+  max_price: 2500
+- name: Consoles 30km Namur
+  source: 2ememain
+  url: https://www.2ememain.be/lrp/api/search?l1CategoryId=356&postcode=5000&distanceMeters=30000&limit=30&offset=0&sortBy=SORT_INDEX&sortOrder=DECREASING
+  kind: hunt
+  min_price: 50
+  max_price: 2500

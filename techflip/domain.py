@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 @dataclass(frozen=True)
 class Listing:
     # Identity
-    source: str                 # "leboncoin", "2ememain"
+    source: str                 # "leboncoin", "2ememain", "cashconverters", "cashexpress"
     source_id: str              # id on the source site
     url: str
 
@@ -39,6 +39,9 @@ class Listing:
     has_phone: bool = False
     seller_id: str | None = None    # source-side user id, for lazy profile enrichment
     image_urls: tuple[str, ...] = field(default_factory=tuple)
+    # The aisle the source filed it under, when it states one: a listing under
+    # /jeux-playstation/ is a game, whatever console its title names.
+    source_category: str | None = None
 
     # Bookkeeping
     search_name: str = ""       # which configured search found it

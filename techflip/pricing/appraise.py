@@ -7,11 +7,16 @@ deal can be held to a higher bar than a cheap local one.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
+from ..text import plain
 from .extract import extract_components
 
-CORE_CATEGORIES = {"console", "laptop", "monitor"}
+# Categories where damage in the ad is damage to the item itself. For a part
+# inside a bundle the wording may concern something else, so it only lowers
+# confidence ("unknown").
+CORE_CATEGORIES = {"console", "laptop", "monitor", "phone", "tablet"}
 CONDITION_MULT = {"working": 1.0, "unknown": 0.7, "broken": 0.35}
 
 # Asking-median -> realizable quick-flip haircut, per category. A used PSU sits
@@ -24,6 +29,7 @@ REALIZATION = {
     "ram": 0.85,
     "storage": 0.85,
     "phone": 0.85,
+    "tablet": 0.85,
     "controller": 0.85,
     "monitor": 0.82,
     "laptop": 0.80,
@@ -60,20 +66,61 @@ class Appraisal:
     days_to_sell: float | None = None
 
 
-def listing_condition(llm_json: dict | None, text: str = "") -> str:
+def listing_condition(llm_json: dict | None, text: str = "", title: str = "") -> str:
+    """working | broken. The vision verdict wins when there is one; otherwise
+    the ad's own words decide (`text`: title + description, `title` alone for
+    the terse damage a shop writes only in titles)."""
     if llm_json:
-        c = str(llm_json.get("condition", "")).lower()
-        if c.startswith("broken") or "hs" in c or "panne" in c:
-            return "broken"
-        return "working"
-    tl = f" {text.lower()} "
-    marks = ("ne s'allume", "en panne", "pour piece", "pour pièce", "hors service",
-             "defectueux", "défectueux", " hs ", " hs,", " hs.", "cassé", "ne fonctionne")
-    return "broken" if any(m in tl for m in marks) else "working"
+        return "broken" if _is_broken(llm_json.get("condition")) else "working"
+    t = plain(text)
+    if any(not _negated(t, m.start()) for m in _DAMAGE.finditer(t)):
+        return "broken"
+    if _NAMED_DEFECT.search(t) or _TITLE_DAMAGE.search(plain(title)):
+        return "broken"
+    return "working"
 
 
-def build_items(text_components, llm_json, catalog, text: str = "") -> list[Item]:
-    condition = listing_condition(llm_json, text)
+# Damage wording in the three languages of the pool, matched on plain() text.
+# Stems, because a shop writes "ABIMER" where a private seller writes "abime".
+_DAMAGE = re.compile(r"""
+      ne\ s'allume | ne\ fonctionne | en\ panne | hors\ service | pour\ pieces?
+    | \bhs\b | defectueu\w* | \bdefect\w* | \bkapot\w* | beschadigd
+    | \bcass(?:e|ee|es|ees)\b | \babim\w* | \bgebroken\b | court-circuit
+    | \bfissur\w* | \bbarst\w* | \bgebarsten\b | schermprobleem
+    | pixels?\ morts? | dode\ pixels? | pixels?\ dood | point\ vert
+    | start\ niet\ op | werkt\ niet | gaat\ niet\ aan | moet\ (?:gemaakt|hersteld)
+    | s'eteint | \ba\ changer\b | vendu\ (?:dans|en)\ l'etat
+    | sans\ (?:la\ )?carte\ mere
+    | \bblacklist\w* | bloque\ icloud | icloud\ bloque | verrouille\ icloud | activation\ lock
+    | non\ officiel | (?:pas|non)\ d'origine | niet\ origineel
+    | \bproblemes?\b | \bprobleem\b | \bproblemen\b
+""", re.X)
+# A word just before the damage, in the same clause, turns it into the
+# commonest reassurance on the site: "sans fissure", "aucun pixel mort",
+# "non blackliste", "geen barsten", "fonctionne sans probleme".
+_NEGATIONS = frozenset({
+    "sans", "aucun", "aucune", "pas", "ni", "non", "jamais", "rien", "zero", "0",
+    "ne", "n", "geen", "zonder", "niet", "nooit", "no", "not", "never", "without"})
+_CLAUSE = re.compile(r"[.,;:!?()\[\]/|+\n]")
+
+
+def _negated(text: str, start: int) -> bool:
+    clause = _CLAUSE.split(text[:start])[-1]
+    return any(w in _NEGATIONS for w in re.findall(r"[0-9a-z]+", clause)[-3:])
+
+
+# A pro shop names the defective part right after "etat": "(ETAT CHARNIERE)
+# Z Fold 7", "(etat lentille)". "(Etat) 100 %" is condition plus battery.
+_NAMED_DEFECT = re.compile(
+    r"\betat\s+(?:charniere|lentille|ecran|scherm|dos|chassis|camera|vitre|coque"
+    r"|batterie|clavier|lecteur)\b")
+# Damage a shop writes in the TITLE only: in a description "coup de coeur" is
+# everywhere, in a Cash Converters title "coup" is a dent.
+_TITLE_DAMAGE = re.compile(r"\bcoups?\b|\blignes?\s+(?:sur\s+l'?)?ecran\b")
+
+
+def build_items(text_components, llm_json, catalog, text: str = "", title: str = "") -> list[Item]:
+    condition = listing_condition(llm_json, text, title)
     items: list[Item] = []
     console_family = None
     for comp in text_components:
@@ -105,14 +152,16 @@ def appraise(items, tracker, realization_factor: float = 0.85,
             floor = None
             continue
         mult = CONDITION_MULT.get(it.condition, 0.7)
+        # A price you were actually paid is already net: no resale haircut on top.
+        haircut = 1.0 if q.source == "owner" else REALIZATION.get(it.category, realization_factor)
         val = q.unit_value * it.qty * mult
         gross += val
-        net += val * REALIZATION.get(it.category, realization_factor)
+        net += val * haircut
         n_priced += 1
-        if q.source in ("sold", "learned", "blend"):
+        if q.source in ("owner", "sold", "learned", "blend"):
             backed += val
         if floor is not None:
-            floor = None if q.low is None else floor + q.low * it.qty * mult * REALIZATION.get(it.category, realization_factor)
+            floor = None if q.low is None else floor + q.low * it.qty * mult * haircut
         if val > main_val:
             main_val, main_days = val, q.days_to_sell
         lines.append(_line(it, q, val))
@@ -157,11 +206,11 @@ def _llm_extras(llm_json, catalog, console_family) -> list[Item]:
 
 
 def _line(it: Item, q, val: float) -> str:
-    tag = {"sold": "parties", "learned": "marché", "blend": "estim+", "seed": "estim"}.get(q.source, "?")
+    tag = {"owner": "vendu par toi", "sold": "parties", "learned": "marché", "blend": "estim+",
+           "seed": "estim"}.get(q.source, "?")
     qty = f" x{it.qty}" if it.qty > 1 else ""
     cond = "" if it.condition == "working" else f" [{it.condition}]"
     return f"{it.label or it.key}{qty}{cond}: {val:.0f}€ ({tag})"
-
 
 
 _LLM_TYPE_TO_CAT = {
@@ -179,12 +228,18 @@ def items_from_classification(verdict, catalog) -> list[Item]:
     raw = verdict.get("components")
     if not isinstance(raw, list):
         return []
+    # An ad the model itself types as a game or an accessory is not selling the
+    # machine on its box art: a PSVR2 headset came back as "PS5 + 2 DualSense"
+    # (444 EUR) and a sealed Tekken 8 as an Xbox Series X. Its type is ground truth.
+    barred = frozenset() if _is_machine_ad(verdict.get("type")) else _MACHINES
     items: list[Item] = []
     seen: set[str] = set()
     for comp in raw:
         if not isinstance(comp, dict):
             continue
         cat = _LLM_TYPE_TO_CAT.get(str(comp.get("type", "")).lower())
+        if cat in barred:
+            continue
         try:
             qty = max(1, int(comp.get("qty") or 1))
         except (TypeError, ValueError):
@@ -195,6 +250,16 @@ def items_from_classification(verdict, catalog) -> list[Item]:
             d = catalog.by_key[key]
             items.append(Item(key, qty, _cond_for(d.category, cond), d.label, d.category))
     return items
+
+
+_MACHINES = frozenset({"console", "laptop"})
+# Ad types that can contain a whole machine. "other" and a missing type mean
+# "could not tell", not "not a machine".
+_MACHINE_ADS = frozenset({"pc", "console", "laptop", "other", ""})
+
+
+def _is_machine_ad(t) -> bool:
+    return str(t or "").lower().strip() in _MACHINE_ADS
 
 
 def _canon(model, cat, catalog):

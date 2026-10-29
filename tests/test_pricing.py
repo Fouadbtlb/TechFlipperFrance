@@ -236,3 +236,39 @@ def test_classification_uses_photo_model_over_title():
 def test_classification_empty_without_components():
     from techflip.pricing.appraise import items_from_classification
     assert items_from_classification({"type": "accessory", "components": []}, CATALOG) == []
+
+
+def test_drifted_seeds_flags_a_stale_price_and_ignores_thin_evidence():
+    """A seed the market disagrees with must surface, but only once enough
+    single-item ads back the claim."""
+    catalog = load_catalog("config/pricebook.yaml")
+    store = _AskingOnly({
+        "gpu:rtx-3070": [300, 300, 310, 290, 300, 305],   # seed 320, ~-5% -> quiet
+        "gpu:rtx-4090": [1100, 1150, 1120, 1130, 1140],   # seed 1500, -25% -> flag
+        "gpu:rtx-3050": [90, 95],                         # too few samples -> quiet
+    })
+    flagged = {r["key"]: r for r in PriceTracker(store, catalog, min_comparables=5, window_days=90).drifted_seeds()}
+    assert "gpu:rtx-4090" in flagged
+    assert flagged["gpu:rtx-4090"]["market"] == 1130
+    assert flagged["gpu:rtx-4090"]["drift"] < -0.2
+    assert "gpu:rtx-3070" not in flagged
+    assert "gpu:rtx-3050" not in flagged
+
+
+class _AskingOnly:
+    def __init__(self, by_key):
+        self.by_key = by_key
+
+    def component_prices(self, key, since_iso, exclude_uid=None, stale_days=None):
+        return self.by_key.get(key, [])
+
+
+def test_shop_shorthand_for_damaged_is_understood():
+    """Cash Converters states the damage in the title: "Console NINTENDO SWITCH
+    ABIMER" was valued at full price."""
+    from techflip.pricing.appraise import listing_condition
+    for text in ["Console NINTENDO SWITCH ABIMER", "Console PS4 abime",
+                 "Manette abîmée", "Console Xbox cassee"]:
+        assert listing_condition(None, text) == "broken", text
+    for text in ["Console NINTENDO Switch En etat", "PS5 tres bon etat"]:
+        assert listing_condition(None, text) == "working", text

@@ -1,10 +1,11 @@
 """Pipeline: fetch -> ingest -> value -> alert the owner -> fan out to the app.
 
 One cycle runs every configured search once. Feeder searches only teach the
-price tracker; hunt searches are valued (valuation.py). A DataDome block stops
-that one site for the cycle, the others carry on. Each cycle also re-checks a
-few listings to learn what left the site (liveness.py), records a heartbeat for
-/v1/health, and once a day prunes data nobody needs any more.
+price tracker; hunt searches are valued (valuation.py). A site that blocks
+(DataDome) or cannot be reached is left alone for the rest of the cycle, the
+others carry on. Each cycle also re-checks a few listings to learn what left
+the site (liveness.py), records a heartbeat for /v1/health, and once a day
+prunes data nobody needs any more.
 
 An owner alert is written off only once Telegram accepted it: a deal marked
 "sent" after a failed send would never be seen.
@@ -37,6 +38,11 @@ from .valuation import Rejection, Valuation, Valuer
 from .viewer import Viewer, judge
 
 log = logging.getLogger(__name__)
+
+# A site that blocks (DataDome) or cannot be reached (network errors are
+# OSErrors in both curl_cffi and requests) is left alone until the next cycle:
+# retrying it on each of its searches only makes the block worse.
+_SITE_DOWN = (DatadomeError, OSError)
 
 _ZONE_MARK = {"EASY": "🟢", "MEDIUM": "🟠", "HARD": "🔴"}
 
@@ -101,8 +107,8 @@ class Pipeline:
             try:
                 listings = self.sources[search.source].fetch(search)
                 self._consecutive_errors = 0
-            except DatadomeError:
-                log.warning("DataDome block on %s, skipping %s for this cycle", search.name, search.source)
+            except _SITE_DOWN as e:
+                log.warning("%s on %s: %s skipped for this cycle", type(e).__name__, search.name, search.source)
                 stats["errors"] += 1
                 self._consecutive_errors += 1
                 blocked.add(search.source)
@@ -247,8 +253,8 @@ class Pipeline:
             for page in range(1, pages + 1):
                 try:
                     listings = source.fetch(search, page=page)
-                except DatadomeError:
-                    log.warning("bootstrap: DataDome on %s, skipping %s", search.name, search.source)
+                except _SITE_DOWN as e:
+                    log.warning("bootstrap: %s on %s, skipping %s", type(e).__name__, search.name, search.source)
                     blocked.add(search.source)
                     break
                 except Exception:

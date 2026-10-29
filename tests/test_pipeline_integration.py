@@ -247,3 +247,22 @@ def test_a_wanted_ad_or_a_counterfeit_is_discarded_for_good(tmp_path, monkeypatc
     p.run_once()
     assert not p.notifier.deals
     assert p.store.alert_tier("leboncoin:w") == p.store.alert_tier("leboncoin:c") == "confirmed"
+
+
+def test_an_unreachable_site_is_tried_once_per_cycle(tmp_path, monkeypatch):
+    """A refused connection is not retried on every search of that site."""
+    searches = tuple(SearchConfig(name=f"s{i}", source="leboncoin", url="u", kind="hunt") for i in range(3))
+
+    class Down:
+        name = "leboncoin"
+        calls = 0
+
+        def fetch(self, search, page=1):
+            Down.calls += 1
+            raise ConnectionError("CONNECT tunnel failed, response 403")
+
+    monkeypatch.setattr(pipe, "_make_source", lambda name, s: Down())
+    monkeypatch.setattr(pipe.time, "sleep", lambda *a: None)
+    p = pipe.Pipeline(_settings(tmp_path, searches))
+    p.notifier = FakeNotifier()
+    assert p.run_once()["errors"] == 1 and Down.calls == 1

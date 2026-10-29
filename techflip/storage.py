@@ -127,7 +127,38 @@ CREATE TABLE IF NOT EXISTS meta (
 );
 """
 
-MIGRATIONS = (("store/001_schema", _SCHEMA),)
+
+
+def _upgrade_legacy_tables(conn: sqlite3.Connection) -> None:
+    """Bring tables made by an older TechFlip up to the current columns.
+
+    The schema step only creates what is missing, so an older database kept
+    its old `listings` table and the step failed on the first index over a new
+    column ("no such column: margin"), stopping the scanner, the API and the
+    board at start. Columns are added, never dropped or rewritten, so the
+    stored history is kept as it is.
+    """
+    fresh = sqlite3.connect(":memory:")
+    fresh.executescript(_SCHEMA)
+    for (table,) in fresh.execute("SELECT name FROM sqlite_master WHERE type='table'"):
+        have = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+        if not have:
+            continue                      # absent here: the schema step creates it
+        for _cid, name, decl, _notnull, default, _pk in fresh.execute(f"PRAGMA table_info({table})"):
+            if name not in have:
+                # ALTER cannot add NOT NULL without a default; old rows have no value.
+                tail = f" DEFAULT {default}" if default is not None else ""
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}{tail}")
+    fresh.close()
+    conn.commit()
+
+
+def _create_or_upgrade(conn: sqlite3.Connection) -> None:
+    _upgrade_legacy_tables(conn)
+    conn.executescript(_SCHEMA)
+
+
+MIGRATIONS = (("store/001_schema", _create_or_upgrade),)
 
 
 def title_key(title: str | None) -> str:

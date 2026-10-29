@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 from math import asin, cos, radians, sin, sqrt
 
 log = logging.getLogger(__name__)
@@ -154,3 +155,45 @@ def _pgeocode_resolver():
         return (float(lat), float(lon))
 
     return query
+
+
+_PLACE_TABLES: dict[str, object] = {}
+
+
+def find_place(query: str) -> dict | None:
+    """A French or Belgian postcode or town name -> {lat, lng, label}, or None.
+
+    For the app's "ta ville, ton code postal" box where the phone's own
+    geocoder is unavailable (the web build). A name must match exactly once
+    accents and case are set aside: pgeocode's name search is fuzzy, and
+    "Lille" ranked Lillebonne first.
+    """
+    from .text import plain
+
+    q = " ".join((query or "").split())
+    if not q:
+        return None
+    try:
+        import pgeocode
+    except Exception:
+        return None
+    countries = ("fr",) if re.fullmatch(r"\d{5}", q) else ("be",) if re.fullmatch(r"\d{4}", q) else ("fr", "be")
+    for cc in countries:
+        try:
+            nomi = _PLACE_TABLES.get(cc) or _PLACE_TABLES.setdefault(cc, pgeocode.Nominatim(cc))
+            if q.isdigit():
+                r = nomi.query_postal_code(q)
+                if r is None or math.isnan(r["latitude"]):
+                    continue
+                return {"lat": float(r["latitude"]), "lng": float(r["longitude"]),
+                        "label": str(r["place_name"]).split(",")[0]}
+            df = nomi.query_location(q)
+        except Exception:
+            continue
+        if df is None or df.empty:
+            continue
+        exact = df[df["place_name"].map(lambda n: plain(str(n)) == plain(q))]
+        if not exact.empty:
+            r = exact.iloc[0]
+            return {"lat": float(r["latitude"]), "lng": float(r["longitude"]), "label": str(r["place_name"])}
+    return None

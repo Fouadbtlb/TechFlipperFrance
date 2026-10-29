@@ -266,6 +266,10 @@ components:
   - {key: phone:pixel-10, label: Pixel 10, category: phone, ship_class: small, seed: 500, aliases: [pixel 10, google pixel 10]}                      # magasin n=13
   - {key: phone:xiaomi-17t-pro, label: Xiaomi 17T Pro, category: phone, ship_class: small, seed: 490, aliases: [xiaomi 17t pro, 17t pro]}            # magasin n=30
   - {key: phone:xiaomi-17, label: Xiaomi 17, category: phone, ship_class: small, seed: 500, aliases: [xiaomi 17]}                                    # magasin n=47
+  - {key: phone:xiaomi-17t, label: Xiaomi 17T, category: phone, ship_class: small, seed: 400, aliases: []}
+  - {key: phone:xiaomi-17-pro, label: Xiaomi 17 Pro, category: phone, ship_class: small, seed: 650, aliases: []}
+  - {key: phone:xiaomi-17-pro-max, label: Xiaomi 17 Pro Max, category: phone, ship_class: small, seed: 800, aliases: []}
+  - {key: phone:xiaomi-17-ultra, label: Xiaomi 17 Ultra, category: phone, ship_class: small, seed: 850, aliases: []}
   - {key: phone:xiaomi-15t-pro, label: Xiaomi 15T Pro, category: phone, ship_class: small, seed: 365, aliases: [xiaomi 15t pro, 15t pro]}            # magasin n=26
   - {key: phone:xiaomi-15, label: Xiaomi 15, category: phone, ship_class: small, seed: 500, aliases: [xiaomi 15]}                                    # prive n=9
   - {key: phone:xiaomi-14t-pro, label: Xiaomi 14T Pro, category: phone, ship_class: small, seed: 250, aliases: [xiaomi 14t pro, 14t pro]}            # magasin n=14
@@ -288,6 +292,21 @@ components:
   - {key: tablet:ipad-air, label: iPad Air, category: tablet, ship_class: parcel, seed: 550, aliases: [ipad air]}                     # prive n=48
   - {key: tablet:ipad-mini, label: iPad mini, category: tablet, ship_class: parcel, seed: 282, aliases: [ipad mini]}                  # prive n=46
   - {key: tablet:ipad, label: iPad, category: tablet, ship_class: parcel, seed: 378, aliases: [ipad]}                                 # prive n=226
+  # Generations, pinned from the family keys above by _VARIANTS (extract.py).
+  - {key: tablet:ipad-pro-m-13, label: iPad Pro 12.9/13 (M1+), category: tablet, ship_class: parcel, seed: 950, aliases: []}
+  - {key: tablet:ipad-pro-m-11, label: iPad Pro 11 (M1+), category: tablet, ship_class: parcel, seed: 750, aliases: []}
+  - {key: tablet:ipad-pro-old, label: iPad Pro (2020 et avant), category: tablet, ship_class: parcel, seed: 330, aliases: []}
+  - {key: tablet:ipad-pro-2017, label: iPad Pro 9.7/10.5 (2015-2017), category: tablet, ship_class: parcel, seed: 110, aliases: []}
+  - {key: tablet:ipad-air-m, label: iPad Air (M1+), category: tablet, ship_class: parcel, seed: 550, aliases: []}
+  - {key: tablet:ipad-air-4, label: iPad Air 4, category: tablet, ship_class: parcel, seed: 255, aliases: []}
+  - {key: tablet:ipad-air-old, label: iPad Air (2019 et avant), category: tablet, ship_class: parcel, seed: 160, aliases: []}
+  - {key: tablet:ipad-mini-6, label: iPad mini 6/7, category: tablet, ship_class: parcel, seed: 375, aliases: []}
+  - {key: tablet:ipad-mini-5, label: iPad mini 5, category: tablet, ship_class: parcel, seed: 150, aliases: []}
+  - {key: tablet:ipad-mini-old, label: iPad mini (2015 et avant), category: tablet, ship_class: parcel, seed: 100, aliases: []}
+  - {key: tablet:ipad-11, label: iPad 11e gen, category: tablet, ship_class: parcel, seed: 400, aliases: []}
+  - {key: tablet:ipad-10, label: iPad 10e gen, category: tablet, ship_class: parcel, seed: 300, aliases: []}
+  - {key: tablet:ipad-9, label: iPad 9e gen, category: tablet, ship_class: parcel, seed: 180, aliases: []}
+  - {key: tablet:ipad-old, label: iPad (8e gen et avant), category: tablet, ship_class: parcel, seed: 130, aliases: []}
   - {key: tablet:surface-pro-new, label: Surface Pro 9+, category: tablet, ship_class: parcel, seed: 690, aliases: [surface pro 9, surface pro 10, surface pro 11, surface pro x]}   # prive n=4
   - {key: tablet:surface-pro-7, label: Surface Pro 7/8, category: tablet, ship_class: parcel, seed: 300, aliases: [surface pro 7, surface pro 8]}   # prive n=9 med 300
   - {key: tablet:surface-pro-old, label: Surface Pro 4-6, category: tablet, ship_class: parcel, seed: 200, aliases: [surface pro 4, surface pro 5, surface pro 6]}   # prive n=5 med 200
@@ -304,6 +323,10 @@ components:
   # magasin, l'ecart le plus large de tout le rayon telephone.
   - {key: phone:honor-magic-lite, label: Honor Magic Lite, category: phone, ship_class: small, seed: 210, aliases: [honor magic lite, magic 7 lite, magic 8 lite, magic 6 lite, magic7 lite, magic8 lite]}   # prive n=2 (169, 250); la Lite est un milieu de gamme, pas la Magic
   - {key: phone:honor-magic, label: Honor Magic, category: phone, ship_class: small, seed: 710, aliases: [honor magic]}               # prive n=12
+  - {key: phone:honor-magic-v, label: Honor Magic V (pliable), category: phone, ship_class: small, seed: 650, aliases: []}     # prive V2 480 .. V6 1450
+  - {key: phone:honor-magic-8, label: Honor Magic 8 (Pro), category: phone, ship_class: small, seed: 720, aliases: []}       # prive 550-795
+  - {key: phone:honor-magic-7, label: Honor Magic 7 (Pro), category: phone, ship_class: small, seed: 650, aliases: []}       # prive 600-720
+  - {key: phone:honor-magic-old, label: Honor Magic (6 et avant), category: phone, ship_class: small, seed: 380, aliases: []}
   - {key: phone:oneplus-13, label: OnePlus 13, category: phone, ship_class: small, seed: 525, aliases: [oneplus 13, one plus 13]}     # prive n=8
   - {key: phone:oneplus-12, label: OnePlus 12, category: phone, ship_class: small, seed: 400, aliases: [oneplus 12, one plus 12]}     # prive n=5, mince
   - {key: phone:nothing-phone, label: Nothing Phone, category: phone, ship_class: small, seed: 222, aliases: [nothing phone]}         # prive n=8

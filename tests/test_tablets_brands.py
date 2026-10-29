@@ -18,21 +18,21 @@ def _key(title, category):
 
 
 def test_tablets_are_recognized():
-    assert _key("Tablette Apple iPad Pro M4 13 pouces 256 Go", "tablet") == "tablet:ipad-pro"
-    assert _key("Apple iPad Air 5 64Go wifi", "tablet") == "tablet:ipad-air"
+    assert _key("Tablette Apple iPad Pro M4 13 pouces 256 Go", "tablet") == "tablet:ipad-pro-m-13"
+    assert _key("Apple iPad Air 5 64Go wifi", "tablet") == "tablet:ipad-air-m"
     # Split by generation on 2026-10-17: a Pro 8 asks about 300, not 475.
     assert _key("Microsoft Surface Pro 8 i5 256", "tablet") == "tablet:surface-pro-7"
     assert _key("Samsung Galaxy Tab S10 Ultra 256", "tablet") == "tablet:galaxy-tab-s10"
 
 
 def test_a_variant_beats_the_generic_ipad():
-    assert _key("iPad Pro 11 512Go", "tablet") == "tablet:ipad-pro"
-    assert _key("iPad mini 6 64 Go", "tablet") == "tablet:ipad-mini"
-    assert _key("Apple iPad 9th gen 64Go", "tablet") == "tablet:ipad"
+    assert _key("iPad Pro 11 512Go", "tablet") == "tablet:ipad-pro-old"  # no generation named: cheapest
+    assert _key("iPad mini 6 64 Go", "tablet") == "tablet:ipad-mini-6"
+    assert _key("Apple iPad 9th gen 64Go", "tablet") == "tablet:ipad-9"
 
 
 def test_the_other_phone_brands_are_recognized():
-    assert _key("GSM HONOR MAGIC V5 16ram/512Gb", "phone") == "phone:honor-magic"
+    assert _key("GSM HONOR MAGIC V5 16ram/512Gb", "phone") == "phone:honor-magic-v"
     assert _key("OnePlus 13 256GB", "phone") == "phone:oneplus-13"
     assert _key("Nothing Phone 2a 256", "phone") == "phone:nothing-phone"
 

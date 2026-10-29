@@ -266,3 +266,45 @@ def test_an_unreachable_site_is_tried_once_per_cycle(tmp_path, monkeypatch):
     p = pipe.Pipeline(_settings(tmp_path, searches))
     p.notifier = FakeNotifier()
     assert p.run_once()["errors"] == 1 and Down.calls == 1
+
+
+def test_a_shop_phone_is_not_held_back_for_a_photo_check(tmp_path, monkeypatch):
+    """A Cash Converters item is on a shelf under warranty: no AI photo check,
+    so it must not be flagged unverified (which keeps it out of the reliable feed)."""
+    from techflip.decision import policy_from_settings
+    from techflip.geo import Locator
+    from techflip.pricing.identify import components_of
+    from techflip.valuation import Valuation, Valuer
+
+    p = _pipe(tmp_path, monkeypatch, (), {})
+    s = p.settings
+    v = Valuer(s, p.store, p.catalog, p.tracker, Locator(origin=s.home), policy_from_settings(s),
+               {}, origins=lambda: [s.home])
+    shop = Listing(source="cashconverters", source_id="9", url="u", title="Xbox Series X",
+                   price=150, description="", published_at=_today_iso(), city="Lille",
+                   zipcode="59000", lat=50.63, lng=3.06, owner_type="pro")
+    got = v.value(shop, components_of(shop, p.catalog))
+    assert isinstance(got, Valuation)
+    assert not got.appraisal.get("photo_unverified")
+
+    private = Listing(**{**shop.__dict__, "source": "leboncoin", "source_id": "10", "owner_type": None})
+    got = v.value(private, components_of(private, p.catalog))
+    assert isinstance(got, Valuation) and got.appraisal.get("photo_unverified")
+
+
+def test_a_proximus_only_phone_is_recorded_as_locked(tmp_path, monkeypatch):
+    from techflip.decision import policy_from_settings
+    from techflip.geo import Locator
+    from techflip.pricing.identify import components_of
+    from techflip.valuation import Valuation, Valuer
+
+    p = _pipe(tmp_path, monkeypatch, (), {})
+    s = p.settings
+    v = Valuer(s, p.store, p.catalog, p.tracker, Locator(origin=s.home), policy_from_settings(s),
+               {}, origins=lambda: [s.home])
+    l = Listing(source="cashconverters", source_id="11", url="u",
+                title="Smartphone (proximus uniquement) samsung s25fe jetblack 8gb/128gb",
+                price=120, description="", published_at=_today_iso(), city="Lille",
+                zipcode="59000", lat=50.63, lng=3.06, owner_type="pro")
+    got = v.value(l, components_of(l, p.catalog))
+    assert isinstance(got, Valuation) and got.appraisal.get("carrier_locked")

@@ -250,6 +250,9 @@ function Detail({ d, bottomPad }: { d: DealDetail; bottomPad: number }) {
           value={d.photo_checked ? 'Oui' : d.photo_unverified ? 'À contrôler sur place' : 'Non'}
           tone={d.photo_checked ? 'profit' : d.photo_unverified ? 'warn' : 'muted'}
         />
+        {d.carrier_locked ? (
+          <LedgerRow label="Bloqué opérateur" value="Oui : un seul réseau, revente plus difficile" tone="warn" />
+        ) : null}
         {d.scam_score != null ? (
           <LedgerRow
             label="Risque d’arnaque"

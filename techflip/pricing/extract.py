@@ -220,6 +220,17 @@ def _machine_is_subject(title: str, category: str) -> bool:
     return _console_is_subject(title)
 
 
+# Never a handset: "JBL Flip 7" (69 EUR) was a 467 EUR Galaxy Z Flip 7.
+_NOT_A_PHONE = {"jbl", "enceinte", "enceintes", "speaker", "luidspreker", "boombox", "soundbar"}
+# Add-ons that are the thing for sale wherever they sit, unless the title
+# joins them to the device ("iPad Pro + Magic Keyboard", "avec clavier"). Dutch
+# and English name the device first: "Galaxy Tab S11 Book Cover Keyboard"
+# (90 EUR) was appraised as a 550 EUR tablet.
+_SCREEN_ADDONS = {"keyboard", "keybord", "toetsenbord", "clavier", "cover", "bookcover", "folio",
+                  "etui", "étui", "hoesje", "pencil", "stylet", "stylus"}
+_JOINED = {"avec", "met", "with", "incl", "inclus", "inclusief", "plus", "en", "et", "and"}
+
+
 def _phone_is_subject(title: str) -> bool:
     """Word order, exactly as for consoles: the handset comes first when the
     handset is what is for sale. "Batterie 98 %" is not an accessory, every
@@ -227,15 +238,28 @@ def _phone_is_subject(title: str) -> bool:
     the accessory set."""
     t = (title or "").lower()
     toks = [x for x in re.split(r"[^0-9a-zà-ÿ]+", t) if x]
+    if set(toks) & _NOT_A_PHONE:
+        return False
     phone = next((i for i, x in enumerate(toks) if x in _PHONE_WORDS), None)
     if phone is None:
         return True
     acc = next((i for i, x in enumerate(toks) if x in _ACCESSORY_WORDS), None)
-    return acc is None or phone < acc
+    if acc is not None and acc < phone:
+        return False
+    addon = next((i for i, x in enumerate(toks) if x in _SCREEN_ADDONS), None)
+    if addon is None:
+        return True
+    if addon < phone:
+        return False
+    # Device first: a bundle only when something joins the two.
+    joined = set(toks[phone + 1:addon]) & _JOINED or re.search(r"\s[+&]\s", t)
+    return bool(joined)
 
 
 def _console_is_subject(title: str) -> bool:
-    t = (title or "").lower()
+    # "Joy-Con" splits into "joy" + "con" and slipped past "joycon":
+    # "Nintendo Switch 2 Joy-Con set" (50 EUR) was a 355 EUR console.
+    t = re.sub(r"joy[\s-]+cons?\b", "joycon", (title or "").lower())
     if _NOT_A_CONSOLE.search(t) or _COMPAT_LIST.search(t):
         return False
     toks = [x for x in re.split(r"[^0-9a-zà-ÿ]+", t) if x]
@@ -258,6 +282,14 @@ def _console_is_subject(title: str) -> bool:
 # downward moves are listed on purpose: reading the description can then correct
 # an over-valuation but can never invent one, which is what keeps a
 # compatibility list ("mieux qu'une PS5 Pro") from upgrading the item.
+# iPad generation cues, shared by the rules below. An ordinal is "5e", "5eme",
+# "5th", or the Dutch "5de"; a chip is M1..M9; the Pro went M-series in 2021.
+_ORD = r"(?:e|de|ste|eme|ieme|th|nd|rd)\b"
+_CHIP = r"\bm[1-9]\b"
+_SIZE13 = r"(?:\b13\b|12[.,]9)"
+_NEW_PRO = r"(?:" + _CHIP + r"|\b202[1-9]\b|\b[5-9]\s*" + _ORD + r")"
+
+
 _VARIANTS: dict[str, tuple[tuple[re.Pattern, str], ...]] = {
     "console:ps5": (
         # "ps5 portable" is how sellers write the PlayStation Portal handheld
@@ -276,6 +308,62 @@ _VARIANTS: dict[str, tuple[tuple[re.Pattern, str], ...]] = {
     "console:switch": (
         (re.compile(r"\blite\b"), "console:switch-lite"),
         (re.compile(r"\boled\b"), "console:switch-oled"),
+    ),
+    # iPads: one key per line priced every generation alike, so a 2018 iPad
+    # read as worth a 2022 one and tablets filled the top of the feed. The
+    # generation is read from the year, chip or "Ne gen"; when nothing names
+    # it, the oldest (cheapest) bucket wins, so an unclear ad never shows a
+    # margin it may not have.
+    # Honor's "Magic" name covers the V foldables and three Pro generations
+    # (Magic 6 Pro ~400, 7 Pro ~650, 8 Pro ~720 privately). Unnamed: oldest.
+    "phone:honor-magic": (
+        (re.compile(r"\blite\b"), "phone:honor-magic-lite"),
+        (re.compile(r"\bmagic\s*v\s*\d"), "phone:honor-magic-v"),
+        (re.compile(r"\bmagic\s*(?:pro\s*)?8\b|\b8\s*pro\b"), "phone:honor-magic-8"),
+        (re.compile(r"\bmagic\s*(?:pro\s*)?7\b|\b7\s*pro\b"), "phone:honor-magic-7"),
+        (re.compile(r"."), "phone:honor-magic-old"),
+    ),
+    # "Xiaomi 17 T pro" (space) is the 17T Pro; Pro, Pro Max and Ultra are
+    # dearer phones that were pulling the base 17's price up.
+    "phone:xiaomi-17": (
+        (re.compile(r"\b17\s*t\s*pro\b"), "phone:xiaomi-17t-pro"),
+        (re.compile(r"\b17\s*t\b"), "phone:xiaomi-17t"),
+        (re.compile(r"\b17\s*ultra\b"), "phone:xiaomi-17-ultra"),
+        (re.compile(r"\b17\s*pro\s*max\b"), "phone:xiaomi-17-pro-max"),
+        (re.compile(r"\b17\s*pro\b"), "phone:xiaomi-17-pro"),
+    ),
+    # The Pro X (2019, ARM) sells like a Surface Pro 7, not a Pro 9+.
+    "tablet:surface-pro-new": (
+        (re.compile(r"\bpro\s*x\b"), "tablet:surface-pro-7"),
+    ),
+    "phone:xiaomi-15": (
+        (re.compile(r"\b15\s*t\s*pro\b"), "phone:xiaomi-15t-pro"),
+    ),
+    "tablet:ipad-pro": (
+        # 9.7 and 10.5 inch, 2015-2017: about 100 EUR, a third of a 2018-2020 Pro.
+        (re.compile(r"\b9[.,][17]\b|\b10[.,]5\b|\b201[5-7]\b"), "tablet:ipad-pro-2017"),
+        (re.compile(r"\b20(?:1\d|20)\b"), "tablet:ipad-pro-old"),
+        (re.compile(_SIZE13 + r".*" + _NEW_PRO + r"|" + _NEW_PRO + r".*" + _SIZE13), "tablet:ipad-pro-m-13"),
+        # The 13-inch Pro only exists since 2024 (M4).
+        (re.compile(r"\b13\s*-?\s*(?:\"|”|''|pouces?|inch|po)"), "tablet:ipad-pro-m-13"),
+        (re.compile(_CHIP + r"|\b20(?:2[1-9])\b|\b11\b.*\b[34]\s*" + _ORD), "tablet:ipad-pro-m-11"),
+        (re.compile(r"."), "tablet:ipad-pro-old"),
+    ),
+    "tablet:ipad-air": (
+        (re.compile(_CHIP + r"|\b202[2-9]\b|\bair\s*(?:[5-9]|11|13)\b|\b[5-9]\s*" + _ORD), "tablet:ipad-air-m"),
+        (re.compile(r"\b2020\b|\bair\s*4\b|\b4\s*" + _ORD), "tablet:ipad-air-4"),
+        (re.compile(r"."), "tablet:ipad-air-old"),
+    ),
+    "tablet:ipad-mini": (
+        (re.compile(r"\b(?:2021|2024|a1[57])\b|\bmini\s*[67]\b|\b[67]\s*" + _ORD), "tablet:ipad-mini-6"),
+        (re.compile(r"\b2019\b|\bmini\s*5\b|\b5\s*" + _ORD), "tablet:ipad-mini-5"),
+        (re.compile(r"."), "tablet:ipad-mini-old"),
+    ),
+    "tablet:ipad": (
+        (re.compile(r"\b(?:2025|a16)\b|\b11\s*" + _ORD), "tablet:ipad-11"),
+        (re.compile(r"\b(?:2022|a14)\b|10[.,]9|\bipad\s*10\b|\b10\s*" + _ORD), "tablet:ipad-10"),
+        (re.compile(r"\b2021\b|\bipad\s*9\b(?![.,]\d)|\b9\s*" + _ORD), "tablet:ipad-9"),
+        (re.compile(r"."), "tablet:ipad-old"),
     ),
 }
 

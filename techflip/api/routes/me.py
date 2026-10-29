@@ -5,6 +5,7 @@ import json
 
 from fastapi import APIRouter
 
+from ...geo import find_place
 from ...notify.push import is_expo_token
 from ..deps import AccountsDep, CurrentUser, EntitlementsDep, api_error
 from ..entitlements import Entitlements
@@ -34,6 +35,16 @@ def me_payload(user, ents: Entitlements) -> dict:
             "product": user["entitlement_product"] if active else None,
         },
     }
+
+
+@router.get("/places")
+def places(user: CurrentUser, q: str = ""):
+    """Town or postcode -> coordinates, for clients without a geocoder (web)."""
+    hit = find_place(q[:80])
+    if hit is None:
+        raise api_error(404, "place_not_found")
+    # The same ~1 km rounding the app applies to a GPS fix.
+    return {"lat": round(hit["lat"], 2), "lng": round(hit["lng"], 2), "label": hit["label"]}
 
 
 @router.get("")

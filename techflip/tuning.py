@@ -62,6 +62,13 @@ DIGEST_WINDOW = timedelta(hours=24)
 
 MAP_MAX_PINS = 250
 
+# ---- trusted sellers ---------------------------------------------------------
+
+# Second-hand chains: the item sits on a shelf, tested and under warranty, and
+# you collect it or it ships from the shop. The checks built for private ads
+# (AI photo check, "too cheap from far away = scam") do not apply to them.
+SHOP_SOURCES = frozenset({"cashconverters", "cashexpress"})
+
 # ---- operations --------------------------------------------------------------
 
 # /v1/health reports the scanner as stale past this delay without a cycle.

@@ -46,7 +46,7 @@ BUCKETS = ("reliable", "check")
 def is_reliable(row) -> bool:
     appr = _appraisal(row)
     return ((row["confidence"] or 0) >= RELIABLE_CONFIDENCE and risk_level(appr) != "high"
-            and not appr.get("photo_unverified"))
+            and not appr.get("photo_unverified") and not appr.get("carrier_locked"))
 
 
 def deals_for(store: Store, viewer: Viewer, max_age_days: int, hidden: set[str] = frozenset(),
@@ -203,6 +203,7 @@ def detail(store: Store, row, j: Judgement, saved: bool, viewer: Viewer | None =
         "feedback": store.feedback_summary(row["uid"], user_id),
         "photo_checked": bool(appr.get("photo_checked")),
         "photo_unverified": bool(appr.get("photo_unverified")),
+        "carrier_locked": bool(appr.get("carrier_locked")),
         "shippable": bool(appr.get("shippable", True)),
         "scam_score": appr.get("risk"),
         "seller": appr.get("seller"),

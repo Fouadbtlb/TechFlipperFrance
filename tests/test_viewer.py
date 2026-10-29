@@ -126,3 +126,17 @@ def test_unreachable_postal_db_does_not_crash(monkeypatch):
     monkeypatch.setattr(builtins, "__import__", boom)
     from techflip.geo import Locator
     assert Locator().distance_to_lille("62000") is not None   # anchor table
+
+
+def test_a_shop_item_far_away_is_not_taken_for_a_scam():
+    """'Too cheap from far away = scam' is about private ads. A Cash Converters
+    markdown ships from the shop: the iPad Pro M1 at 500 (value ~850, 80 km)
+    was hidden from everyone."""
+    from techflip.decision import default_policy
+    from techflip.viewer import Viewer, judge
+    v = Viewer(home=(50.6292, 3.0573), policy=default_policy(), radius_km=60)
+    row = {"true_value": 849, "price": 500, "lat": 50.48, "lng": 4.19, "confidence": 1.0,
+           "category": "tablet", "reposts": 0, "title": "ipad pro 5 (2021) 12,9", "owner_type": "pro",
+           "source": "cashconverters", "appraisal": '{"shippable": true, "ship_class": "parcel", "risk": null}'}
+    assert judge(row, v).alert
+    assert not judge({**row, "source": "leboncoin", "owner_type": None}, v).alert

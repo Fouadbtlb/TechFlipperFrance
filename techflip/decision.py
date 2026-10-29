@@ -40,7 +40,7 @@ def default_policy() -> ZonePolicy:
 
 
 def decide(true_value, price, logistics, zone, confidence, policy,
-           risk=None, is_trade=False) -> Decision:
+           risk=None, is_trade=False, trusted_seller=False) -> Decision:
     bar = policy.bars[zone]
     min_conf = policy.min_conf[zone]
 
@@ -58,7 +58,9 @@ def decide(true_value, price, logistics, zone, confidence, policy,
     # Far item priced well under its value: a real seller offloads a bargain
     # locally in a day, so a cheap ship-only ad you can't inspect is almost always
     # a scam. Near Lille the same discount is a real deal (go check in person).
-    if zone != "EASY" and price and true_value is not None and price < 0.6 * true_value:
+    # A shop is not that seller: Cash Converters marks stock down and ships it.
+    if (not trusted_seller and zone != "EASY" and price and true_value is not None
+            and price < 0.6 * true_value):
         return Decision(False, None, zone, bar,
                         (f"prix {price:.0f}€ trop bas vs valeur {true_value:.0f}€ (arnaque à distance)",))
 

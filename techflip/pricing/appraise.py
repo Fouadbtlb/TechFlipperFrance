@@ -88,7 +88,8 @@ _DAMAGE = re.compile(r"""
     | \bcass(?:e|ee|es|ees)\b | \babim\w* | \bgebroken\b | court-circuit
     | \bfissur\w* | \bbarst\w* | \bgebarsten\b | schermprobleem
     | pixels?\ morts? | dode\ pixels? | pixels?\ dood | point\ vert
-    | start\ niet\ op | werkt\ niet | gaat\ niet\ aan | moet\ (?:gemaakt|hersteld)
+    | start\ niet\ (?:meer\ )?op | werkt\ niet | gaat\ niet\ (?:meer\ )?aan | doet\ het\ niet
+    | moet\ (?:gemaakt|hersteld)
     | s'eteint | \ba\ changer\b | vendu\ (?:dans|en)\ l'etat
     | sans\ (?:la\ )?carte\ mere
     | \bblacklist\w* | bloque\ icloud | icloud\ bloque | verrouille\ icloud | activation\ lock

@@ -56,7 +56,7 @@ def test_broken_back_glass_in_dutch_is_broken():
 def test_the_lite_is_not_the_flagship():
     assert _key("honor magic 7 lite 256 gb", "phone") == "phone:honor-magic-lite"
     assert _key("Smartphone honor magic 8 lite noir 512gb", "phone") == "phone:honor-magic-lite"
-    assert _key("Honor Magic 7 Pro 512Go", "phone") == "phone:honor-magic"
+    assert _key("Honor Magic 7 Pro 512Go", "phone") == "phone:honor-magic-7"
 
 
 def test_surface_generations_are_separated():

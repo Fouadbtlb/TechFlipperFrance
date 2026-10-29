@@ -64,6 +64,7 @@ export interface DealDetail extends DealCard {
   parts: Part[];
   photo_checked: boolean;
   photo_unverified: boolean;
+  carrier_locked?: boolean;
   shippable: boolean;
   scam_score: number | null;
   seller: Seller | null;

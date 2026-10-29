@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 
+from . import tuning
 from .decision import Decision, ZonePolicy, decide
 from .geo import distance_km, logistics_cost, zone_for_distance
 
@@ -82,7 +83,8 @@ def judge(row, viewer: Viewer) -> Judgement:
                  viewer.cost_per_km, logistics)
 
     d = decide(true_value, price, logistics, zone, row["confidence"] or 0.0, viewer.policy,
-               risk=appr.get("risk"), is_trade=bool(appr.get("is_trade")))
+               risk=appr.get("risk"), is_trade=bool(appr.get("is_trade")),
+               trusted_seller=_source(row) in tuning.SHOP_SOURCES)
     return Judgement(d, dist, logistics, mode, visible)
 
 
@@ -99,3 +101,10 @@ def _appraisal(row) -> dict:
     if not raw:
         return {}
     return raw if isinstance(raw, dict) else json.loads(raw)
+
+
+def _source(row) -> str | None:
+    try:
+        return row["source"]
+    except (KeyError, IndexError):
+        return None

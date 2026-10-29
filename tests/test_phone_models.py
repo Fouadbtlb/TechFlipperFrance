@@ -24,7 +24,7 @@ def test_the_new_models_are_recognized():
     # Honor was the honest "unknown" here until 2026-09-29, when the private
     # market was measured and it turned out to be the widest shop-to-private
     # gap in the whole phone aisle: 430 against 710.
-    assert _phone("GSM HONOR MAGIC V5") == "phone:honor-magic"
+    assert _phone("GSM HONOR MAGIC V5") == "phone:honor-magic-v"
 
 
 def test_a_variant_never_matches_as_its_parent():

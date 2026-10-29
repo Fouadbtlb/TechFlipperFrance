@@ -25,6 +25,7 @@ import logging
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 
+from . import tuning
 from .config import Settings
 from .decision import ZonePolicy
 from .domain import Listing
@@ -33,6 +34,7 @@ from .geo import Locator, distance_km, logistics_cost, zone_for_distance
 from .pricing.appraise import Appraisal, appraise, build_items, items_from_classification
 from .pricing.catalog import Catalog
 from .pricing.extract import is_ambiguous_identity, is_bundle, primary_key
+from .pricing.identify import carrier_locked
 from .pricing.tracker import PriceTracker
 from .scoring.seller import seller_summary
 from .storage import Store
@@ -131,6 +133,10 @@ class Valuer:
             return self._result(appr, ctx, category, method="parts", verdict=None, risk=None, alertable=False)
         if isinstance(outcome, Rejection):
             return outcome
+        # Usable on one network only: still a phone, but not a clean resale.
+        # Recorded so the app keeps it out of the reliable feed and says why.
+        if category == "phone" and carrier_locked(text):
+            outcome.appraisal["carrier_locked"] = True
         return self._with_seller(l, outcome)
 
     # ---------------------------------------------------------------- steps
@@ -164,7 +170,8 @@ class Valuer:
 
     def _decomposed(self, l, comps, ctx: _Context, appr: Appraisal, net: float, text: str,
                     category: str) -> Valuation | Rejection:
-        needs_photo = self._needs_photo(comps)
+        # A shop item is on a shelf under warranty: no fake-photo risk (tuning.SHOP_SOURCES).
+        needs_photo = self._needs_photo(comps) and l.source not in tuning.SHOP_SOURCES
         wants_ai = needs_photo or ctx.zone != "EASY" or net < 1.5 * ctx.bar or appr.confidence < 0.5
         verdict = None
         if self.classify and wants_ai and net >= self.settings.ai_min_margin:

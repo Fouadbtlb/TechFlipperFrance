@@ -213,3 +213,12 @@ def test_unchecked_photos_never_count_as_reliable_and_shops_do_not_haggle():
     assert not is_reliable({**row, "appraisal": '{"risk": 1, "photo_unverified": true}'})
     assert negotiation(row, judge(row, v), v) is not None
     assert negotiation({**row, "owner_type": "pro"}, judge(row, v), v) is None
+
+
+def test_a_carrier_locked_phone_is_never_reliable():
+    from techflip.api.deals import is_reliable
+    row = {"true_value": 340, "price": 200, "lat": LILLE[0], "lng": LILLE[1], "confidence": 0.9,
+           "category": "phone", "reposts": 0, "title": "Samsung S25 FE", "owner_type": "pro",
+           "appraisal": '{"risk": null}'}
+    assert is_reliable(row)
+    assert not is_reliable({**row, "appraisal": '{"risk": null, "carrier_locked": true}'})
